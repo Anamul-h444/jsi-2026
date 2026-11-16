@@ -22,6 +22,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # ব্রাউজার যেন পুরোনো CSS/JS ক্যাশ থেকে না দেখায়: প্রতিটি ডিপ্লয়ে নতুন ভার্সন নম্বর
+      - name: Cache-busting version
+        run: sed -i "s/?v=dev/?v=${GITHUB_SHA::8}/g" index.html
       - uses: actions/configure-pages@v5
         with:
           enablement: true

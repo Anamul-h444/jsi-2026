@@ -493,7 +493,7 @@
         <h3>${m.label} (${m.range})</h3>
         <div class="kv">
           <div><small>১. জেএসআই অনুসারে মূল বেতন</small><b>${tk(p.basic)}</b></div>
-          <div><small>২. ${i === 0 ? 'প্রণোদনা বাদ দিয়ে জুন ২০২৬-এর তুলনায় আপনার বেতন বৃদ্ধি পেয়েছে' : PERIODS[i - 1].label + '-এর তুলনায় আপনার বেতন বৃদ্ধি পেয়েছে'}</small><b>${signed(rise)}</b></div>
+          <div><small>২. ${i === 0 ? 'প্রণোদনা বাদ দিয়ে জুন ২০২৬-এর তুলনায় আপনার বেতন বৃদ্ধি পেয়েছে' : PERIODS[i - 1].label + '-এর তুলনায় আপনার বেতন বৃদ্ধি পেয়েছে'}</small><b>${signed(rise)}</b>${i === 0 ? tl.june.special.map(s => `<small>${s.label} ${tk(s.amt)} বাদ (${s.note})</small>`).join('') : ''}</div>
           <div><small>৩. ${i === 3 ? 'সব ভাতাসহ মোট বেতন (কর্তনের পর)' : 'পূর্বের ভাতাসহ এখন মোট বেতন পাবেন (কর্তনের পর)'}</small><b>${tk(p.net)}</b></div>
         </div>
         ${p.pct < 1 ? `<div class="formula">মূল বেতন = ${tk(inp.oldBasic)} + (${tk(tl.newBasic26)} − ${tk(inp.oldBasic)}) × ${bn(p.pct * 100)}% = ${tk(p.basic)}</div>` : ''}
@@ -621,7 +621,7 @@
         image: { type: 'jpeg', quality: 0.96 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 794, scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], avoid: '.avoid' },
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['.avoid', 'h2', 'h3', 'tr', '.kv', '.formula'] },
       }).from(stage.firstElementChild).save();
       toast('পিডিএফ ডাউনলোড হয়েছে');
     } catch (e) {
