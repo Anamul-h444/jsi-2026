@@ -70,6 +70,7 @@
     } else { $('#ad2').hidden = true; }
     setupInstall();
     setupShare();
+    setupPicker();
 
     $('#rank').innerHTML = `<option value=""></option>` + CURRENT_RANK_KEYS.map(k => `<option value="${k}">${RANKS[k].name}</option>`).join('');
     $('#skill').innerHTML = `<option value="NONE">প্রযোজ্য নয়</option><option value="HIGH">উচ্চ দক্ষতা বেতন</option><option value="NORMAL">দক্ষতা বেতন</option>`;
@@ -89,6 +90,7 @@
     $$('[data-seg]').forEach(seg => setSeg(seg, S[seg.dataset.seg]));
     $$('[data-step]').forEach(st => st.querySelector('output').textContent = bn(S[st.dataset.step] || 0));
     renderPromos();
+    $$('#form select.input').forEach(enhanceSelect);
     updateOldStartHint();
     refreshPlaceholders();
 
@@ -110,14 +112,82 @@
     $('#btn-pension').addEventListener('click', () => calcPension(true));
     $('#btn-add-promo').addEventListener('click', () => { S.promotions.push({ rank: '', date: '' }); renderPromos(); save(); });
     $('#btn-reset').addEventListener('click', () => {
-      if (!confirm('আপনার দেওয়া সব তথ্য মুছে ফেলতে চান?')) return;
-      localStorage.removeItem(STORE_KEY); S = JSON.parse(JSON.stringify(DEFAULTS)); location.reload();
+      askConfirm({
+        title: 'সব তথ্য মুছে ফেলবেন?',
+        text: 'আপনার দেওয়া নাম, পদবি, মূল বেতন, তারিখসহ সব তথ্য মুছে যাবে। এটি আর ফেরত আনা যাবে না।',
+        ok: 'হ্যাঁ, মুছে ফেলুন',
+      }).then(yes => {
+        if (!yes) return;
+        localStorage.removeItem(STORE_KEY); S = JSON.parse(JSON.stringify(DEFAULTS)); location.reload();
+      });
     });
     $$('.nav-btn').forEach(b => b.addEventListener('click', () => go(b.dataset.view)));
     $$('[data-report]').forEach(b => b.addEventListener('click', () => makePdf(b.dataset.report)));
   }
 
   const devNameHTML = () => esc(SITE_CONFIG.developer.name) + (SITE_CONFIG.developer.corps ? ` <small class="corps">${esc(SITE_CONFIG.developer.corps)}</small>` : '');
+
+  /* ---------------- তালিকা থেকে বাছাই: ব্রাউজারের সাদা ড্রপডাউনের বদলে ডার্ক থিমের তালিকা ----------------
+     আসল <select> লুকানো থাকে (হিসাবের সব কোড আগের মতোই এর মান পড়ে), তার জায়গায় একটি বাটন দেখায় */
+  function enhanceSelect(sel) {
+    if (!sel._trig) {
+      const t = document.createElement('button');
+      t.type = 'button'; t.className = 'input select-trigger'; t.setAttribute('aria-haspopup', 'listbox');
+      sel.after(t); sel.classList.add('native-hidden'); sel.tabIndex = -1; sel._trig = t;
+      t.addEventListener('click', () => openPicker(sel));
+    }
+    syncSelect(sel);
+  }
+  function syncSelect(sel) {
+    const t = sel._trig; if (!t) return;
+    const o = sel.selectedOptions[0];
+    t.innerHTML = `<span>${esc(o ? o.textContent : '')}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+    t.classList.toggle('empty', !sel.value);
+    t.hidden = sel.hidden;
+  }
+  let pickFor = null;
+  function openPicker(sel) {
+    pickFor = sel;
+    const lab = sel.closest('.field')?.querySelector('label');
+    $('#psTitle').textContent = lab ? lab.childNodes[0].textContent.trim() : 'নির্বাচন করুন';
+    $('#psList').innerHTML = [...sel.options].filter(o => o.value !== '').map(o =>
+      `<button type="button" role="option" class="ps-opt${o.value === sel.value ? ' on' : ''}" aria-selected="${o.value === sel.value}" data-v="${esc(o.value)}"><span>${esc(o.textContent)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></button>`).join('');
+    $('#pickSheet').hidden = false; document.body.classList.add('no-scroll');
+    const on = $('#psList .on'); if (on) on.scrollIntoView({ block: 'center' });
+  }
+  function closePicker() { $('#pickSheet').hidden = true; document.body.classList.remove('no-scroll'); if (pickFor && pickFor._trig) pickFor._trig.focus(); pickFor = null; }
+  function setupPicker() {
+    $('#psList').addEventListener('click', e => {
+      const b = e.target.closest('.ps-opt'); if (!b || !pickFor) return;
+      const sel = pickFor;
+      sel.value = b.dataset.v; syncSelect(sel);
+      closePicker();
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    $('#psClose').addEventListener('click', closePicker);
+    $('#pickSheet').addEventListener('click', e => { if (e.target.id === 'pickSheet') closePicker(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#pickSheet').hidden) closePicker(); });
+  }
+
+  /* ---------------- নিশ্চিতকরণ বাক্স ---------------- */
+  function askConfirm({ title, text, ok = 'হ্যাঁ', cancel = 'বাতিল' }) {
+    return new Promise(resolve => {
+      const box = $('#confirmBox');
+      $('#cfTitle').textContent = title; $('#cfText').textContent = text;
+      $('#cfOk').textContent = ok; $('#cfCancel').textContent = cancel;
+      box.hidden = false; document.body.classList.add('no-scroll');
+      setTimeout(() => $('#cfCancel').focus(), 50);
+      const done = v => {
+        box.hidden = true; document.body.classList.remove('no-scroll');
+        $('#cfOk').onclick = $('#cfCancel').onclick = box.onclick = document.onkeydown = null;
+        resolve(v);
+      };
+      $('#cfOk').onclick = () => done(true);
+      $('#cfCancel').onclick = () => done(false);
+      box.onclick = e => { if (e.target === box) done(false); };
+      document.onkeydown = e => { if (e.key === 'Escape') done(false); };
+    });
+  }
 
   /* ---------------- শেয়ার ---------------- */
   const SHARE_TEXT = 'জেএসআই ০১/২০২৬ অনুযায়ী নতুন বেতন স্কেলে আপনার মূল বেতন, ভাতা ও পেনশন কত হবে — এক মিনিটে জেনে নিন, পিডিএফসহ, সম্পূর্ণ ফ্রি।';
@@ -226,6 +296,7 @@
         R.oldScale.map((v, i) => `<option value="${v}">${bn(v)} টাকা — ${bn(i + 1)} নং ধাপ</option>`).join('');
       sel.value = R.oldScale.includes(num(S.oldBasic)) ? String(num(S.oldBasic)) : '';
     }
+    syncSelect(sel);
   }
 
   function updateOldStartHint() {
@@ -285,7 +356,7 @@
         <div class="field" style="margin:0"><label>তারিখ</label><input class="input" type="date" data-promo="date" data-idx="${i}" value="${esc(p.date)}" /></div>
         <button type="button" class="x" data-del="${i}" aria-label="মুছুন">×</button>
       </div>`).join('');
-    $$('#promoList select').forEach((s, i) => s.value = S.promotions[i].rank || '');
+    $$('#promoList select').forEach((s, i) => { s.value = S.promotions[i].rank || ''; enhanceSelect(s); });
     $$('#promoList [data-del]').forEach(b => b.addEventListener('click', () => {
       S.promotions.splice(Number(b.dataset.del), 1); renderPromos(); save();
     }));

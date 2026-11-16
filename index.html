@@ -275,6 +275,27 @@
   </footer>
 </main>
 
+<!-- তালিকা থেকে বাছাই (ড্রপডাউনের বদলে ডার্ক থিমের তালিকা) -->
+<div class="pick-sheet" id="pickSheet" hidden>
+  <div class="ps-panel" role="dialog" aria-modal="true" aria-labelledby="psTitle">
+    <div class="ps-head"><b id="psTitle"></b><button type="button" class="ss-x" id="psClose" aria-label="বন্ধ করুন">×</button></div>
+    <div class="ps-list" id="psList" role="listbox"></div>
+  </div>
+</div>
+
+<!-- নিশ্চিতকরণ বাক্স -->
+<div class="cf-modal" id="confirmBox" hidden>
+  <div class="cf-panel" role="alertdialog" aria-modal="true" aria-labelledby="cfTitle" aria-describedby="cfText">
+    <div class="cf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg></div>
+    <h3 id="cfTitle"></h3>
+    <p id="cfText"></p>
+    <div class="cf-btns">
+      <button type="button" class="btn btn-ghost" id="cfCancel">বাতিল</button>
+      <button type="button" class="btn cf-danger" id="cfOk"></button>
+    </div>
+  </div>
+</div>
+
 <div class="share-sheet" id="shareSheet" hidden>
   <div class="ss-panel" role="dialog" aria-label="শেয়ার করুন">
     <div class="ss-head"><b>শেয়ার করুন</b><button type="button" class="ss-x" id="shareClose" aria-label="বন্ধ করুন">×</button></div>
