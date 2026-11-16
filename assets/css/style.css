@@ -369,6 +369,25 @@ input[type=date].input { color-scheme: dark; }
 .ad2-feats li { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; color: #f3e6c2; background: rgba(240,190,69,.12); border: 1px solid rgba(240,190,69,.38); }
 .ad2-feats li::before { content: '✓ '; color: #F0BE45; font-weight: 700; }
 
+/* শেয়ার */
+.share-card { display: flex; align-items: center; gap: 12px; margin: 18px 0 0; padding: 14px; border-radius: 16px; background: linear-gradient(135deg, rgba(87,211,162,.12), rgba(227,185,78,.08)); border: 1px solid rgba(87,211,162,.3); }
+.share-card .sc-t { flex: 1; min-width: 0; }
+.share-card .sc-t b { display: block; font-size: 15px; line-height: 1.35; }
+.share-card .sc-t small { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.share-card .btn { flex: none; height: 44px; padding: 0 16px; font-size: 14.5px; }
+.share-card .btn svg { width: 18px; height: 18px; }
+.share-sheet { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; animation: fadeIn .2s ease both; }
+.ss-panel { width: 100%; max-width: 560px; background: #12201b; border: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 16px 16px calc(18px + env(safe-area-inset-bottom)); animation: rise .3s var(--ease) both; }
+.ss-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.ss-head b { font-size: 17px; }
+.ss-x { width: 36px; height: 36px; border: 0; background: none; color: var(--muted); font-size: 26px; cursor: pointer; }
+.ss-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+.ss-grid a { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text); text-decoration: none; padding: 8px 0; border-radius: 12px; }
+.ss-grid a:active { background: rgba(255,255,255,.05); }
+.ss-ic { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 20px; font-family: system-ui, sans-serif; }
+.ss-ic.wa { background: #25D366; } .ss-ic.fb { background: #1877F2; } .ss-ic.ms { background: linear-gradient(135deg, #00B2FF, #A033FF); } .ss-ic.tg { background: #229ED9; }
+@keyframes fadeIn { from { opacity: 0; } }
+
 /* অ্যাপ ইনস্টল কার্ড */
 .install-card {
   display: flex; align-items: flex-start; gap: 12px; margin: 10px 0 4px; padding: 12px; border-radius: 16px;
@@ -477,3 +496,10 @@ input[type=date].input { color-scheme: dark; }
 
 .rpt table.fixed { table-layout: fixed; }
 .rpt td { overflow-wrap: anywhere; }
+
+/* ছোট স্ক্রিনে হেডারের নাম এক লাইনে */
+@media (max-width: 390px) {
+  .brand h1 { font-size: 15.5px; white-space: nowrap; }
+  .brand p { font-size: 11.5px; }
+  .appbar .wrap { gap: 8px; }
+}

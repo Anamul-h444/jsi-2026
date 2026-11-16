@@ -69,6 +69,7 @@
       $('#ad2').href = SITE_CONFIG.ad2.url;
     } else { $('#ad2').hidden = true; }
     setupInstall();
+    setupShare();
 
     $('#rank').innerHTML = `<option value=""></option>` + CURRENT_RANK_KEYS.map(k => `<option value="${k}">${RANKS[k].name}</option>`).join('');
     $('#skill').innerHTML = `<option value="NONE">প্রযোজ্য নয়</option><option value="HIGH">উচ্চ দক্ষতা বেতন</option><option value="NORMAL">দক্ষতা বেতন</option>`;
@@ -117,6 +118,34 @@
   }
 
   const devNameHTML = () => esc(SITE_CONFIG.developer.name) + (SITE_CONFIG.developer.corps ? ` <small class="corps">${esc(SITE_CONFIG.developer.corps)}</small>` : '');
+
+  /* ---------------- শেয়ার ---------------- */
+  const SHARE_TEXT = 'জেএসআই ০১/২০২৬ অনুযায়ী নতুন বেতন স্কেলে আপনার মূল বেতন, ভাতা ও পেনশন কত হবে — এক মিনিটে জেনে নিন, পিডিএফসহ, সম্পূর্ণ ফ্রি।';
+  const shareUrl = () => location.origin + location.pathname.replace(/index\.html$/, '');
+  async function doShare() {
+    const url = shareUrl();
+    if (navigator.share) {
+      try { await navigator.share({ title: 'JSI-2026 বেতন ও পেনশন ক্যালকুলেটর', text: SHARE_TEXT, url }); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    const u = encodeURIComponent(url), t = encodeURIComponent(SHARE_TEXT + ' ' + url);
+    $('#sh-wa').href = `https://wa.me/?text=${t}`;
+    $('#sh-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${u}`;
+    $('#sh-ms').href = `fb-messenger://share/?link=${u}`;
+    $('#sh-tg').href = `https://t.me/share/url?url=${u}&text=${encodeURIComponent(SHARE_TEXT)}`;
+    $('#shareSheet').hidden = false;
+  }
+  function setupShare() {
+    ['#btn-share', '#btn-share2'].forEach(id => $(id).addEventListener('click', doShare));
+    $('#shareClose').addEventListener('click', () => { $('#shareSheet').hidden = true; });
+    $('#shareSheet').addEventListener('click', e => { if (e.target.id === 'shareSheet') $('#shareSheet').hidden = true; });
+    $('#sh-copy').addEventListener('click', async () => {
+      const txt = SHARE_TEXT + ' ' + shareUrl();
+      try { await navigator.clipboard.writeText(txt); }
+      catch (e) { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+      $('#shareSheet').hidden = true; toast('লিংক কপি হয়েছে');
+    });
+  }
 
   /* ---------------- অ্যাপ হিসেবে ইনস্টল (PWA) ---------------- */
   let installEvt = null;
@@ -532,7 +561,7 @@
       <div><b>বৈবাহিক অবস্থা:</b> ${inp.marital === 'MARRIED' ? 'বিবাহিত' : 'অবিবাহিত'}</div>
     </div>`;
   }
-  const rptFooter = () => `<div class="rf"><span>এটি একটি আনুমানিক হিসাব। চূড়ান্ত অঙ্ক পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</span><span>ডেভেলপার: <b>${devNameHTML()}</b></span></div>`;
+  const rptFooter = () => `<div class="rf"><span>এটি একটি আনুমানিক হিসাব। চূড়ান্ত অঙ্ক পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</span><span>ইঞ্জিনিয়ার: <b>${devNameHTML()}</b></span></div>`;
 
   function rptSalary(tl) {
     const inp = tl.input, R = tl.rank, fx = tl.fix;
