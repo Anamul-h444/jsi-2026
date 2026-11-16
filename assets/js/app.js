@@ -70,7 +70,7 @@
 
 
     // স্টেট → ফর্ম
-    ['name','baNo','unit','rank','dob','joinDate','oldBasic','skill','appointment','serviceWardenship','otherNew','retireDate','commutePct']
+    ['name','baNo','unit','rank','dob','joinDate','oldBasic','skill','appointment','serviceWardenship','otherNew','retireDate']
       .forEach(id => { const el = $('#' + id); if (el) el.value = S[id] ?? ''; });
     if (S.rank && !RANKS[S.rank]) S.rank = '';
     if (!S.rank || (RANKS[S.rank].oldScale && !RANKS[S.rank].oldScale.includes(num(S.oldBasic)))) S.oldBasic = '';
@@ -183,7 +183,7 @@
       gpfPercent: 5, otherDeductions: 0,
       retireDate: parseDate(S.retireDate),
       promotions: S.promotions.map(p => ({ rank: p.rank, date: parseDate(p.date) })),
-      commutePct: optNum(S.commutePct) ?? 50,
+      commutePct: 50, // সবার জন্য অর্ধেক পেনশন এককালীন (প্রচলিত নিয়ম)
       rationAdults: S.rationAdults || 0, rationChildren: S.rationChildren || 0,
     };
   }
@@ -406,14 +406,18 @@
     return `
     <div class="summary-hero" style="margin-top:6px">
       <div class="who"><span><b>${esc(inp.name || 'নাম দেওয়া হয়নি')}</b></span><span>${esc(rt.finalRank)}</span></div>
-      <div class="lbl">মাসিক নিট পেনশন (${bn(rt.cPct * 100)}% কম্যুটেশনের পর)</div>
+      <div class="lbl">প্রতি মাসে পেনশন পাবেন</div>
       <div class="big" id="pen-big">${tk(0)}</div>
       <div class="sub">অবসর: ${bnDate(rt.retire)} · চাকরিকাল ${bn(rt.years)} বছর ${bn(rt.months)} মাস</div>
       <div class="kpis">
         <div class="kpi"><small>শেষ মূল বেতন</small><b>${tk(rt.lastBasic)}</b></div>
-        <div class="kpi"><small>গ্রস পেনশন</small><b>${tk(rt.gross)}</b></div>
-        <div class="kpi"><small>এককালীন কম্যুটেশন</small><b>${tk(rt.lump)}</b></div>
+        <div class="kpi"><small>পূর্ণ পেনশন</small><b>${tk(rt.gross)}</b></div>
+        <div class="kpi"><small>অবসরের সময় এককালীন (আনুতোষিক)</small><b>${tk(rt.lump)}</b></div>
       </div>
+    </div>
+    <div class="notice info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <div><b>সহজ কথায়:</b> শেষ মূল বেতন আর চাকরির বছর থেকে আপনার <b>পূর্ণ পেনশন</b> বের হয়। তার <b>অর্ধেক</b> অবসরের সময় একবারে মোটা অঙ্কে পান, যাকে <b>আনুতোষিক</b> বলে। বাকি <b>অর্ধেক</b> সারাজীবন প্রতি মাসে <b>মাসিক পেনশন</b> হিসেবে পান।</div>
     </div>
     ${!rt.eligible ? `<div class="notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><div>পেনশনের কর্ম উপাদানের জন্য কমপক্ষে ১০ বছরের যোগ্য চাকরি প্রয়োজন (অধ্যায়-৬, অনুচ্ছেদ ১৫)।</div></div>` : ''}
 
@@ -426,19 +430,19 @@
     <div class="card">
       <div class="section-title" style="margin-top:0"><h3>পেনশনের হিসাব</h3><span class="line"></span></div>
       <div class="formula">
-        গ্রস পেনশন = (শেষ গৃহীত বেতন + ৬০৮) × চাকরির বছর ÷ ৩১<br>
+        পূর্ণ পেনশন = (শেষ মূল বেতন + ৬০৮) × চাকরির বছর ÷ ৩১<br>
         = (${tk(rt.pensionable)} + ৬০৮) × ${bn(rt.years)} ÷ ৩১ = ${tk(rt.formula, 2)}<br>
         সর্বোচ্চ সীমা = ${tk(rt.L)}-এর ৯০% = ${tk(rt.cap, 2)}<br>
-        ${rt.capped ? 'সূত্রের ফল সীমার বেশি, তাই সর্বোচ্চ সীমাই প্রযোজ্য।' : 'সূত্রের ফল সীমার মধ্যে।'} গ্রস পেনশন = <b>${tk(rt.gross)}</b>
+        ${rt.capped ? 'সূত্রের ফল সীমার বেশি, তাই সর্বোচ্চ সীমাই প্রযোজ্য।' : 'সূত্রের ফল সীমার মধ্যে।'} পূর্ণ পেনশন = <b>${tk(rt.gross)}</b>
       </div>
       <table class="tbl">
-        <tr><td>শেষ গৃহীত মূল বেতন</td><td class="n">${tk(rt.lastBasic)}</td></tr>
+        <tr><td>শেষ মূল বেতন</td><td class="n">${tk(rt.lastBasic)}</td></tr>
         ${rt.swPension ? `<tr><td>সার্ভিস ওয়ার্ডিনেস বেতন</td><td class="n">${tk(rt.swPension)}</td></tr>` : ''}
-        <tr><td>গ্রস পেনশন</td><td class="n">${tk(rt.gross)}</td></tr>
-        <tr class="minus"><td>কম্যুটেশন (${bn(rt.cPct * 100)}%)</td><td class="n">− ${tk(rt.commuted)}</td></tr>
-        <tr class="sum"><td>মাসিক নিট পেনশন</td><td class="n">${tk(rt.net)}</td></tr>
+        <tr><td>পূর্ণ পেনশন</td><td class="n">${tk(rt.gross)}</td></tr>
+        <tr class="minus"><td>অর্ধেক এককালীন নেওয়া হলো<small>এর বদলে আনুতোষিক পাবেন</small></td><td class="n">− ${tk(rt.commuted)}</td></tr>
+        <tr class="sum"><td>প্রতি মাসে পেনশন</td><td class="n">${tk(rt.net)}</td></tr>
       </table>
-      <div class="formula">এককালীন কম্যুটেশন = ${tk(rt.commuted)} × ১২ × ${bn(rt.factor, 3)}<br><small>পরবর্তী জন্মদিনে বয়স ${bn(rt.ageNext)} বছর, জেএসআই অনুচ্ছেদ ২৮-এর গুণক</small><br>= <b>${tk(rt.lump)}</b></div>
+      <div class="formula">এককালীন আনুতোষিক = ছেড়ে দেওয়া অর্ধেক পেনশন × ১২ × বয়সের গুণক<br>= ${tk(rt.commuted)} × ১২ × ${bn(rt.factor, 3)} = <b>${tk(rt.lump)}</b><br><small>অবসরের পরের জন্মদিনে বয়স ${bn(rt.ageNext)} বছর; বয়স যত কম, গুণক তত বেশি (জেএসআই অনুচ্ছেদ ২৮)</small></div>
     </div>
 
     <div class="card">
@@ -450,10 +454,10 @@
         <tr><td>রেশনের পরিবর্তে রেশন ভাতা (মাসিক)<small>${bn(inp.rationAdults)} প্রাপ্তবয়স্ক × ৳১,০০০ + ${bn(inp.rationChildren)} শিশু × ৳৫০০</small></td><td class="n">${tk(rt.ration)}</td></tr>
         <tr class="sum"><td>মাসে হাতে আসবে (পেনশন + চিকিৎসা + রেশন)</td><td class="n">${tk(rt.monthlyInHand)}</td></tr>
         <tr><td>উৎসব ভাতা (বছরে ২টি)</td><td class="n">${tk(rt.festivalYearly)}</td></tr>
-        <tr><td>বাংলা নববর্ষ ভাতা (নিট পেনশনের ১৫%)</td><td class="n">${tk(rt.noboborsho)}</td></tr>
-        <tr class="sum"><td>এককালীন মোট (কম্যুটেশন + ছুটি নগদায়ন)</td><td class="n">${tk(rt.lump + rt.leaveEncash)}</td></tr>
+        <tr><td>বাংলা নববর্ষ ভাতা (মাসিক পেনশনের ১৫%)</td><td class="n">${tk(rt.noboborsho)}</td></tr>
+        <tr class="sum"><td>অবসরের সময় এককালীন মোট (আনুতোষিক + ছুটি নগদায়ন)</td><td class="n">${tk(rt.lump + rt.leaveEncash)}</td></tr>
       </table>
-      <h4 style="margin:16px 0 4px;font-size:14.5px">প্রতি বছর ৫% বৃদ্ধিতে নিট পেনশন</h4>
+      <h4 style="margin:16px 0 4px;font-size:14.5px">প্রতি বছর ৫% বৃদ্ধিতে মাসিক পেনশন</h4>
       <table class="tbl">${rt.growth.map((g, i) => `<tr><td>${i === 0 ? 'অবসরের বছর' : bn(i) + ' বছর পর'} (${bnPlain(g.year)})</td><td class="n">${tk(g.net)}</td></tr>`).join('')}</table>
     </div>
 
@@ -551,25 +555,25 @@
         ${rt.events.map(e => `<tr><td>${bnDate(e.date)}</td><td>${esc(e.text)}</td><td>${esc(e.rank)}</td><td class="n">${tk(e.basic)}</td></tr>`).join('')}
       </table>
       <div class="avoid"><h3>পেনশনের হিসাব</h3>
-      <div class="formula">গ্রস পেনশন = (শেষ গৃহীত বেতন + ৬০৮) × চাকরির বছর ÷ ৩১, তবে (শেষ গৃহীত বেতন + ৬০৮)-এর ৯০%-এর বেশি নয়<br>
+      <div class="formula">পূর্ণ পেনশন = (শেষ মূল বেতন + ৬০৮) × চাকরির বছর ÷ ৩১, তবে (শেষ মূল বেতন + ৬০৮)-এর ৯০%-এর বেশি নয়<br>
         = (${tk(rt.pensionable)} + ৬০৮) × ${bn(rt.years)} ÷ ৩১ = ${tk(rt.formula, 2)} · সীমা ${tk(rt.cap, 2)} → <b>${tk(rt.gross)}</b></div>
       <table>
-        <tr><td>গ্রস পেনশন</td><td class="n">${tk(rt.gross)}</td></tr>
-        <tr class="minus"><td>কম্যুটেশন (${bn(rt.cPct * 100)}%)</td><td class="n">− ${tk(rt.commuted)}</td></tr>
-        <tr class="sum"><td>মাসিক নিট পেনশন</td><td class="n">${tk(rt.net)}</td></tr>
-        <tr><td>এককালীন কম্যুটেশন = ${tk(rt.commuted)} × ১২ × ${bn(rt.factor, 3)} (পরবর্তী জন্মদিনে বয়স ${bn(rt.ageNext)})</td><td class="n">${tk(rt.lump)}</td></tr>
+        <tr><td>পূর্ণ পেনশন</td><td class="n">${tk(rt.gross)}</td></tr>
+        <tr class="minus"><td>অর্ধেক এককালীন নেওয়া হলো</td><td class="n">− ${tk(rt.commuted)}</td></tr>
+        <tr class="sum"><td>প্রতি মাসে পেনশন</td><td class="n">${tk(rt.net)}</td></tr>
+        <tr><td>এককালীন আনুতোষিক = ${tk(rt.commuted)} × ১২ × ${bn(rt.factor, 3)} (অবসরের পরের জন্মদিনে বয়স ${bn(rt.ageNext)})</td><td class="n">${tk(rt.lump)}</td></tr>
         <tr><td>ছুটি নগদায়ন (১৮ মাসের মূল বেতন)</td><td class="n">${tk(rt.leaveEncash)}</td></tr>
-        <tr class="sum"><td>এককালীন মোট</td><td class="n">${tk(rt.lump + rt.leaveEncash)}</td></tr>
+        <tr class="sum"><td>অবসরের সময় এককালীন মোট</td><td class="n">${tk(rt.lump + rt.leaveEncash)}</td></tr>
       </table></div>
       <div class="avoid"><h3>মাসিক ও বার্ষিক সুবিধা</h3>
       <table>
-        <tr><td>নিট পেনশন</td><td class="n">${tk(rt.net)}</td></tr>
+        <tr><td>মাসিক পেনশন</td><td class="n">${tk(rt.net)}</td></tr>
         <tr><td>চিকিৎসা ভাতা (বয়স ${bn(rt.ageAtRetire)})</td><td class="n">${tk(rt.med)}</td></tr>
         <tr><td>রেশন ভাতা (${bn(inp.rationAdults)} প্রাপ্তবয়স্ক, ${bn(inp.rationChildren)} শিশু)</td><td class="n">${tk(rt.ration)}</td></tr>
         <tr class="sum"><td>মাসিক মোট</td><td class="n">${tk(rt.monthlyInHand)}</td></tr>
         <tr><td>উৎসব ভাতা (বছরে ২টি)</td><td class="n">${tk(rt.festivalYearly)}</td></tr>
         <tr><td>বাংলা নববর্ষ ভাতা</td><td class="n">${tk(rt.noboborsho)}</td></tr>
-        ${rt.growth.slice(1).map((g, i) => `<tr><td>${bn(i + 1)} বছর পর নিট পেনশন (৫% বৃদ্ধিতে)</td><td class="n">${tk(g.net)}</td></tr>`).join('')}
+        ${rt.growth.slice(1).map((g, i) => `<tr><td>${bn(i + 1)} বছর পর মাসিক পেনশন (৫% বৃদ্ধিতে)</td><td class="n">${tk(g.net)}</td></tr>`).join('')}
       </table></div>`;
   }
 
@@ -580,7 +584,7 @@
       <li>৩১ ডিসেম্বর ২০২৭ পর্যন্ত ভাতাগুলো ৩০ জুন ২০২৬-এর আহরিত অঙ্কে ধরা হয়েছে, যা মূল বেতন থেকে স্বয়ংক্রিয়ভাবে হিসাব করা।</li>
       <li>ফ্যামিলি কোয়ার্টারে বসবাস না করে সাধারণ হারে ("অন্যান্য স্থান") বাড়ি ভাড়া ধরা হয়েছে। কিট রক্ষণাবেক্ষণ, পাহাড়ি, হাওড়/দ্বীপ/চর ও তেজস্ক্রিয় ঝুঁকি ভাতা ধরা হয়নি।</li>
       <li>মাসিক কর্তন সর্বনিম্ন হারে (জিপিএফ মূল বেতনের ৫%) ধরা হয়েছে।</li>
-      <li>৫০% কম্যুটেশন প্রচলিত নিয়মে ধরা হয়েছে। জেএসআই অনুযায়ী পেনশন ও কম্যুটেশনের বিদ্যমান হার অপরিবর্তিত।</li>
+      <li>প্রচলিত নিয়মে পূর্ণ পেনশনের অর্ধেক এককালীন (আনুতোষিক) ও অর্ধেক মাসিক পেনশন ধরা হয়েছে।</li>
       <li>উচ্চতর গ্রেড (৮ বছর পূর্তিতে), ব্যক্তিগত বেতন ও বিশেষ পরিস্থিতি এই হিসাবে ধরা হয়নি।</li>
       <li>চূড়ান্ত অঙ্ক সংশ্লিষ্ট পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</li>
     </ul></div>`;
