@@ -142,8 +142,8 @@ function autoOldAllowances(inp) {
     kit: inp.kit ? ALLOW.kit[rankLevel(r) === 'JCO' ? 'JCO' : 'OR'].old : 0,
     serviceWardenship: inp.serviceWardenship || 0,
     hill: hillOld,
-    // বিশেষ সুবিধা (প্রণোদনা): সর্বশেষ মূল বেতনের ২০%, ন্যূনতম ২,০০০ টাকা; ০১ জুলাই ২০২৬ থেকে বাদ। মহার্ঘ ভাতা আগেই বাতিল।
-    pronodona: Math.max(Math.round(inp.oldBasic * 0.20), 2000),
+    // বিশেষ সুবিধা (প্রণোদনা): সর্বশেষ মূল বেতনের ১৫%, ন্যূনতম ২,০০০ টাকা; ০১ জুলাই ২০২৬ থেকে বাদ। মহার্ঘ ভাতা আগেই বাতিল।
+    pronodona: Math.max(Math.round(inp.oldBasic * 0.15), 2000),
   };
 }
 
@@ -240,7 +240,7 @@ function computeTimeline(inp) {
     allowances: oldItems,
     allowTotal: oldAllowTotal,
     special: [{ label: OLD_ALLOW_LABELS.pronodona, amt: prono,
-      note: prono > 2000 ? `আগের মূল বেতন ${bn(inp.oldBasic)} টাকার ২০%` : `আগের মূল বেতন ${bn(inp.oldBasic)} টাকার ২০% ২,০০০-এর কম, তাই ন্যূনতম ২,০০০` }].filter(x => x.amt),
+      note: prono > 2000 ? `আগের মূল বেতন ${bn(inp.oldBasic)} টাকার ১৫%` : `আগের মূল বেতন ${bn(inp.oldBasic)} টাকার ১৫% ২,০০০-এর কম, তাই ন্যূনতম ২,০০০` }].filter(x => x.amt),
     specialTotal: specialBenefit,
   };
   june.gross = june.basic + june.allowTotal + june.specialTotal;
