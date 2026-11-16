@@ -158,13 +158,13 @@
     if (!R) { h.className = 'hint'; h.innerHTML = ''; return; }
     if (R.oldScale) {
       h.className = 'hint';
-      h.innerHTML = `জেএসআই ০২/২০১৬ অনুযায়ী ${R.name} পদের স্কেল: ${bn(R.oldScale[0])} – ${bn(R.oldScale[R.oldScale.length - 1])} টাকা।`;
+      h.innerHTML = `জেএসআই ০১/২০১৬ অনুযায়ী ${R.name} পদের স্কেল: ${bn(R.oldScale[0])} – ${bn(R.oldScale[R.oldScale.length - 1])} টাকা।`;
       return;
     }
     h.className = 'hint' + (R.oldNote ? ' warn' : '');
     h.innerHTML = R.oldNote
       ? `⚠ ${R.name} পদের পুরোনো স্কেলের প্রথম ধাপ হিসেবে আপাতত ${bn(R.oldStart)} টাকা <b>অনুমিত</b> মান ধরা হয়েছে।`
-      : `জেএসআই ০২/২০১৬ অনুযায়ী ${R.name} পদের স্কেল শুরু হয় ${bn(R.oldStart)} টাকা থেকে।`;
+      : `জেএসআই ০১/২০১৬ অনুযায়ী ${R.name} পদের স্কেল শুরু হয় ${bn(R.oldStart)} টাকা থেকে।`;
   }
 
   function collect() {
@@ -245,7 +245,7 @@
     const out = $('#salary-out');
     if (errs.length) {
       if (fromBtn) { toast(errs[0]); return false; }
-      out.innerHTML = `<div class="card empty"><div class="em">📝</div><b>এখনো হিসাব করা হয়নি</b><p>"তথ্য" অংশে প্রয়োজনীয় তথ্য দিয়ে <b>বেতন হিসাব করুন</b> চাপুন।</p><button class="btn btn-primary" onclick="document.querySelector('[data-view=input]').click()">তথ্য দিন</button></div>`;
+      out.innerHTML = `<div class="card empty"><div class="em">📝</div><b>এখনো হিসাব করা হয়নি</b><p>"তথ্য" অংশে প্রয়োজনীয় তথ্য দিয়ে নিচের <b>সাবমিট করুন</b> বাটনে চাপুন।</p><button class="btn btn-primary" onclick="document.querySelector('[data-view=input]').click()">তথ্য দিন</button></div>`;
       return false;
     }
     const tl = computeTimeline(inp);

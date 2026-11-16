@@ -219,7 +219,7 @@ input[type=date].input { color-scheme: dark; }
 .btn[disabled] { opacity: .6; pointer-events: none; }
 .btn-row { display: flex; gap: 10px; }
 .btn-row .btn { flex: 1; }
-.sticky-cta { position: sticky; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 10px); z-index: 10; margin-top: 8px; }
+.form-submit { margin-top: 16px; }
 
 /* ============== ফলাফল ============== */
 .summary-hero {
