@@ -133,7 +133,7 @@ function autoOldAllowances(inp) {
     dsa: dsaAmount(r, yrs, 'old'),
     medical: ALLOW.medical.old,
     tiffin: isCplDown(r) ? ALLOW.tiffin.old : 0,
-    transport: isCplDown(r) && inp.location !== 'OTHER' ? ALLOW.transport.old : 0,
+    transport: isCplDown(r) ? ALLOW.transport.old : 0,
     education: Math.min(inp.children || 0, ALLOW.education.maxChildren) * ALLOW.education.perChild,
     skill: skillAmount(r, inp.skill, 'old'),
     appointment: APPOINTMENT[inp.appointment || 'NONE'].old,
