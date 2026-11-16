@@ -55,7 +55,7 @@
   /* ---------------- ফর্ম সেটআপ ---------------- */
   function initForm() {
     // কনফিগ
-    $('#dev-name').textContent = SITE_CONFIG.developer.name;
+    $('#dev-name').innerHTML = devNameHTML();
     $('#dev-role').textContent = SITE_CONFIG.developer.title;
     $('#ad-title').textContent = SITE_CONFIG.ad.title;
     $('#ad-tag').textContent = SITE_CONFIG.ad.tagline;
@@ -65,7 +65,7 @@
       $('#ad2-title').textContent = SITE_CONFIG.ad2.title;
       $('#ad2-sub').textContent = SITE_CONFIG.ad2.subtitle;
       $('#ad2-tag').textContent = SITE_CONFIG.ad2.tagline;
-      $('#ad2-cta').textContent = SITE_CONFIG.ad2.cta;
+      $('#ad2-feats').innerHTML = (SITE_CONFIG.ad2.features || []).map(f => `<li>${esc(f)}</li>`).join('');
       $('#ad2').href = SITE_CONFIG.ad2.url;
     } else { $('#ad2').hidden = true; }
     setupInstall();
@@ -115,6 +115,8 @@
     $$('.nav-btn').forEach(b => b.addEventListener('click', () => go(b.dataset.view)));
     $$('[data-report]').forEach(b => b.addEventListener('click', () => makePdf(b.dataset.report)));
   }
+
+  const devNameHTML = () => esc(SITE_CONFIG.developer.name) + (SITE_CONFIG.developer.corps ? ` <small class="corps">${esc(SITE_CONFIG.developer.corps)}</small>` : '');
 
   /* ---------------- অ্যাপ হিসেবে ইনস্টল (PWA) ---------------- */
   let installEvt = null;
@@ -518,7 +520,7 @@
     return `
     <div class="rh">
       <div><h1>${title}</h1><p>জেএসআই ০১/২০২৬ (বাংলাদেশ গেজেট, অতিরিক্ত, ১৫ নভেম্বর ২০২৬) অনুযায়ী · প্রস্তুতের তারিখ: ${bnDate(today)}</p></div>
-      <div class="devbox"><img src="assets/img/developer.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${SITE_CONFIG.developer.name}</b>${SITE_CONFIG.developer.title}</div></div>
+      <div class="devbox"><img src="assets/img/developer.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${devNameHTML()}</b>${SITE_CONFIG.developer.title}</div></div>
     </div>
     <div class="info">
       <div><b>নাম:</b> ${esc(inp.name || '—')}</div>
@@ -530,7 +532,7 @@
       <div><b>বৈবাহিক অবস্থা:</b> ${inp.marital === 'MARRIED' ? 'বিবাহিত' : 'অবিবাহিত'}</div>
     </div>`;
   }
-  const rptFooter = () => `<div class="rf"><span>এটি একটি আনুমানিক হিসাব। চূড়ান্ত অঙ্ক পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</span><span>ডেভেলপার: <b>${SITE_CONFIG.developer.name}</b></span></div>`;
+  const rptFooter = () => `<div class="rf"><span>এটি একটি আনুমানিক হিসাব। চূড়ান্ত অঙ্ক পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</span><span>ডেভেলপার: <b>${devNameHTML()}</b></span></div>`;
 
   function rptSalary(tl) {
     const inp = tl.input, R = tl.rank, fx = tl.fix;
