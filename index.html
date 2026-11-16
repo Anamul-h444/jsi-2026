@@ -64,12 +64,11 @@
     <form id="form" autocomplete="off" onsubmit="return false">
 
       <!-- ১. ব্যক্তিগত তথ্য -->
-      <div class="card acc open" data-acc>
-        <button type="button" class="acc-head">
+      <div class="card acc open">
+        <div class="acc-head">
           <span class="num">১</span>
           <span class="t"><b>ব্যক্তিগত তথ্য</b><small>নাম, পদবি, জন্মতারিখ ও যোগদানের তারিখ</small></span>
-          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
+        </div>
         <div class="acc-body"><div><div class="acc-inner">
           <div class="grid">
             <div class="field full"><label>নাম</label><input class="input" id="name" /></div>
@@ -83,17 +82,16 @@
         </div></div></div>
       </div>
 
-      <!-- ২. মূল বেতন -->
-      <div class="card acc open" data-acc>
-        <button type="button" class="acc-head">
+      <!-- ২. মূল বেতন (পদবি দেওয়ার পর দেখা যায়) -->
+      <div class="card acc open" id="secBasic" hidden>
+        <div class="acc-head">
           <span class="num">২</span>
           <span class="t"><b>৩০ জুন ২০২৬-এর মূল বেতন</b><small>জেএসআই ০২/২০১৬ অনুযায়ী আহরিত মূল বেতন</small></span>
-          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
+        </div>
         <div class="acc-body"><div><div class="acc-inner">
           <div class="grid">
             <div class="field full" id="oldBasicField"><label>বর্তমান মূল বেতন (৳) <span class="req">*</span></label>
-              <select class="input" id="oldBasicSel" disabled><option value="">আগে পদবি নির্বাচন করুন</option></select>
+              <select class="input" id="oldBasicSel"></select>
               <input class="input" id="oldBasic" inputmode="numeric" placeholder="মূল বেতন লিখুন" hidden /></div>
             <div class="field" id="oldStartField" hidden><label>পুরোনো স্কেলের প্রথম ধাপ (৳)</label><input class="input" id="oldStart" inputmode="numeric" /></div>
           </div>
@@ -102,12 +100,11 @@
       </div>
 
       <!-- ৩. পরিবার ও কর্মস্থল -->
-      <div class="card acc" data-acc>
-        <button type="button" class="acc-head">
+      <div class="card acc open">
+        <div class="acc-head">
           <span class="num">৩</span>
           <span class="t"><b>পরিবার ও কর্মস্থল</b><small>বাড়ি ভাড়া, শিক্ষা ও যাতায়াত ভাতার জন্য</small></span>
-          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
+        </div>
         <div class="acc-body"><div><div class="acc-inner">
           <div class="field"><label>বৈবাহিক অবস্থা</label>
             <div class="seg" data-seg="marital"><button type="button" data-v="MARRIED">বিবাহিত</button><button type="button" data-v="UNMARRIED">অবিবাহিত</button></div>
@@ -124,12 +121,11 @@
       </div>
 
       <!-- ৪. বেতন উপাদান -->
-      <div class="card acc" data-acc>
-        <button type="button" class="acc-head">
+      <div class="card acc open">
+        <div class="acc-head">
           <span class="num">৪</span>
           <span class="t"><b>দক্ষতা ও অন্যান্য বেতন উপাদান</b><small>দক্ষতা বেতন, ব্যাজ, নিযুক্তি ও বিশেষ ভাতা</small></span>
-          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
+        </div>
         <div class="acc-body"><div><div class="acc-inner">
           <div class="grid">
             <div class="field"><label>দক্ষতা বেতন</label><select class="input" id="skill"></select></div>
@@ -155,12 +151,11 @@
       </div>
 
       <!-- ৫. জুন ২০২৬-এর ভাতা -->
-      <div class="card acc" data-acc>
-        <button type="button" class="acc-head">
+      <div class="card acc open">
+        <div class="acc-head">
           <span class="num">৫</span>
           <span class="t"><b>জুন ২০২৬-এর ভাতা ও বিশেষ সুবিধা</b><small>পে-স্লিপ দেখে মিলিয়ে নিন (ঐচ্ছিক)</small></span>
-          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
+        </div>
         <div class="acc-body"><div><div class="acc-inner">
           <div class="notice" style="margin:14px 0 4px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
@@ -176,12 +171,11 @@
       </div>
 
       <!-- ৬. কর্তন -->
-      <div class="card acc" data-acc>
-        <button type="button" class="acc-head">
+      <div class="card acc open">
+        <div class="acc-head">
           <span class="num">৬</span>
           <span class="t"><b>মাসিক কর্তন</b><small>জিপিএফ, ঋণের কিস্তি, মেস বিল ইত্যাদি</small></span>
-          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
+        </div>
         <div class="acc-body"><div><div class="acc-inner">
           <div class="grid">
             <div class="field"><label>জিপিএফ চাঁদা (মূল বেতনের %)</label><input class="input" id="gpfPercent" inputmode="numeric" placeholder="৫" /></div>

@@ -63,7 +63,7 @@
     $('#ad-cta').textContent = SITE_CONFIG.ad.cta;
     $('#ad').href = SITE_CONFIG.ad.url || '#';
 
-    $('#rank').innerHTML = `<option value="">পদবি নির্বাচন করুন</option>` + CURRENT_RANK_KEYS.map(k => `<option value="${k}">${RANKS[k].name}</option>`).join('');
+    $('#rank').innerHTML = `<option value=""></option>` + CURRENT_RANK_KEYS.map(k => `<option value="${k}">${RANKS[k].name}</option>`).join('');
     $('#location').innerHTML = Object.entries(LOCATIONS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
     $('#skill').innerHTML = `<option value="NONE">প্রযোজ্য নয়</option><option value="HIGH">উচ্চ দক্ষতা বেতন</option><option value="NORMAL">দক্ষতা বেতন</option>`;
     $('#appointment').innerHTML = Object.entries(APPOINTMENT).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('');
@@ -98,7 +98,6 @@
     $('#view-pension').addEventListener('input', onInput);
     $('#view-pension').addEventListener('change', onInput);
 
-    $$('[data-acc] .acc-head').forEach(h => h.addEventListener('click', () => h.parentElement.classList.toggle('open')));
     $$('[data-seg] button').forEach(b => b.addEventListener('click', () => {
       const seg = b.parentElement; S[seg.dataset.seg] = b.dataset.v; setSeg(seg, b.dataset.v); save(); refreshPlaceholders();
     }));
@@ -159,12 +158,9 @@
     const sel = $('#oldBasicSel'), inpEl = $('#oldBasic');
     const useSel = !R || !!R.oldScale;
     sel.hidden = !useSel; inpEl.hidden = useSel;
-    $('#oldStartField').hidden = useSel;
-    if (!R) {
-      sel.disabled = true;
-      sel.innerHTML = '<option value="">আগে পদবি নির্বাচন করুন</option>';
-    } else if (R.oldScale) {
-      sel.disabled = false;
+    $('#oldStartField').hidden = !R || useSel;
+    $('#secBasic').hidden = !R;
+    if (R && R.oldScale) {
       sel.innerHTML = '<option value="">মূল বেতন নির্বাচন করুন</option>' +
         R.oldScale.map((v, i) => `<option value="${v}">${bn(v)} টাকা — ${bn(i + 1)} নং ধাপ</option>`).join('');
       sel.value = R.oldScale.includes(num(S.oldBasic)) ? String(num(S.oldBasic)) : '';
@@ -174,7 +170,7 @@
   function updateOldStartHint() {
     const R = RANKS[S.rank];
     const h = $('#oldStartHint');
-    if (!R) { h.className = 'hint'; h.innerHTML = 'পদবি নির্বাচন করলে সেই পদের পুরোনো স্কেলের ধাপগুলো এখানে আসবে।'; return; }
+    if (!R) { h.className = 'hint'; h.innerHTML = ''; return; }
     if (R.oldScale) {
       h.className = 'hint';
       h.innerHTML = `জেএসআই ০২/২০১৬ অনুযায়ী ${R.name} পদের স্কেল: ${bn(R.oldScale[0])} – ${bn(R.oldScale[R.oldScale.length - 1])} টাকা।`;

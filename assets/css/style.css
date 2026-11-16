@@ -139,7 +139,7 @@ button, input, select { font-family: inherit; font-size: inherit; color: inherit
 .acc { padding: 0; overflow: hidden; }
 .acc-head {
   width: 100%; display: flex; align-items: center; gap: 12px; padding: 15px 16px; background: none; border: 0;
-  text-align: left; cursor: pointer;
+  text-align: left;
 }
 .acc-head .num {
   width: 32px; height: 32px; border-radius: 10px; flex: none; display: grid; place-items: center; font-weight: 700; font-size: 14px;
@@ -148,11 +148,7 @@ button, input, select { font-family: inherit; font-size: inherit; color: inherit
 .acc-head .t { flex: 1; }
 .acc-head .t b { display: block; font-size: 15.5px; font-weight: 600; }
 .acc-head .t small { color: var(--muted); font-size: 12.5px; }
-.acc-head .chev { transition: transform .35s var(--ease); color: var(--muted); }
-.acc.open .acc-head .chev { transform: rotate(180deg); }
-.acc-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s var(--ease); }
-.acc.open .acc-body { grid-template-rows: 1fr; }
-.acc-body > div { overflow: hidden; }
+.acc-body { display: block; }
 .acc-inner { padding: 4px 16px 18px; border-top: 1px solid var(--border); }
 
 /* ফর্ম */
