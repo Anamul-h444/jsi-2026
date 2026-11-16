@@ -9,7 +9,7 @@
 
   /* ---------------- স্টেট ---------------- */
   const DEFAULTS = {
-    name: '', baNo: '', unit: '', rank: 'CPL', dob: '', joinDate: '',
+    name: '', baNo: '', unit: '', rank: '', dob: '', joinDate: '',
     oldBasic: '', oldStart: '', oldStartTouched: false,
     marital: 'MARRIED', quarter: '0', location: 'OTHER', children: 0, disabledChildren: 0,
     skill: 'NONE', appointment: 'NONE', badges: 0, serviceWardenship: '', specials: [],
@@ -63,7 +63,7 @@
     $('#ad-cta').textContent = SITE_CONFIG.ad.cta;
     $('#ad').href = SITE_CONFIG.ad.url || '#';
 
-    $('#rank').innerHTML = CURRENT_RANK_KEYS.map(k => `<option value="${k}">${RANKS[k].name}</option>`).join('');
+    $('#rank').innerHTML = `<option value="">পদবি নির্বাচন করুন</option>` + CURRENT_RANK_KEYS.map(k => `<option value="${k}">${RANKS[k].name}</option>`).join('');
     $('#location').innerHTML = Object.entries(LOCATIONS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
     $('#skill').innerHTML = `<option value="NONE">প্রযোজ্য নয়</option><option value="HIGH">উচ্চ দক্ষতা বেতন</option><option value="NORMAL">দক্ষতা বেতন</option>`;
     $('#appointment').innerHTML = Object.entries(APPOINTMENT).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('');
@@ -78,7 +78,11 @@
     // স্টেট → ফর্ম
     ['name','baNo','unit','rank','dob','joinDate','oldBasic','location','skill','appointment','serviceWardenship','hill','otherNew','gpfPercent','otherDeductions','retireDate','commutePct']
       .forEach(id => { const el = $('#' + id); if (el) el.value = S[id] ?? ''; });
-    $('#oldStart').value = S.oldStart || RANKS[S.rank].oldStart;
+    if (S.rank && !RANKS[S.rank]) S.rank = '';
+    if (!S.rank || (RANKS[S.rank].oldScale && !RANKS[S.rank].oldScale.includes(num(S.oldBasic)))) S.oldBasic = '';
+    $('#oldBasic').value = S.oldBasic;
+    $('#oldStart').value = S.oldStart || (RANKS[S.rank]?.oldStart ?? '');
+    renderOldBasic();
     ['kit','haor','radiation'].forEach(id => $('#' + id).checked = !!S[id]);
     $$('#specials input').forEach(i => i.checked = S.specials.includes(i.value));
     $$('[data-seg]').forEach(seg => setSeg(seg, S[seg.dataset.seg]));
@@ -129,8 +133,16 @@
       S[el.id] = el.checked;
     } else if (el.id === 'rank') {
       S.rank = el.value;
-      if (!S.oldStartTouched) { S.oldStart = ''; $('#oldStart').value = RANKS[S.rank].oldStart; }
+      const R = RANKS[S.rank];
+      if (!R || R.oldScale) { S.oldStart = ''; S.oldStartTouched = false; }
+      if (!S.oldStartTouched) $('#oldStart').value = R ? R.oldStart : '';
+      if (!R?.oldScale || !R.oldScale.includes(num(S.oldBasic))) S.oldBasic = '';
+      $('#oldBasic').value = S.oldBasic;
+      renderOldBasic();
       updateOldStartHint();
+      refreshPlaceholders();
+    } else if (el.id === 'oldBasicSel') {
+      S.oldBasic = el.value; $('#oldBasic').value = el.value;
     } else if (el.id === 'oldStart') {
       S.oldStart = el.value; S.oldStartTouched = el.value !== '';
       updateOldStartHint();
@@ -138,16 +150,40 @@
       S[el.id] = el.value;
     }
     save();
-    if (e.type === 'change' || el.id === 'oldBasic') refreshPlaceholders();
+    if (e.type === 'change' || el.id === 'oldBasic' || el.id === 'oldBasicSel') refreshPlaceholders();
+  }
+
+  /* পদবি অনুযায়ী পুরোনো স্কেলের ধাপগুলো ড্রপডাউনে দেখানো; স্কেল না থাকলে হাতে লেখার ঘর */
+  function renderOldBasic() {
+    const R = RANKS[S.rank];
+    const sel = $('#oldBasicSel'), inpEl = $('#oldBasic');
+    const useSel = !R || !!R.oldScale;
+    sel.hidden = !useSel; inpEl.hidden = useSel;
+    $('#oldStartField').hidden = useSel;
+    if (!R) {
+      sel.disabled = true;
+      sel.innerHTML = '<option value="">আগে পদবি নির্বাচন করুন</option>';
+    } else if (R.oldScale) {
+      sel.disabled = false;
+      sel.innerHTML = '<option value="">মূল বেতন নির্বাচন করুন</option>' +
+        R.oldScale.map((v, i) => `<option value="${v}">${bn(v)} টাকা — ${bn(i + 1)} নং ধাপ</option>`).join('');
+      sel.value = R.oldScale.includes(num(S.oldBasic)) ? String(num(S.oldBasic)) : '';
+    }
   }
 
   function updateOldStartHint() {
     const R = RANKS[S.rank];
     const h = $('#oldStartHint');
+    if (!R) { h.className = 'hint'; h.innerHTML = 'পদবি নির্বাচন করলে সেই পদের পুরোনো স্কেলের ধাপগুলো এখানে আসবে।'; return; }
+    if (R.oldScale) {
+      h.className = 'hint';
+      h.innerHTML = `জেএসআই ০২/২০১৬ অনুযায়ী ${R.name} পদের স্কেল: ${bn(R.oldScale[0])} – ${bn(R.oldScale[R.oldScale.length - 1])} টাকা।`;
+      return;
+    }
     h.className = 'hint' + (R.oldNote ? ' warn' : '');
     h.innerHTML = R.oldNote
-      ? `⚠ ${R.name} পদের পুরোনো স্কেলের প্রথম ধাপ জেএসআই ০১/২০২৬-এ উল্লেখ নেই। ${bn(R.oldStart)} টাকা <b>অনুমিত</b> মান। আপনার পে-স্লিপ বা জেএসআই ০১/২০১৬ দেখে সঠিক অঙ্ক দিন।`
-      : `জেএসআই ০১/২০১৬ অনুযায়ী ${R.name} পদের স্কেল শুরু হয় ${bn(R.oldStart)} টাকা থেকে। আপনার স্কেল ভিন্ন হলে পরিবর্তন করুন।`;
+      ? `⚠ ${R.name} পদের পুরোনো স্কেলের প্রথম ধাপ জেএসআই ০১/২০২৬-এ উল্লেখ নেই। ${bn(R.oldStart)} টাকা <b>অনুমিত</b> মান। আপনার পে-স্লিপ বা জেএসআই ০২/২০১৬ দেখে সঠিক অঙ্ক দিন।`
+      : `জেএসআই ০২/২০১৬ অনুযায়ী ${R.name} পদের স্কেল শুরু হয় ${bn(R.oldStart)} টাকা থেকে। আপনার স্কেল ভিন্ন হলে পরিবর্তন করুন।`;
   }
 
   function collect() {
@@ -156,7 +192,7 @@
     return {
       name: S.name.trim(), baNo: S.baNo.trim(), unit: S.unit.trim(),
       rank: S.rank, dob: parseDate(S.dob), joinDate: parseDate(S.joinDate),
-      oldBasic: num(S.oldBasic), oldStart: num(S.oldStart || RANKS[S.rank].oldStart),
+      oldBasic: num(S.oldBasic), oldStart: num(S.oldStart || (RANKS[S.rank]?.oldStart ?? 0)),
       marital: S.marital, quarter: S.quarter === '1', location: S.location,
       children: S.children || 0, disabledChildren: S.disabledChildren || 0,
       skill: S.skill, appointment: S.appointment, badges: S.badges || 0,
@@ -173,7 +209,7 @@
 
   function refreshPlaceholders() {
     const inp = collect();
-    if (!inp.oldBasic) {
+    if (!inp.oldBasic || !RANKS[inp.rank]) {
       $$('[id^=ov_]').forEach(el => { if (el.id !== 'ov_other') el.placeholder = 'মূল বেতন দিন'; });
       return;
     }
@@ -212,6 +248,7 @@
   /* ---------------- বৈধতা ---------------- */
   function validate(inp, strict) {
     const errs = [];
+    if (!RANKS[inp.rank]) return ['বর্তমান পদবি নির্বাচন করুন'];
     if (!inp.oldBasic) errs.push('৩০ জুন ২০২৬-এর মূল বেতন দিন');
     else if (inp.oldBasic < 5000 || inp.oldBasic > 100000) errs.push('মূল বেতনের অঙ্কটি সঠিক কিনা যাচাই করুন');
     if (!inp.oldStart) errs.push('পুরোনো স্কেলের প্রথম ধাপ দিন');
@@ -440,7 +477,7 @@
     <div class="info">
       <div><b>নাম:</b> ${esc(inp.name || '—')}</div>
       <div><b>পদবি:</b> ${RANKS[inp.rank].name}</div>
-      <div><b>বিএ নম্বর:</b> ${esc(inp.baNo || '—')}</div>
+      <div><b>সেনা নং:</b> ${esc(inp.baNo || '—')}</div>
       <div><b>ইউনিট:</b> ${esc(inp.unit || '—')}</div>
       <div><b>জন্মতারিখ:</b> ${bnDate(inp.dob)}</div>
       <div><b>যোগদান:</b> ${bnDate(inp.joinDate)}</div>

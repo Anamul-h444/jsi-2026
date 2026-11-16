@@ -48,7 +48,7 @@
   <section class="view active" id="view-input">
     <div class="hero">
       <h2>নতুন বেতন স্কেলে আপনার <em>বেতন ও পেনশনের</em> হিসাব জানুন</h2>
-      <p>নিচের তথ্যগুলো দিন।</p>
+      <p>নিচের তথ্যগুলো দিন আর জেনে নিন –</p>
       <ul class="hero-list">
         <li>জুলাই ২০২৬ থেকে জানুয়ারি ২০২৮ পর্যন্ত প্রতিটি ধাপের মূল বেতন ও ভাতাসহ সম্ভাব্য হিসাব পাবেন।</li>
         <li>পেনশনের সম্ভাব্য হিসাব জানুন।</li>
@@ -72,9 +72,9 @@
         </button>
         <div class="acc-body"><div><div class="acc-inner">
           <div class="grid">
-            <div class="field full"><label>নাম</label><input class="input" id="name" placeholder="যেমন: মোঃ আব্দুল করিম" /></div>
-            <div class="field"><label>বিএ নম্বর <span class="hint">(ঐচ্ছিক)</span></label><input class="input" id="baNo" inputmode="numeric" placeholder="ঐচ্ছিক" /></div>
-            <div class="field"><label>ইউনিট <span class="hint">(ঐচ্ছিক)</span></label><input class="input" id="unit" placeholder="ঐচ্ছিক" /></div>
+            <div class="field full"><label>নাম</label><input class="input" id="name" /></div>
+            <div class="field"><label>সেনা নং <span class="hint">(ঐচ্ছিক)</span></label><input class="input" id="baNo" inputmode="numeric" /></div>
+            <div class="field"><label>ইউনিট <span class="hint">(ঐচ্ছিক)</span></label><input class="input" id="unit" /></div>
             <div class="field full"><label>বর্তমান পদবি <span class="req">*</span></label><select class="input" id="rank"></select></div>
             <div class="field"><label>জন্মতারিখ <span class="req">*</span></label><input class="input" type="date" id="dob" /></div>
             <div class="field"><label>চাকরিতে যোগদান <span class="req">*</span></label><input class="input" type="date" id="joinDate" /></div>
@@ -87,13 +87,15 @@
       <div class="card acc open" data-acc>
         <button type="button" class="acc-head">
           <span class="num">২</span>
-          <span class="t"><b>৩০ জুন ২০২৬-এর মূল বেতন</b><small>জেএসআই ০১/২০১৬ অনুযায়ী আহরিত মূল বেতন</small></span>
+          <span class="t"><b>৩০ জুন ২০২৬-এর মূল বেতন</b><small>জেএসআই ০২/২০১৬ অনুযায়ী আহরিত মূল বেতন</small></span>
           <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="acc-body"><div><div class="acc-inner">
           <div class="grid">
-            <div class="field"><label>বর্তমান মূল বেতন (৳) <span class="req">*</span></label><input class="input" id="oldBasic" inputmode="numeric" placeholder="যেমন: ২৪২০০" /></div>
-            <div class="field"><label>পুরোনো স্কেলের প্রথম ধাপ (৳)</label><input class="input" id="oldStart" inputmode="numeric" /></div>
+            <div class="field full" id="oldBasicField"><label>বর্তমান মূল বেতন (৳) <span class="req">*</span></label>
+              <select class="input" id="oldBasicSel" disabled><option value="">আগে পদবি নির্বাচন করুন</option></select>
+              <input class="input" id="oldBasic" inputmode="numeric" placeholder="মূল বেতন লিখুন" hidden /></div>
+            <div class="field" id="oldStartField" hidden><label>পুরোনো স্কেলের প্রথম ধাপ (৳)</label><input class="input" id="oldStart" inputmode="numeric" /></div>
           </div>
           <p class="hint" id="oldStartHint" style="margin:8px 0 0"></p>
         </div></div></div>
