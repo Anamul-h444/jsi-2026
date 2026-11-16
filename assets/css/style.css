@@ -357,17 +357,17 @@ input[type=date].input { color-scheme: dark; }
 .ad p { margin: 2px 0 0; font-size: 13.5px; color: #d8d3f3; }
 .ad .go { margin-top: 14px; position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; border-radius: 12px; background: #fff; color: #2a1d4a; font-weight: 700; font-size: 14px; }
 
-/* দ্বিতীয় বিজ্ঞাপন: নিয়ন্ত্রক */
-.ad2 { background: linear-gradient(135deg, #0f2f3a, #123f4a 50%, #1b3b2a); border-color: rgba(87,211,162,.3); margin-top: 0; }
-.ad2::before { background: radial-gradient(circle, rgba(87,211,162,.32), transparent 65%); }
-.ad .tag.soon { background: linear-gradient(135deg, var(--gold), #c99a2e); color: #1b1606; font-weight: 700; }
-.ad2-ic { width: 58px; height: 58px; border-radius: 16px; flex: none; display: grid; place-items: center; background: linear-gradient(135deg, #57d3a2, #2fa77a); box-shadow: 0 8px 22px rgba(47,167,122,.4); color: #06281c; }
-.ad2-ic svg { width: 30px; height: 30px; }
-.ad2 .ad2-sub { color: #bfeedd; font-size: 13px; }
-.ad2 .ad2-tag { position: relative; z-index: 1; margin: 12px 0 0; font-size: 13.5px; color: #d6ebe3; line-height: 1.55; }
+/* দ্বিতীয় বিজ্ঞাপন: নিয়ন্ত্রক (ব্র্যান্ড: নেভি ও সোনালি) */
+.ad2 { background: linear-gradient(135deg, #0F1830, #16224a 55%, #1E3A8A); border-color: rgba(240,190,69,.35); margin-top: 0; }
+.ad2::before { background: radial-gradient(circle, rgba(240,190,69,.28), transparent 65%); }
+.ad .tag.soon { background: linear-gradient(135deg, #F0BE45, #D9A21B); color: #1b1606; font-weight: 700; }
+.ad2-ic { width: 58px; height: 58px; border-radius: 16px; flex: none; display: grid; place-items: center; background: linear-gradient(145deg, #ffffff, #EEF2FF); box-shadow: 0 8px 22px rgba(30,58,138,.45); }
+.ad2-ic img { width: 40px; height: 45px; }
+.ad2 .ad2-sub { color: #c7d3f5; font-size: 13px; }
+.ad2 .ad2-tag { position: relative; z-index: 1; margin: 12px 0 0; font-size: 13.5px; color: #dfe6f7; line-height: 1.55; }
 .ad2-feats { position: relative; z-index: 1; list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
-.ad2-feats li { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; color: #d6fbe9; background: rgba(87,211,162,.14); border: 1px solid rgba(87,211,162,.35); }
-.ad2-feats li::before { content: '✓ '; color: var(--green-2); font-weight: 700; }
+.ad2-feats li { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; color: #f3e6c2; background: rgba(240,190,69,.12); border: 1px solid rgba(240,190,69,.38); }
+.ad2-feats li::before { content: '✓ '; color: #F0BE45; font-weight: 700; }
 
 /* অ্যাপ ইনস্টল কার্ড */
 .install-card {

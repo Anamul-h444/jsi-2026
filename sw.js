@@ -15,6 +15,7 @@ const CORE = [
   './assets/img/icon-192.png',
   './assets/img/developer.jpg',
   './assets/img/varahobey-logo.png',
+  './assets/img/niyontrok-crest.svg',
 ];
 
 self.addEventListener('install', e => {
