@@ -59,6 +59,7 @@
     $('#dev-role').textContent = SITE_CONFIG.developer.title;
     $('#ad-title').textContent = SITE_CONFIG.ad.title;
     $('#ad-tag').textContent = SITE_CONFIG.ad.tagline;
+    $('#ad-feats').innerHTML = (SITE_CONFIG.ad.features || []).map(f => `<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>${esc(f)}</li>`).join('');
     $('#ad-cta').textContent = SITE_CONFIG.ad.cta;
     $('#ad').href = SITE_CONFIG.ad.url || '#';
     if (SITE_CONFIG.ad2) {

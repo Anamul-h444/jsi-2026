@@ -357,6 +357,12 @@ input[type=date].input { color-scheme: dark; }
 .ad p { margin: 2px 0 0; font-size: 13.5px; color: #d8d3f3; }
 .ad .go { margin-top: 14px; position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; border-radius: 12px; background: #fff; color: #2a1d4a; font-weight: 700; font-size: 14px; }
 
+/* ভাড়া হবে: বৈশিষ্ট্য */
+.ad-feats { position: relative; z-index: 1; list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.ad-feats:empty { display: none; }
+.ad-feats li { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 999px; color: #d6fbe9; background: rgba(46,190,140,.16); border: 1px solid rgba(46,190,140,.45); }
+.ad-feats li svg { width: 15px; height: 15px; color: #5be0ad; }
+
 /* দ্বিতীয় বিজ্ঞাপন: নিয়ন্ত্রক (ব্র্যান্ড: নেভি ও সোনালি) */
 .ad2 { background: linear-gradient(135deg, #0F1830, #16224a 55%, #1E3A8A); border-color: rgba(240,190,69,.35); margin-top: 0; }
 .ad2::before { background: radial-gradient(circle, rgba(240,190,69,.28), transparent 65%); }
