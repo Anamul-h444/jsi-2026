@@ -318,7 +318,7 @@
       const isFinal = idx === 3;
       const m3 = isFinal ? 'সব ভাতাসহ মোট বেতন (কর্তনের পর)' : 'পূর্বের ভাতাসহ এখন মোট বেতন পাবেন (কর্তনের পর)';
       const basicNote = p.pct < 1
-        ? `পুরোনো মূল বেতন + বর্ধিত অংশের ${bn(p.pct * 100)}%`
+        ? `পুরোনো মূল বেতন + বৃদ্ধি ${bn(p.pct * 100)}%`
         : (idx === 2 ? '১০০% নতুন মূল বেতন (ইনক্রিমেন্টসহ)' : 'নতুন মূল বেতন');
       let riseLabel, riseVal;
       if (idx === 0) {
@@ -333,7 +333,7 @@
         <div class="card period">
           <div class="ph">
             <div><h4>${meta.label}</h4><small>${meta.range}</small></div>
-            <span class="badge ${isFinal ? 'green' : 'gold'}">${isFinal ? 'নতুন ভাতা চালু' : (p.pct < 1 ? `বৃদ্ধির ${bn(p.pct * 100)}%` : '১০০% মূল বেতন')}</span>
+            <span class="badge ${isFinal ? 'green' : 'gold'}">${isFinal ? 'নতুন ভাতা চালু' : (p.pct < 1 ? `বৃদ্ধি ${bn(p.pct * 100)}%` : '১০০% মূল বেতন')}</span>
           </div>
           <div class="metrics">
             <div class="metric"><div class="ic a">১</div><div class="t"><small>জেএসআই অনুসারে প্রাপ্য মূল বেতন</small><b>${tk(p.basic)}</b><small>${basicNote}</small></div><span class="delta ${deltaCls(p.basicRise)}">${signed(p.basicRise)}</span></div>
