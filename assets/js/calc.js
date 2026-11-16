@@ -142,8 +142,8 @@ function autoOldAllowances(inp) {
     kit: inp.kit ? ALLOW.kit[rankLevel(r) === 'JCO' ? 'JCO' : 'OR'].old : 0,
     serviceWardenship: inp.serviceWardenship || 0,
     hill: hillOld,
-    pronodona: Math.max(Math.round(inp.oldBasic * 0.05), 1000),
-    mohargho: Math.max(Math.round(inp.oldBasic * (RANKS[r].group === 'JCO' ? 0.10 : 0.15)), 1500),
+    // বিশেষ সুবিধা (প্রণোদনা): সর্বশেষ মূল বেতনের ২০%, ন্যূনতম ২,০০০ টাকা; ০১ জুলাই ২০২৬ থেকে বাদ। মহার্ঘ ভাতা আগেই বাতিল।
+    pronodona: Math.max(Math.round(inp.oldBasic * 0.20), 2000),
   };
 }
 
@@ -163,7 +163,6 @@ const OLD_ALLOW_LABELS = {
   hill: 'পাহাড়ি ভাতা',
   other: 'অন্যান্য ভাতা',
   pronodona: 'বিশেষ সুবিধা (প্রণোদনা)',
-  mohargho: 'বিশেষ সুবিধা (মহার্ঘ ভাতা)',
 };
 
 /* ---------- ০১ জানুয়ারি ২০২৮ থেকে নতুন ভাতা ---------- */
@@ -226,8 +225,8 @@ function computeTimeline(inp) {
   const oldItems = oldKeys.map(k => ({ key: k, label: OLD_ALLOW_LABELS[k], amt: pick(k) })).filter(i => i.amt);
   if (inp.oldOther) oldItems.push({ key: 'other', label: OLD_ALLOW_LABELS.other, amt: inp.oldOther });
   const oldAllowTotal = oldItems.reduce((s, i) => s + i.amt, 0);
-  const prono = pick('pronodona'), moh = pick('mohargho');
-  const specialBenefit = (prono || 0) + (moh || 0);
+  const prono = pick('pronodona');
+  const specialBenefit = prono || 0;
 
   const gpfRate = Math.max(5, Math.min(25, inp.gpfPercent || 5)) / 100;
   const otherDed = inp.otherDeductions || 0;
@@ -240,7 +239,7 @@ function computeTimeline(inp) {
     basic: inp.oldBasic,
     allowances: oldItems,
     allowTotal: oldAllowTotal,
-    special: [{ label: OLD_ALLOW_LABELS.pronodona, amt: prono }, { label: OLD_ALLOW_LABELS.mohargho, amt: moh }].filter(x => x.amt),
+    special: [{ label: OLD_ALLOW_LABELS.pronodona, amt: prono }].filter(x => x.amt),
     specialTotal: specialBenefit,
   };
   june.gross = june.basic + june.allowTotal + june.specialTotal;

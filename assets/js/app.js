@@ -281,7 +281,7 @@
         : (idx === 2 ? '১০০% নতুন মূল বেতন (ইনক্রিমেন্টসহ)' : 'নতুন মূল বেতন');
       let riseLabel, riseVal;
       if (idx === 0) {
-        riseLabel = `প্রণোদনা ও মহার্ঘ ভাতা বাদ দিয়ে জুন ২০২৬-এর তুলনায় বৃদ্ধি`;
+        riseLabel = `প্রণোদনা বাদ দিয়ে জুন ২০২৬-এর তুলনায় বৃদ্ধি`;
         riseVal = p.gross - tl.june.gross;
       } else {
         riseLabel = `${prevLabel}-এর তুলনায় বৃদ্ধি`;
@@ -324,34 +324,57 @@
     return `
     <div class="summary-hero">
       <div class="who"><span><b>${esc(inp.name || 'নাম দেওয়া হয়নি')}</b></span><span>${R.name}</span></div>
-      <div class="lbl">জানুয়ারি ২০২৮ থেকে সব ভাতাসহ হাতে পাওয়া মাসিক বেতন</div>
+      <div class="lbl">জানুয়ারি ২০২৮ থেকে সকল ভাতাসহ মাসিক বেতন পাবেন</div>
       <div class="big" id="hero-big">${tk(0)}</div>
-      <div class="sub">কর্তনের আগে মোট ${tk(p4.gross)} · ৩০ জুন ২০২৬-এর তুলনায় ${signed(p4.gross - tl.june.gross)}</div>
       <div class="kpis">
-        <div class="kpi"><small>নির্ধারিত মূল বেতন</small><b>${tk(fx.fixed)}</b></div>
-        <div class="kpi"><small>জুলাই ২০২৬ (ইনক্রিমেন্টসহ)</small><b>${tk(tl.newBasic26)}</b></div>
-        <div class="kpi"><small>জুলাই ২০২৭ থেকে</small><b>${tk(p3.basic)}</b></div>
+        <div class="kpi"><small>জুলাই ২০২৬ মূল বেতন (ইনক্রিমেন্টসহ)</small><b>${tk(p1.basic)}</b></div>
+        <div class="kpi"><small>জানুয়ারি ২০২৭ মূল বেতন</small><b>${tk(p2.basic)}</b></div>
+        <div class="kpi"><small>জুলাই ২০২৭ মূল বেতন (ইনক্রিমেন্টসহ)</small><b>${tk(p3.basic)}</b></div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="section-title" style="margin-top:0"><h3>মূল বেতন নির্ধারণ</h3><span class="line"></span></div>
-      <div class="formula">
-        পার্থক্য = ${tk(inp.oldBasic)} − ${tk(inp.oldStart)} = <b>${tk(fx.diff)}</b><br>
-        নতুন প্রথম ধাপ + পার্থক্য = ${tk(R.newScale[0])} + ${tk(fx.diff)} = <b>${tk(fx.target)}</b><br>
-        ${fx.exact ? 'সমান ধাপ পাওয়া গেছে, তাই এই ধাপেই নির্ধারণ' : 'সমান ধাপ না থাকায় পরবর্তী উচ্চতর ধাপে নির্ধারণ'} → <b>${tk(fx.fixed)}</b><br>
-        ০১ জুলাই ২০২৬-এর বার্ষিক ইনক্রিমেন্ট → <b>${tk(tl.newBasic26)}</b>
-        ${fx.personal ? `<br>ব্যক্তিগত বেতন (Personal Pay): <b>${tk(fx.personal)}</b>` : ''}
+    <div class="card voucher">
+      <div class="v-head">
+        <div><small>মূল বেতন নির্ধারণ বিবরণী</small><h3>০১ জুলাই ২০২৬-এ মূল বেতন নির্ধারণ</h3></div>
+        <span class="v-stamp">জেএসআই<br>০১/২০২৬</span>
       </div>
-      <p class="hint" style="margin:10px 0 2px">${R.name} পদের নতুন স্কেল (হলুদ = নির্ধারিত ধাপ, সবুজ = জুলাই ২০২৭-এর ধাপ):</p>
+      <div class="v-meta"><span>${esc(inp.name || '—')}</span><span>${R.name}</span></div>
+      ${fx.atStart ? `
+      <div class="v-row"><span class="v-no">১</span><div class="v-t"><b>৩০ জুন ২০২৬-এ আহরিত মূল বেতন</b><small>পুরোনো স্কেলের প্রারম্ভিক ধাপে</small></div><span class="v-amt">${tk(inp.oldBasic)}</span></div>
+      <div class="v-row"><span class="v-no">২</span><div class="v-t"><b>নতুন স্কেলের প্রারম্ভিক ধাপে নির্ধারণ</b><small>জেএসআই ০১/২০২৬, ক্রোড়পত্র-ক</small></div><span class="v-amt">${tk(fx.fixed)}</span></div>
+      ` : `
+      <div class="v-row"><span class="v-no">১</span><div class="v-t"><b>৩০ জুন ২০২৬-এ আহরিত মূল বেতন</b><small>পুরোনো স্কেল (জেএসআই ০১/২০১৬)</small></div><span class="v-amt">${tk(inp.oldBasic)}</span></div>
+      <div class="v-row"><span class="v-no">২</span><div class="v-t"><b>পুরোনো স্কেলের প্রারম্ভিক ধাপ</b><small>${R.name} পদের স্কেল শুরু</small></div><span class="v-amt minus">− ${tk(inp.oldStart)}</span></div>
+      <div class="v-row v-sub"><span class="v-no">৩</span><div class="v-t"><b>পার্থক্য</b><small>(১) থেকে (২) বিয়োগ</small></div><span class="v-amt">${tk(fx.diff)}</span></div>
+      <div class="v-row"><span class="v-no">৪</span><div class="v-t"><b>নতুন স্কেলের প্রারম্ভিক ধাপ</b><small>জেএসআই ০১/২০২৬, ক্রোড়পত্র-ক</small></div><span class="v-amt">${tk(R.newScale[0])}</span></div>
+      <div class="v-row"><span class="v-no">৫</span><div class="v-t"><b>পার্থক্য যোগ</b><small>(৩)-এর অঙ্ক</small></div><span class="v-amt plus">+ ${tk(fx.diff)}</span></div>
+      <div class="v-row v-sub"><span class="v-no">৬</span><div class="v-t"><b>নতুন স্কেলে প্রাপ্য অঙ্ক</b><small>(৪) + (৫)</small></div><span class="v-amt">${tk(fx.target)}</span></div>
+      <div class="v-row"><span class="v-no">৭</span><div class="v-t"><b>নতুন স্কেলে নির্ধারিত মূল বেতন</b><small>${fx.personal ? 'স্কেলের সর্বোচ্চ ধাপ; বাকি অংশ ব্যক্তিগত বেতন হিসেবে' : fx.exact ? 'অঙ্কটি স্কেলের একটি ধাপের সমান, তাই এই ধাপেই নির্ধারণ' : 'স্কেলে সমান ধাপ না থাকায় পরবর্তী উচ্চতর ধাপে নির্ধারণ'}</small></div><span class="v-amt">${tk(fx.fixed)}</span></div>
+      ${fx.personal ? `<div class="v-row"><span class="v-no">৮</span><div class="v-t"><b>ব্যক্তিগত বেতন (Personal Pay)</b><small>সর্বোচ্চ ধাপের অতিরিক্ত অংশ</small></div><span class="v-amt plus">+ ${tk(fx.personal)}</span></div>` : ''}
+      `}
+      <div class="v-row"><span class="v-no">${bn(fx.atStart ? 3 : fx.personal ? 9 : 8)}</span><div class="v-t"><b>০১ জুলাই ২০২৬-এর বার্ষিক ইনক্রিমেন্ট</b><small>পরবর্তী ধাপে উন্নীত</small></div><span class="v-amt plus">+ ${tk(tl.newBasic26 - fx.fixed - fx.personal)}</span></div>
+      <div class="v-total"><span>০১ জুলাই ২০২৬ থেকে নতুন মূল বেতন (ইনক্রিমেন্টসহ)</span><b>${tk(tl.newBasic26)}</b></div>
+      <p class="hint" style="margin:12px 0 2px">${R.name} পদের নতুন স্কেল (হলুদ = নির্ধারিত ধাপ, সবুজ = জুলাই ২০২৭-এর ধাপ):</p>
       <div class="scale-strip">${strip}</div>
-      <div class="notice info" style="margin:6px 0 0">
+    </div>
+
+    <div class="card">
+      <div class="section-title" style="margin-top:0"><h3>ধাপে ধাপে বেতন বৃদ্ধির হিসাব</h3><span class="line"></span></div>
+      <div class="formula">মোট বৃদ্ধি = নতুন মূল বেতন − পুরোনো মূল বেতন<br>= ${tk(tl.newBasic26)} − ${tk(inp.oldBasic)} = <b>${tk(tl.raise)}</b></div>
+      <table class="tbl step-tbl">
+        <tr><th>সময়কাল</th><th class="n">বৃদ্ধির হার</th><th class="n">বৃদ্ধির পরিমাণ</th><th class="n">প্রাপ্য মূল বেতন</th></tr>
+        <tr><td>জুলাই ২০২৬<small>প্রথম ধাপ</small></td><td class="n">${bn(tl.tr.p1 * 100)}%</td><td class="n up">+ ${tk(p1.basic - inp.oldBasic)}</td><td class="n"><b>${tk(p1.basic)}</b></td></tr>
+        <tr><td>জানুয়ারি ২০২৭</td><td class="n">${bn(tl.tr.p2 * 100)}%</td><td class="n up">+ ${tk(p2.basic - inp.oldBasic)}</td><td class="n"><b>${tk(p2.basic)}</b></td></tr>
+        <tr><td>জুলাই ২০২৭<small>পূর্ণ বেতন + ইনক্রিমেন্ট</small></td><td class="n">১০০%</td><td class="n up">+ ${tk(p3.basic - inp.oldBasic)}</td><td class="n"><b>${tk(p3.basic)}</b></td></tr>
+      </table>
+      <p class="hint" style="margin:8px 0 0">বৃদ্ধির পরিমাণ = মোট বৃদ্ধির নির্ধারিত হার, যা ৩০ জুন ২০২৬-এর মূল বেতনের সাথে যোগ হয়।</p>
+      <div class="notice info" style="margin:12px 0 0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
         <div>${R.group === 'JCO' ? 'জেসিও' : 'সার্জেন্ট ও তদনিম্ন'} পদের জন্য বর্ধিত মূল বেতন ধাপে ধাপে দেওয়া হবে: ${pctTxt}। "বিশেষ সুবিধা" ০১ জুলাই ২০২৬ থেকে বিলুপ্ত।</div>
       </div>
     </div>
 
-    <div class="section-title"><h3>ধাপে ধাপে বেতন</h3><span class="line"></span></div>
+    <div class="section-title"><h3>প্রতিটি ধাপের বেতন ও ভাতা</h3><span class="line"></span></div>
     <div class="timeline">${tl.periods.map(periodCard).join('')}</div>
 
     <div class="card">
