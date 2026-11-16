@@ -1,0 +1,18 @@
+{
+  "name": "জেএসআই ২০২৬ বেতন ও পেনশন ক্যালকুলেটর",
+  "short_name": "জেএসআই ২০২৬",
+  "description": "সেনাবাহিনীর জেসিও ও ওআর সদস্যদের জেএসআই ০১/২০২৬ অনুযায়ী বেতন ও পেনশনের হিসাব",
+  "lang": "bn",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1210",
+  "theme_color": "#0b1210",
+  "icons": [
+    { "src": "assets/img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/img/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

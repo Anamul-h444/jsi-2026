@@ -10,6 +10,12 @@
   <meta property="og:title" content="জেএসআই ২০২৬ বেতন ও পেনশন ক্যালকুলেটর" />
   <meta property="og:description" content="সেনাবাহিনীর জেসিও ও ওআর সদস্যদের জন্য নতুন বেতন, ভাতা ও পেনশনের পূর্ণ হিসাব।" />
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="জেএসআই ২০২৬" />
   <link rel="preload" href="assets/fonts/noto-serif-bengali-bengali-400-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/noto-serif-bengali-bengali-700-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="assets/css/style.css?v=dev" />
@@ -35,12 +41,26 @@
 
   <div class="dev-ribbon">
     <div class="in">
-      <div class="avatar">এহ</div>
+      <img class="avatar" src="assets/img/developer.jpg" alt="কর্পোরাল (টিএভি) এনামুল হক" width="44" height="44" />
       <div>
         <small>ডেভেলপ করেছেন</small>
         <b id="dev-name">কর্পোরাল (টিএভি) এনামুল হক</b>
         <span class="role" id="dev-role">ফুলস্ট্যাক সফটওয়্যার ডেভেলপার</span>
       </div>
+    </div>
+  </div>
+
+  <!-- অ্যাপ ইনস্টলের পরামর্শ (শুধু মোবাইলে, ইনস্টল না করা থাকলে) -->
+  <div class="install-card" id="installCard" hidden>
+    <img src="assets/img/icon-192.png" alt="" width="46" height="46" />
+    <div class="ic-t">
+      <b>মোবাইলে অ্যাপ হিসেবে ইনস্টল করুন</b>
+      <small>এক চাপে খুলবে, ইন্টারনেট ছাড়াও চলবে</small>
+      <div class="ic-steps" id="installSteps" hidden></div>
+    </div>
+    <div class="ic-act">
+      <button type="button" class="ic-btn" id="installBtn">ইনস্টল</button>
+      <button type="button" class="ic-x" id="installClose" aria-label="বন্ধ করুন">×</button>
     </div>
   </div>
 
@@ -204,13 +224,24 @@
   <a class="ad" id="ad" target="_blank" rel="noopener">
     <span class="tag">বিজ্ঞাপন</span>
     <div class="row">
-      <div class="house"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div>
+      <img class="ad-logo" src="assets/img/varahobey-logo.png" alt="ভাড়া হবে লোগো" width="58" height="58" />
       <div><h4 id="ad-title">ভাড়া হবে</h4><p id="ad-tag"></p></div>
     </div>
     <span class="go"><span id="ad-cta">ওয়েবসাইট দেখুন</span> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
   </a>
 
+  <a class="ad ad2" id="ad2" target="_blank" rel="noopener">
+    <span class="tag soon">শীঘ্রই আসছে</span>
+    <div class="row">
+      <div class="ad2-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/><path d="M22 10v6"/></svg></div>
+      <div><h4 id="ad2-title"></h4><p id="ad2-sub" class="ad2-sub"></p></div>
+    </div>
+    <p id="ad2-tag" class="ad2-tag"></p>
+    <span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg><span id="ad2-cta"></span></span>
+  </a>
+
   <footer class="footer">
+    <img class="dev-photo" src="assets/img/developer.jpg" alt="কর্পোরাল (টিএভি) এনামুল হক" width="72" height="72" loading="lazy" />
     <div>ডিজাইন ও ডেভেলপমেন্ট</div>
     <div class="devname">কর্পোরাল (টিএভি) এনামুল হক</div>
     <div>ফুলস্ট্যাক সফটওয়্যার ডেভেলপার</div>

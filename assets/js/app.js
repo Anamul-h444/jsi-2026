@@ -61,6 +61,14 @@
     $('#ad-tag').textContent = SITE_CONFIG.ad.tagline;
     $('#ad-cta').textContent = SITE_CONFIG.ad.cta;
     $('#ad').href = SITE_CONFIG.ad.url || '#';
+    if (SITE_CONFIG.ad2) {
+      $('#ad2-title').textContent = SITE_CONFIG.ad2.title;
+      $('#ad2-sub').textContent = SITE_CONFIG.ad2.subtitle;
+      $('#ad2-tag').textContent = SITE_CONFIG.ad2.tagline;
+      $('#ad2-cta').textContent = SITE_CONFIG.ad2.cta;
+      $('#ad2').href = SITE_CONFIG.ad2.url;
+    } else { $('#ad2').hidden = true; }
+    setupInstall();
 
     $('#rank').innerHTML = `<option value=""></option>` + CURRENT_RANK_KEYS.map(k => `<option value="${k}">${RANKS[k].name}</option>`).join('');
     $('#skill').innerHTML = `<option value="NONE">প্রযোজ্য নয়</option><option value="HIGH">উচ্চ দক্ষতা বেতন</option><option value="NORMAL">দক্ষতা বেতন</option>`;
@@ -106,6 +114,43 @@
     });
     $$('.nav-btn').forEach(b => b.addEventListener('click', () => go(b.dataset.view)));
     $$('[data-report]').forEach(b => b.addEventListener('click', () => makePdf(b.dataset.report)));
+  }
+
+  /* ---------------- অ্যাপ হিসেবে ইনস্টল (PWA) ---------------- */
+  let installEvt = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; showInstall(); });
+  window.addEventListener('appinstalled', () => { $('#installCard').hidden = true; toast('অ্যাপ ইনস্টল হয়েছে'); });
+  const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const isMobile = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || matchMedia('(pointer: coarse)').matches;
+  const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  function installDismissed() { try { return localStorage.getItem('jsi2026_install_x') === '1'; } catch (e) { return false; } }
+  function showInstall() {
+    if (isStandalone() || installDismissed() || !isMobile()) return;
+    $('#installCard').hidden = false;
+  }
+  function setupInstall() {
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+    showInstall();
+    $('#installBtn').addEventListener('click', async () => {
+      if (installEvt) {
+        installEvt.prompt();
+        const r = await installEvt.userChoice.catch(() => null);
+        installEvt = null;
+        if (r && r.outcome === 'accepted') $('#installCard').hidden = true;
+        return;
+      }
+      const st = $('#installSteps');
+      st.innerHTML = isIOS()
+        ? 'Safari-র নিচের <b>শেয়ার</b> বাটনে (⬆) চাপুন, তারপর <b>Add to Home Screen</b> বাছাই করুন।'
+        : 'ব্রাউজারের উপরের <b>মেনু (⋮)</b>-তে চাপুন, তারপর <b>Install app</b> বা <b>Add to Home screen</b> বাছাই করুন।';
+      st.hidden = false;
+    });
+    $('#installClose').addEventListener('click', () => {
+      $('#installCard').hidden = true;
+      try { localStorage.setItem('jsi2026_install_x', '1'); } catch (e) { /* ignore */ }
+    });
   }
 
   function setSeg(seg, v) { $$('button', seg).forEach(b => b.classList.toggle('on', b.dataset.v === String(v))); }
@@ -473,7 +518,7 @@
     return `
     <div class="rh">
       <div><h1>${title}</h1><p>জেএসআই ০১/২০২৬ (বাংলাদেশ গেজেট, অতিরিক্ত, ১৫ নভেম্বর ২০২৬) অনুযায়ী · প্রস্তুতের তারিখ: ${bnDate(today)}</p></div>
-      <div class="devbox">ডেভেলপ করেছেন<b>${SITE_CONFIG.developer.name}</b>${SITE_CONFIG.developer.title}</div>
+      <div class="devbox"><img src="assets/img/developer.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${SITE_CONFIG.developer.name}</b>${SITE_CONFIG.developer.title}</div></div>
     </div>
     <div class="info">
       <div><b>নাম:</b> ${esc(inp.name || '—')}</div>
