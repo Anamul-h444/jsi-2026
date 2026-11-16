@@ -10,12 +10,11 @@
   /* ---------------- স্টেট ---------------- */
   const DEFAULTS = {
     name: '', baNo: '', unit: '', rank: '', dob: '', joinDate: '',
-    oldBasic: '', oldStart: '', oldStartTouched: false,
-    marital: 'MARRIED', quarter: '0', location: 'OTHER', children: 0, disabledChildren: 0,
+    oldBasic: '',
+    marital: 'MARRIED', children: 0, disabledChildren: 0,
     skill: 'NONE', appointment: 'NONE', badges: 0, serviceWardenship: '', specials: [],
-    kit: true, haor: false, radiation: false, hill: 'NONE', otherNew: '',
-    ov: {}, gpfPercent: '', otherDeductions: '',
-    retireDate: '', promotions: [], commutePct: '', rationAdults: 2, rationChildren: 0,
+    otherNew: '',
+        retireDate: '', promotions: [], commutePct: '', rationAdults: 2, rationChildren: 0,
   };
   let S = load();
   let lastTL = null, lastRT = null;
@@ -64,30 +63,22 @@
     $('#ad').href = SITE_CONFIG.ad.url || '#';
 
     $('#rank').innerHTML = `<option value=""></option>` + CURRENT_RANK_KEYS.map(k => `<option value="${k}">${RANKS[k].name}</option>`).join('');
-    $('#location').innerHTML = Object.entries(LOCATIONS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
     $('#skill').innerHTML = `<option value="NONE">প্রযোজ্য নয়</option><option value="HIGH">উচ্চ দক্ষতা বেতন</option><option value="NORMAL">দক্ষতা বেতন</option>`;
     $('#appointment').innerHTML = Object.entries(APPOINTMENT).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('');
     $('#specials').innerHTML = Object.entries(SPECIAL_PAY).map(([k, v]) =>
       `<label class="chipbox"><input type="checkbox" value="${k}" /><span>${v.label.replace(' বেতন', '')}</span></label>`).join('');
 
-    const oldKeys = ['houseRent','dsa','medical','tiffin','transport','education','skill','appointment','badge','specialPay','kit','hill'];
-    $('#oldAllowGrid').innerHTML = oldKeys.map(k =>
-      `<div class="field"><label>${OLD_ALLOW_LABELS[k]}</label><input class="input" id="ov_${k}" inputmode="numeric" /></div>`).join('') +
-      `<div class="field"><label>অন্যান্য ভাতা (৳)</label><input class="input" id="ov_other" inputmode="numeric" placeholder="০" /></div>`;
 
     // স্টেট → ফর্ম
-    ['name','baNo','unit','rank','dob','joinDate','oldBasic','location','skill','appointment','serviceWardenship','hill','otherNew','gpfPercent','otherDeductions','retireDate','commutePct']
+    ['name','baNo','unit','rank','dob','joinDate','oldBasic','skill','appointment','serviceWardenship','otherNew','retireDate','commutePct']
       .forEach(id => { const el = $('#' + id); if (el) el.value = S[id] ?? ''; });
     if (S.rank && !RANKS[S.rank]) S.rank = '';
     if (!S.rank || (RANKS[S.rank].oldScale && !RANKS[S.rank].oldScale.includes(num(S.oldBasic)))) S.oldBasic = '';
     $('#oldBasic').value = S.oldBasic;
-    $('#oldStart').value = S.oldStart || (RANKS[S.rank]?.oldStart ?? '');
     renderOldBasic();
-    ['kit','haor','radiation'].forEach(id => $('#' + id).checked = !!S[id]);
     $$('#specials input').forEach(i => i.checked = S.specials.includes(i.value));
     $$('[data-seg]').forEach(seg => setSeg(seg, S[seg.dataset.seg]));
     $$('[data-step]').forEach(st => st.querySelector('output').textContent = bn(S[st.dataset.step] || 0));
-    $$('[id^=ov_]').forEach(el => { const k = el.id.slice(3); if (S.ov[k] !== undefined && S.ov[k] !== '') el.value = S.ov[k]; });
     renderPromos();
     updateOldStartHint();
     refreshPlaceholders();
@@ -133,8 +124,6 @@
     } else if (el.id === 'rank') {
       S.rank = el.value;
       const R = RANKS[S.rank];
-      if (!R || R.oldScale) { S.oldStart = ''; S.oldStartTouched = false; }
-      if (!S.oldStartTouched) $('#oldStart').value = R ? R.oldStart : '';
       if (!R?.oldScale || !R.oldScale.includes(num(S.oldBasic))) S.oldBasic = '';
       $('#oldBasic').value = S.oldBasic;
       renderOldBasic();
@@ -142,9 +131,6 @@
       refreshPlaceholders();
     } else if (el.id === 'oldBasicSel') {
       S.oldBasic = el.value; $('#oldBasic').value = el.value;
-    } else if (el.id === 'oldStart') {
-      S.oldStart = el.value; S.oldStartTouched = el.value !== '';
-      updateOldStartHint();
     } else if (el.id in S) {
       S[el.id] = el.value;
     }
@@ -158,7 +144,6 @@
     const sel = $('#oldBasicSel'), inpEl = $('#oldBasic');
     const useSel = !R || !!R.oldScale;
     sel.hidden = !useSel; inpEl.hidden = useSel;
-    $('#oldStartField').hidden = !R || useSel;
     $('#secBasic').hidden = !R;
     if (R && R.oldScale) {
       sel.innerHTML = '<option value="">মূল বেতন নির্বাচন করুন</option>' +
@@ -178,24 +163,24 @@
     }
     h.className = 'hint' + (R.oldNote ? ' warn' : '');
     h.innerHTML = R.oldNote
-      ? `⚠ ${R.name} পদের পুরোনো স্কেলের প্রথম ধাপ জেএসআই ০১/২০২৬-এ উল্লেখ নেই। ${bn(R.oldStart)} টাকা <b>অনুমিত</b> মান। আপনার পে-স্লিপ বা জেএসআই ০২/২০১৬ দেখে সঠিক অঙ্ক দিন।`
-      : `জেএসআই ০২/২০১৬ অনুযায়ী ${R.name} পদের স্কেল শুরু হয় ${bn(R.oldStart)} টাকা থেকে। আপনার স্কেল ভিন্ন হলে পরিবর্তন করুন।`;
+      ? `⚠ ${R.name} পদের পুরোনো স্কেলের প্রথম ধাপ হিসেবে আপাতত ${bn(R.oldStart)} টাকা <b>অনুমিত</b> মান ধরা হয়েছে।`
+      : `জেএসআই ০২/২০১৬ অনুযায়ী ${R.name} পদের স্কেল শুরু হয় ${bn(R.oldStart)} টাকা থেকে।`;
   }
 
   function collect() {
-    const ov = {};
-    Object.entries(S.ov).forEach(([k, v]) => { const n = optNum(v); if (n !== undefined) ov[k] = n; });
+    /* নির্ধারিত অনুমান: নিজ ব্যবস্থায় বাসা (ফ্যামিলি কোয়ার্টার নয়), সাধারণ হারে বাড়ি ভাড়া,
+       কিট/হাওড়/তেজস্ক্রিয়/পাহাড়ি ভাতা নেই, জুন ২০২৬-এর ভাতা মূল বেতন থেকে স্বয়ংক্রিয়, সর্বনিম্ন কর্তন */
     return {
       name: S.name.trim(), baNo: S.baNo.trim(), unit: S.unit.trim(),
       rank: S.rank, dob: parseDate(S.dob), joinDate: parseDate(S.joinDate),
-      oldBasic: num(S.oldBasic), oldStart: num(S.oldStart || (RANKS[S.rank]?.oldStart ?? 0)),
-      marital: S.marital, quarter: S.quarter === '1', location: S.location,
+      oldBasic: num(S.oldBasic), oldStart: RANKS[S.rank]?.oldStart ?? 0,
+      marital: S.marital, quarter: false, location: 'OTHER',
       children: S.children || 0, disabledChildren: S.disabledChildren || 0,
       skill: S.skill, appointment: S.appointment, badges: S.badges || 0,
       serviceWardenship: num(S.serviceWardenship), specials: S.specials,
-      kit: S.kit, haor: S.haor, radiation: S.radiation, hill: S.hill, otherNew: num(S.otherNew),
-      oldOverrides: ov, oldOther: ov.other || 0,
-      gpfPercent: optNum(S.gpfPercent) ?? 5, otherDeductions: num(S.otherDeductions),
+      kit: false, haor: false, radiation: false, hill: 'NONE', otherNew: num(S.otherNew),
+      oldOverrides: {}, oldOther: 0,
+      gpfPercent: 5, otherDeductions: 0,
       retireDate: parseDate(S.retireDate),
       promotions: S.promotions.map(p => ({ rank: p.rank, date: parseDate(p.date) })),
       commutePct: optNum(S.commutePct) ?? 50,
@@ -247,7 +232,6 @@
     if (!RANKS[inp.rank]) return ['বর্তমান পদবি নির্বাচন করুন'];
     if (!inp.oldBasic) errs.push('৩০ জুন ২০২৬-এর মূল বেতন দিন');
     else if (inp.oldBasic < 5000 || inp.oldBasic > 100000) errs.push('মূল বেতনের অঙ্কটি সঠিক কিনা যাচাই করুন');
-    if (!inp.oldStart) errs.push('পুরোনো স্কেলের প্রথম ধাপ দিন');
     if (inp.oldBasic && inp.oldStart && inp.oldBasic < inp.oldStart) errs.push('মূল বেতন পুরোনো স্কেলের প্রথম ধাপের চেয়ে কম হতে পারে না');
     if (strict && !inp.joinDate) errs.push('চাকরিতে যোগদানের তারিখ দিন');
     if (strict && !inp.dob) errs.push('জন্মতারিখ দিন');
@@ -477,8 +461,7 @@
       <div><b>ইউনিট:</b> ${esc(inp.unit || '—')}</div>
       <div><b>জন্মতারিখ:</b> ${bnDate(inp.dob)}</div>
       <div><b>যোগদান:</b> ${bnDate(inp.joinDate)}</div>
-      <div><b>কর্মস্থল:</b> ${LOCATIONS[inp.location]}</div>
-      <div><b>বৈবাহিক অবস্থা:</b> ${inp.marital === 'MARRIED' ? 'বিবাহিত' : 'অবিবাহিত'}${inp.quarter ? ' (সরকারি বাসা)' : ''}</div>
+      <div><b>বৈবাহিক অবস্থা:</b> ${inp.marital === 'MARRIED' ? 'বিবাহিত' : 'অবিবাহিত'}</div>
     </div>`;
   }
   const rptFooter = () => `<div class="rf"><span>এটি একটি আনুমানিক হিসাব। চূড়ান্ত অঙ্ক পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</span><span>ডেভেলপার: <b>${SITE_CONFIG.developer.name}</b></span></div>`;
@@ -511,7 +494,7 @@
       <table class="fixed">
         <tr><th style="width:42%">বিষয়</th><th>বিবরণ</th></tr>
         <tr><td>৩০ জুন ২০২৬-এর মূল বেতন</td><td>${tk(inp.oldBasic)}</td></tr>
-        <tr><td>পুরোনো স্কেলের প্রথম ধাপ${R.oldNote && inp.oldStart === R.oldStart ? ' (অনুমিত)' : ''}</td><td>${tk(inp.oldStart)}</td></tr>
+        <tr><td>পুরোনো স্কেলের প্রথম ধাপ${R.oldNote ? ' (অনুমিত)' : ''}</td><td>${tk(inp.oldStart)}</td></tr>
         <tr><td>নতুন স্কেল (${R.name})</td><td style="font-size:10.5px">${R.newScale.map(x => bn(x)).join(' – ')}</td></tr>
         <tr><td>পার্থক্য</td><td>${tk(inp.oldBasic)} − ${tk(inp.oldStart)} = ${tk(fx.diff)}</td></tr>
         <tr><td>নতুন প্রথম ধাপ + পার্থক্য</td><td>${tk(R.newScale[0])} + ${tk(fx.diff)} = ${tk(fx.target)}</td></tr>
@@ -577,8 +560,10 @@
   function rptNotes(tl) {
     const R = tl.rank;
     return `<div class="avoid"><h3>অনুমান ও সতর্কতা</h3><ul class="note">
-      ${R.oldNote && tl.input.oldStart === R.oldStart ? `<li>${R.name} পদের পুরোনো স্কেলের প্রথম ধাপ জেএসআই ০১/২০২৬-এ উল্লেখ নেই, তাই ${tk(R.oldStart)} অনুমিত মান হিসেবে ধরা হয়েছে।</li>` : ''}
-      <li>৩১ ডিসেম্বর ২০২৭ পর্যন্ত ভাতাগুলো ৩০ জুন ২০২৬-এর আহরিত অঙ্কে ধরা হয়েছে। ব্যবহারকারী অঙ্ক না দিলে আনুমানিক মান ব্যবহার করা হয়েছে।</li>
+      ${R.oldNote ? `<li>${R.name} পদের পুরোনো স্কেলের প্রথম ধাপ নিশ্চিত না হওয়ায় ${tk(R.oldStart)} অনুমিত মান হিসেবে ধরা হয়েছে।</li>` : ''}
+      <li>৩১ ডিসেম্বর ২০২৭ পর্যন্ত ভাতাগুলো ৩০ জুন ২০২৬-এর আহরিত অঙ্কে ধরা হয়েছে, যা মূল বেতন থেকে স্বয়ংক্রিয়ভাবে হিসাব করা।</li>
+      <li>ফ্যামিলি কোয়ার্টারে বসবাস না করে সাধারণ হারে ("অন্যান্য স্থান") বাড়ি ভাড়া ধরা হয়েছে। কিট রক্ষণাবেক্ষণ, পাহাড়ি, হাওড়/দ্বীপ/চর ও তেজস্ক্রিয় ঝুঁকি ভাতা ধরা হয়নি।</li>
+      <li>মাসিক কর্তন সর্বনিম্ন হারে (জিপিএফ মূল বেতনের ৫%) ধরা হয়েছে।</li>
       <li>৫০% কম্যুটেশন প্রচলিত নিয়মে ধরা হয়েছে। জেএসআই অনুযায়ী পেনশন ও কম্যুটেশনের বিদ্যমান হার অপরিবর্তিত।</li>
       <li>উচ্চতর গ্রেড (৮ বছর পূর্তিতে), ব্যক্তিগত বেতন ও বিশেষ পরিস্থিতি এই হিসাবে ধরা হয়নি।</li>
       <li>চূড়ান্ত অঙ্ক সংশ্লিষ্ট পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</li>

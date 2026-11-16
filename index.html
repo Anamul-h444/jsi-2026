@@ -93,26 +93,21 @@
             <div class="field full" id="oldBasicField"><label>বর্তমান মূল বেতন (৳) <span class="req">*</span></label>
               <select class="input" id="oldBasicSel"></select>
               <input class="input" id="oldBasic" inputmode="numeric" placeholder="মূল বেতন লিখুন" hidden /></div>
-            <div class="field" id="oldStartField" hidden><label>পুরোনো স্কেলের প্রথম ধাপ (৳)</label><input class="input" id="oldStart" inputmode="numeric" /></div>
           </div>
           <p class="hint" id="oldStartHint" style="margin:8px 0 0"></p>
         </div></div></div>
       </div>
 
-      <!-- ৩. পরিবার ও কর্মস্থল -->
+      <!-- ৩. পরিবার -->
       <div class="card acc open">
         <div class="acc-head">
           <span class="num">৩</span>
-          <span class="t"><b>পরিবার ও কর্মস্থল</b><small>বাড়ি ভাড়া, শিক্ষা ও যাতায়াত ভাতার জন্য</small></span>
+          <span class="t"><b>পরিবার</b><small>বৈবাহিক অবস্থা ও সন্তান</small></span>
         </div>
         <div class="acc-body"><div><div class="acc-inner">
           <div class="field"><label>বৈবাহিক অবস্থা</label>
             <div class="seg" data-seg="marital"><button type="button" data-v="MARRIED">বিবাহিত</button><button type="button" data-v="UNMARRIED">অবিবাহিত</button></div>
           </div>
-          <div class="field"><label>বাসস্থান</label>
-            <div class="seg" data-seg="quarter"><button type="button" data-v="0">বাইরের সাধারণ বাসা</button><button type="button" data-v="1">সরকারি বাসা বরাদ্দ</button></div>
-          </div>
-          <div class="field"><label>কর্মস্থল</label><select class="input" id="location"></select></div>
           <div class="grid" style="margin-top:12px">
             <div class="field"><label>সন্তান সংখ্যা (২৩ বছরের নিচে)</label><div class="stepper" data-step="children"><button type="button" data-d="-1">−</button><output>০</output><button type="button" data-d="1">+</button></div></div>
             <div class="field"><label>নিবন্ধিত প্রতিবন্ধী সন্তান</label><div class="stepper" data-step="disabledChildren"><button type="button" data-d="-1">−</button><output>০</output><button type="button" data-d="1">+</button></div></div>
@@ -124,7 +119,7 @@
       <div class="card acc open">
         <div class="acc-head">
           <span class="num">৪</span>
-          <span class="t"><b>দক্ষতা ও অন্যান্য বেতন উপাদান</b><small>দক্ষতা বেতন, ব্যাজ, নিযুক্তি ও বিশেষ ভাতা</small></span>
+          <span class="t"><b>দক্ষতা ও অন্যান্য বেতন উপাদান</b><small>দক্ষতা বেতন, ব্যাজ ও নিযুক্তি বেতন</small></span>
         </div>
         <div class="acc-body"><div><div class="acc-inner">
           <div class="grid">
@@ -133,55 +128,8 @@
             <div class="field"><label>সদাচরণ ব্যাজ</label><div class="stepper" data-step="badges"><button type="button" data-d="-1">−</button><output>০</output><button type="button" data-d="1">+</button></div></div>
             <div class="field"><label>সার্ভিস ওয়ার্ডিনেস বেতন (৳)</label><input class="input" id="serviceWardenship" inputmode="numeric" placeholder="না থাকলে ফাঁকা" /></div>
           </div>
-          <div class="field"><label>বিশেষ দক্ষতা বেতন</label><div class="chips" id="specials"></div></div>
-          <div class="field"><label>অন্যান্য প্রাপ্যতা</label>
-            <div class="chips">
-              <label class="chipbox"><input type="checkbox" id="kit" checked /><span>কিট রক্ষণাবেক্ষণ ভাতা</span></label>
-              <label class="chipbox"><input type="checkbox" id="haor" /><span>হাওড়/দ্বীপ/চর এলাকা</span></label>
-              <label class="chipbox"><input type="checkbox" id="radiation" /><span>র‍্যাডার/রূপপুরে কর্মরত</span></label>
-            </div>
-          </div>
-          <div class="grid" style="margin-top:12px">
-            <div class="field"><label>পাহাড়ি ভাতা</label><select class="input" id="hill">
-              <option value="NONE">প্রযোজ্য নয়</option><option value="SADAR">পার্বত্য জেলা সদর/সদর উপজেলা</option><option value="OTHER">পার্বত্য জেলার অন্যান্য উপজেলা</option>
-            </select></div>
-            <div class="field"><label>অন্যান্য নতুন ভাতা (৳/মাস)</label><input class="input" id="otherNew" inputmode="numeric" placeholder="ঐচ্ছিক" /></div>
-          </div>
-        </div></div></div>
-      </div>
-
-      <!-- ৫. জুন ২০২৬-এর ভাতা -->
-      <div class="card acc open">
-        <div class="acc-head">
-          <span class="num">৫</span>
-          <span class="t"><b>জুন ২০২৬-এর ভাতা ও বিশেষ সুবিধা</b><small>পে-স্লিপ দেখে মিলিয়ে নিন (ঐচ্ছিক)</small></span>
-        </div>
-        <div class="acc-body"><div><div class="acc-inner">
-          <div class="notice" style="margin:14px 0 4px">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
-            <div>০১ জুলাই ২০২৬ থেকে ৩১ ডিসেম্বর ২০২৭ পর্যন্ত ভাতাগুলো ৩০ জুন ২০২৬ তারিখে আহরিত অঙ্কেই চলবে। ঘরগুলোতে ধূসর রঙে স্বয়ংক্রিয় আনুমানিক মান দেখানো আছে। পে-স্লিপের সঠিক অঙ্ক লিখলে হিসাব আরও নির্ভুল হবে।</div>
-          </div>
-          <div class="grid" id="oldAllowGrid"></div>
-          <h4 style="margin:18px 0 0;font-size:14.5px">বিশেষ সুবিধা <span class="hint">(০১ জুলাই ২০২৬ থেকে বিলুপ্ত)</span></h4>
-          <div class="grid" style="margin-top:10px">
-            <div class="field"><label>প্রণোদনা (৳)</label><input class="input" id="ov_pronodona" inputmode="numeric" /></div>
-            <div class="field"><label>মহার্ঘ ভাতা (৳)</label><input class="input" id="ov_mohargho" inputmode="numeric" /></div>
-          </div>
-        </div></div></div>
-      </div>
-
-      <!-- ৬. কর্তন -->
-      <div class="card acc open">
-        <div class="acc-head">
-          <span class="num">৬</span>
-          <span class="t"><b>মাসিক কর্তন</b><small>জিপিএফ, ঋণের কিস্তি, মেস বিল ইত্যাদি</small></span>
-        </div>
-        <div class="acc-body"><div><div class="acc-inner">
-          <div class="grid">
-            <div class="field"><label>জিপিএফ চাঁদা (মূল বেতনের %)</label><input class="input" id="gpfPercent" inputmode="numeric" placeholder="৫" /></div>
-            <div class="field"><label>অন্যান্য কর্তন (৳/মাস)</label><input class="input" id="otherDeductions" inputmode="numeric" placeholder="যেমন: ঋণ, মেস" /></div>
-          </div>
-          <p class="hint" style="margin:8px 0 0">জিপিএফে সর্বনিম্ন ৫% ও সর্বোচ্চ ২৫% চাঁদা দেওয়া যায়।</p>
+          <div class="field"><label>বিশেষ দক্ষতা বেতন <span class="hint">(থাকলে নির্বাচন করুন)</span></label><div class="chips" id="specials"></div></div>
+          <div class="field"><label>অন্যান্য নতুন ভাতা (৳/মাস)</label><input class="input" id="otherNew" inputmode="numeric" placeholder="ঐচ্ছিক" /></div>
         </div></div></div>
       </div>
 
