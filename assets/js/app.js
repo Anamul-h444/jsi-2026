@@ -256,8 +256,6 @@
       const d = b.nextElementSibling; d.classList.toggle('open');
       b.querySelector('span').textContent = d.classList.contains('open') ? 'বিস্তারিত লুকান' : 'বিস্তারিত হিসাব দেখুন';
     }));
-    const hit = $('.scale-strip .hit2', out);
-    if (hit) setTimeout(() => hit.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }), 400);
     return true;
   }
 
@@ -265,8 +263,6 @@
     const inp = tl.input, R = tl.rank, [p1, p2, p3, p4] = tl.periods;
     const fx = tl.fix;
     const pctTxt = `${bn(tl.tr.p1 * 100)}% → ${bn(tl.tr.p2 * 100)}% → ১০০%`;
-    const strip = R.newScale.map((s, i) =>
-      `<span class="${i === fx.idx ? 'hit' : ''}${i === tl.inc27.idx ? ' hit2' : ''}">${bn(s)}</span>`).join('');
 
     const allowRows = (items) => items.map(i =>
       `<tr><td>${esc(i.label)}${i.note ? `<small>${esc(i.note)}</small>` : ''}</td><td class="n">${tk(i.amt, i.amt % 1 ? 2 : 0)}</td></tr>`).join('');
@@ -275,16 +271,16 @@
       const meta = PERIODS[idx];
       const prevLabel = idx === 0 ? 'জুন ২০২৬' : PERIODS[idx - 1].label;
       const isFinal = idx === 3;
-      const m3 = isFinal ? 'সব ভাতাসহ মোট বেতন (কর্তনের পর)' : 'পূর্বের ভাতাসহ হাতে পাওয়া বেতন (কর্তনের পর)';
+      const m3 = isFinal ? 'সব ভাতাসহ মোট বেতন (কর্তনের পর)' : 'পূর্বের ভাতাসহ এখন মোট বেতন পাবেন (কর্তনের পর)';
       const basicNote = p.pct < 1
         ? `পুরোনো মূল বেতন + বর্ধিত অংশের ${bn(p.pct * 100)}%`
         : (idx === 2 ? '১০০% নতুন মূল বেতন (ইনক্রিমেন্টসহ)' : 'নতুন মূল বেতন');
       let riseLabel, riseVal;
       if (idx === 0) {
-        riseLabel = `প্রণোদনা বাদ দিয়ে জুন ২০২৬-এর তুলনায় বৃদ্ধি`;
+        riseLabel = `প্রণোদনা বাদ দিয়ে জুন ২০২৬-এর তুলনায় আপনার বেতন বৃদ্ধি পেয়েছে`;
         riseVal = p.gross - tl.june.gross;
       } else {
-        riseLabel = `${prevLabel}-এর তুলনায় বৃদ্ধি`;
+        riseLabel = `${prevLabel}-এর তুলনায় আপনার বেতন বৃদ্ধি পেয়েছে`;
         riseVal = p.gross - p.prev.gross;
       }
       return `
@@ -296,8 +292,8 @@
           </div>
           <div class="metrics">
             <div class="metric"><div class="ic a">১</div><div class="t"><small>জেএসআই অনুসারে প্রাপ্য মূল বেতন</small><b>${tk(p.basic)}</b><small>${basicNote}</small></div><span class="delta ${deltaCls(p.basicRise)}">${signed(p.basicRise)}</span></div>
-            <div class="metric"><div class="ic b">২</div><div class="t"><small>${riseLabel}</small><b class="${deltaCls(riseVal)}">${signed(riseVal)}</b><small>মোট বেতন (কর্তনের আগে) হিসাবে</small></div></div>
-            <div class="metric"><div class="ic c">৩</div><div class="t"><small>${m3}</small><b>${tk(p.net)}</b><small>মোট ${tk(p.gross)} − কর্তন ${tk(p.ded.total)}</small></div></div>
+            <div class="metric"><div class="ic b">২</div><div class="t"><small>${riseLabel}</small><b class="${deltaCls(riseVal)}">${signed(riseVal)}</b></div></div>
+            <div class="metric"><div class="ic c">৩</div><div class="t"><small>${m3}</small><b>${tk(p.net)}</b></div></div>
           </div>
           <button class="details-btn"><span>বিস্তারিত হিসাব দেখুন</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
           <div class="details"><div>
@@ -309,7 +305,7 @@
               <tr class="sum"><td>মোট বেতন ও ভাতা</td><td class="n">${tk(p.gross)}</td></tr>
               <tr class="minus"><td>জিপিএফ (${bn(Math.max(5, Math.min(25, inp.gpfPercent)))}%)</td><td class="n">− ${tk(p.ded.gpf)}</td></tr>
               ${p.ded.other ? `<tr class="minus"><td>অন্যান্য কর্তন</td><td class="n">− ${tk(p.ded.other)}</td></tr>` : ''}
-              <tr class="sum"><td>হাতে পাওয়া বেতন</td><td class="n">${tk(p.net)}</td></tr>
+              <tr class="sum"><td>সর্বমোট বেতন</td><td class="n">${tk(p.net)}</td></tr>
             </table>
             ${idx === 0 ? `<table class="tbl"><tr><th>জুন ২০২৬-এর তুলনা</th><th class="n">টাকা</th></tr>
               <tr><td>মূল বেতন বৃদ্ধি</td><td class="n up">+ ${tk(p.basic - inp.oldBasic)}</td></tr>
@@ -354,20 +350,18 @@
       `}
       <div class="v-row"><span class="v-no">${bn(fx.atStart ? 3 : fx.personal ? 9 : 8)}</span><div class="v-t"><b>০১ জুলাই ২০২৬-এর বার্ষিক ইনক্রিমেন্ট</b><small>পরবর্তী ধাপে উন্নীত</small></div><span class="v-amt plus">+ ${tk(tl.newBasic26 - fx.fixed - fx.personal)}</span></div>
       <div class="v-total"><span>০১ জুলাই ২০২৬ থেকে নতুন মূল বেতন (ইনক্রিমেন্টসহ)</span><b>${tk(tl.newBasic26)}</b></div>
-      <p class="hint" style="margin:12px 0 2px">${R.name} পদের নতুন স্কেল (হলুদ = নির্ধারিত ধাপ, সবুজ = জুলাই ২০২৭-এর ধাপ):</p>
-      <div class="scale-strip">${strip}</div>
     </div>
 
     <div class="card">
       <div class="section-title" style="margin-top:0"><h3>ধাপে ধাপে বেতন বৃদ্ধির হিসাব</h3><span class="line"></span></div>
-      <div class="formula">মোট বৃদ্ধি = নতুন মূল বেতন − পুরোনো মূল বেতন<br>= ${tk(tl.newBasic26)} − ${tk(inp.oldBasic)} = <b>${tk(tl.raise)}</b></div>
+      <div class="formula">আপনার মোট মূল বেতন বৃদ্ধি = নতুন মূল বেতন − পুরোনো মূল বেতন<br>= ${tk(tl.newBasic26)} − ${tk(inp.oldBasic)} = <b>${tk(tl.raise)}</b></div>
       <table class="tbl step-tbl">
         <tr><th>সময়কাল</th><th class="n">বৃদ্ধির হার</th><th class="n">বৃদ্ধির পরিমাণ</th><th class="n">প্রাপ্য মূল বেতন</th></tr>
         <tr><td>জুলাই ২০২৬<small>প্রথম ধাপ</small></td><td class="n">${bn(tl.tr.p1 * 100)}%</td><td class="n up">+ ${tk(p1.basic - inp.oldBasic)}</td><td class="n"><b>${tk(p1.basic)}</b></td></tr>
         <tr><td>জানুয়ারি ২০২৭</td><td class="n">${bn(tl.tr.p2 * 100)}%</td><td class="n up">+ ${tk(p2.basic - inp.oldBasic)}</td><td class="n"><b>${tk(p2.basic)}</b></td></tr>
         <tr><td>জুলাই ২০২৭<small>পূর্ণ বেতন + ইনক্রিমেন্ট</small></td><td class="n">১০০%</td><td class="n up">+ ${tk(p3.basic - inp.oldBasic)}</td><td class="n"><b>${tk(p3.basic)}</b></td></tr>
       </table>
-      <p class="hint" style="margin:8px 0 0">বৃদ্ধির পরিমাণ = মোট বৃদ্ধির নির্ধারিত হার, যা ৩০ জুন ২০২৬-এর মূল বেতনের সাথে যোগ হয়।</p>
+      <p class="hint" style="margin:8px 0 0">বৃদ্ধির পরিমাণ = মোট মূল বেতন বৃদ্ধির নির্ধারিত হার, যা ৩০ জুন ২০২৬-এর মূল বেতনের সাথে যোগ হয়।</p>
       <div class="notice info" style="margin:12px 0 0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
         <div>${R.group === 'JCO' ? 'জেসিও' : 'সার্জেন্ট ও তদনিম্ন'} পদের জন্য বর্ধিত মূল বেতন ধাপে ধাপে দেওয়া হবে: ${pctTxt}। "বিশেষ সুবিধা" ০১ জুলাই ২০২৬ থেকে বিলুপ্ত।</div>
@@ -499,9 +493,8 @@
         <h3>${m.label} (${m.range})</h3>
         <div class="kv">
           <div><small>১. জেএসআই অনুসারে মূল বেতন</small><b>${tk(p.basic)}</b></div>
-          <div><small>২. ${i === 0 ? 'জুন ২০২৬-এর তুলনায় বৃদ্ধি (বিশেষ সুবিধা বাদে)' : PERIODS[i - 1].label + '-এর তুলনায় বৃদ্ধি'}</small><b>${signed(rise)}</b></div>
-          <div><small>মোট বেতন ও ভাতা</small><b>${tk(p.gross)}</b></div>
-          <div><small>৩. কর্তনের পর ${i === 3 ? 'সব ভাতাসহ' : 'পূর্বের ভাতাসহ'} মোট</small><b>${tk(p.net)}</b></div>
+          <div><small>২. ${i === 0 ? 'প্রণোদনা বাদ দিয়ে জুন ২০২৬-এর তুলনায় আপনার বেতন বৃদ্ধি পেয়েছে' : PERIODS[i - 1].label + '-এর তুলনায় আপনার বেতন বৃদ্ধি পেয়েছে'}</small><b>${signed(rise)}</b></div>
+          <div><small>৩. ${i === 3 ? 'সব ভাতাসহ মোট বেতন (কর্তনের পর)' : 'পূর্বের ভাতাসহ এখন মোট বেতন পাবেন (কর্তনের পর)'}</small><b>${tk(p.net)}</b></div>
         </div>
         ${p.pct < 1 ? `<div class="formula">মূল বেতন = ${tk(inp.oldBasic)} + (${tk(tl.newBasic26)} − ${tk(inp.oldBasic)}) × ${bn(p.pct * 100)}% = ${tk(p.basic)}</div>` : ''}
         <table><tr><th>বিবরণ</th><th class="n">টাকা</th></tr>
@@ -509,7 +502,7 @@
           <tr class="sum"><td>মোট বেতন ও ভাতা</td><td class="n">${tk(p.gross)}</td></tr>
           <tr class="minus"><td>জিপিএফ</td><td class="n">− ${tk(p.ded.gpf)}</td></tr>
           ${p.ded.other ? `<tr class="minus"><td>অন্যান্য কর্তন</td><td class="n">− ${tk(p.ded.other)}</td></tr>` : ''}
-          <tr class="sum"><td>হাতে পাওয়া বেতন</td><td class="n">${tk(p.net)}</td></tr>
+          <tr class="sum"><td>সর্বমোট বেতন</td><td class="n">${tk(p.net)}</td></tr>
         </table></div>`;
     };
     return `
@@ -532,10 +525,10 @@
         ${tl.june.special.map(s => `<tr><td>${s.label}</td><td class="n">${tk(s.amt)}</td></tr>`).join('')}
         <tr class="sum"><td>মোট</td><td class="n">${tk(tl.june.gross)}</td></tr>
         <tr class="minus"><td>জিপিএফ ও অন্যান্য কর্তন</td><td class="n">− ${tk(tl.june.ded.total)}</td></tr>
-        <tr class="sum"><td>হাতে পাওয়া বেতন</td><td class="n">${tk(tl.june.net)}</td></tr>
+        <tr class="sum"><td>সর্বমোট বেতন</td><td class="n">${tk(tl.june.net)}</td></tr>
       </table>
       <h2>২. ধাপে ধাপে বেতন (জুলাই ২০২৬ – জানুয়ারি ২০২৮)</h2>
-      <table class="avoid"><tr><th>সময়কাল</th><th class="n">মূল বেতন</th><th class="n">মোট বেতন</th><th class="n">বৃদ্ধি</th><th class="n">হাতে পাওয়া</th></tr>
+      <table class="avoid"><tr><th>সময়কাল</th><th class="n">মূল বেতন</th><th class="n">মোট বেতন</th><th class="n">বৃদ্ধি</th><th class="n">সর্বমোট বেতন</th></tr>
         <tr><td>জুন ২০২৬</td><td class="n">${tk(inp.oldBasic)}</td><td class="n">${tk(tl.june.gross)}</td><td class="n">—</td><td class="n">${tk(tl.june.net)}</td></tr>
         ${tl.periods.map((p, i) => `<tr><td>${PERIODS[i].label}</td><td class="n">${tk(p.basic)}</td><td class="n">${tk(p.gross)}</td><td class="n">${signed(p.gross - p.prev.gross)}</td><td class="n">${tk(p.net)}</td></tr>`).join('')}
       </table>
@@ -616,6 +609,9 @@
     const stage = $('#pdf-stage');
     stage.innerHTML = `<div class="rpt">${body}</div>`;
     $('#overlay').classList.add('show');
+    // পাতা নিচে স্ক্রল করা থাকলে html2canvas ফাঁকা পাতা তৈরি করে, তাই সাময়িকভাবে উপরে নেওয়া হয়
+    const keepY = window.scrollY;
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     try {
       await document.fonts.ready;
       const fname = `JSI-2026-${type === 'salary' ? 'Salary' : type === 'pension' ? 'Pension' : 'Full'}-Report${inp.name ? '-' + inp.name.replace(/[^\p{L}\p{N}]+/gu, '_') : ''}.pdf`;
@@ -623,7 +619,7 @@
         margin: [8, 0, 10, 0],
         filename: fname,
         image: { type: 'jpeg', quality: 0.96 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 794 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 794, scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'legacy'], avoid: '.avoid' },
       }).from(stage.firstElementChild).save();
@@ -634,6 +630,7 @@
     } finally {
       $('#overlay').classList.remove('show');
       stage.innerHTML = '';
+      window.scrollTo({ top: keepY, left: 0, behavior: 'instant' });
     }
   }
   window.__jsiPdf = makePdf;
