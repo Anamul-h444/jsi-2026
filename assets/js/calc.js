@@ -162,7 +162,7 @@ const OLD_ALLOW_LABELS = {
   serviceWardenship: 'সার্ভিস ওয়ার্ডিনেস বেতন',
   hill: 'পাহাড়ি ভাতা',
   other: 'অন্যান্য ভাতা',
-  pronodona: 'বিশেষ সুবিধা (প্রণোদনা)',
+  pronodona: 'বিশেষ প্রণোদনা',
 };
 
 /* ---------- ০১ জানুয়ারি ২০২৮ থেকে নতুন ভাতা ---------- */
@@ -239,7 +239,8 @@ function computeTimeline(inp) {
     basic: inp.oldBasic,
     allowances: oldItems,
     allowTotal: oldAllowTotal,
-    special: [{ label: OLD_ALLOW_LABELS.pronodona, amt: prono }].filter(x => x.amt),
+    special: [{ label: OLD_ALLOW_LABELS.pronodona, amt: prono,
+      note: prono > 2000 ? `আগের মূল বেতন ${bn(inp.oldBasic)} টাকার ২০%` : `আগের মূল বেতন ${bn(inp.oldBasic)} টাকার ২০% ২,০০০-এর কম, তাই ন্যূনতম ২,০০০` }].filter(x => x.amt),
     specialTotal: specialBenefit,
   };
   june.gross = june.basic + june.allowTotal + june.specialTotal;

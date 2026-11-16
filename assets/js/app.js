@@ -292,7 +292,7 @@
           </div>
           <div class="metrics">
             <div class="metric"><div class="ic a">১</div><div class="t"><small>জেএসআই অনুসারে প্রাপ্য মূল বেতন</small><b>${tk(p.basic)}</b><small>${basicNote}</small></div><span class="delta ${deltaCls(p.basicRise)}">${signed(p.basicRise)}</span></div>
-            <div class="metric"><div class="ic b">২</div><div class="t"><small>${riseLabel}</small><b class="${deltaCls(riseVal)}">${signed(riseVal)}</b></div></div>
+            <div class="metric"><div class="ic b">২</div><div class="t"><small>${riseLabel}</small><b class="${deltaCls(riseVal)}">${signed(riseVal)}</b>${idx === 0 ? tl.june.special.map(s => `<small>${s.label} ${tk(s.amt)} বাদ (${s.note})</small>`).join('') : ''}</div></div>
             <div class="metric"><div class="ic c">৩</div><div class="t"><small>${m3}</small><b>${tk(p.net)}</b></div></div>
           </div>
           <button class="details-btn"><span>বিস্তারিত হিসাব দেখুন</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
@@ -309,7 +309,7 @@
             </table>
             ${idx === 0 ? `<table class="tbl"><tr><th>জুন ২০২৬-এর তুলনা</th><th class="n">টাকা</th></tr>
               <tr><td>মূল বেতন বৃদ্ধি</td><td class="n up">+ ${tk(p.basic - inp.oldBasic)}</td></tr>
-              ${tl.june.special.map(s => `<tr class="minus"><td>${s.label} বাদ</td><td class="n">− ${tk(s.amt)}</td></tr>`).join('')}
+              ${tl.june.special.map(s => `<tr class="minus"><td>${s.label} বাদ<small>${s.note}</small></td><td class="n">− ${tk(s.amt)}</td></tr>`).join('')}
               <tr class="sum"><td>নিট বৃদ্ধি</td><td class="n">${signed(riseVal)}</td></tr></table>` : ''}
             ${isFinal ? `<p class="hint" style="margin-top:8px">০১ জানুয়ারি ২০২৮ থেকে জেএসআই ০১/২০২৬-এর নির্ধারিত হারে সব ভাতা দেওয়া হবে (অধ্যায়-৪, অনুচ্ছেদ ১)।</p>` : `<p class="hint" style="margin-top:8px">৩১ ডিসেম্বর ২০২৭ পর্যন্ত সব ভাতা ৩০ জুন ২০২৬ তারিখে আহরিত অঙ্কে চলবে।</p>`}
           </div></div>
@@ -364,7 +364,7 @@
       <p class="hint" style="margin:8px 0 0">বৃদ্ধির পরিমাণ = মোট মূল বেতন বৃদ্ধির নির্ধারিত হার, যা ৩০ জুন ২০২৬-এর মূল বেতনের সাথে যোগ হয়।</p>
       <div class="notice info" style="margin:12px 0 0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <div>${R.group === 'JCO' ? 'জেসিও' : 'সার্জেন্ট ও তদনিম্ন'} পদের জন্য বর্ধিত মূল বেতন ধাপে ধাপে দেওয়া হবে: ${pctTxt}। "বিশেষ সুবিধা" ০১ জুলাই ২০২৬ থেকে বিলুপ্ত।</div>
+        <div>${R.group === 'JCO' ? 'জেসিও' : 'সার্জেন্ট ও তদনিম্ন'} পদের জন্য বর্ধিত মূল বেতন ধাপে ধাপে দেওয়া হবে: ${pctTxt}। বিশেষ প্রণোদনা ০১ জুলাই ২০২৬ থেকে বাদ যাবে।</div>
       </div>
     </div>
 
@@ -522,7 +522,7 @@
       <h3>জুন ২০২৬ (পূর্বের বেতন)</h3>
       <table><tr><th>বিবরণ</th><th class="n">টাকা</th></tr>
         <tr><td>মূল বেতন</td><td class="n">${tk(inp.oldBasic)}</td></tr>${rows(tl.june.allowances)}
-        ${tl.june.special.map(s => `<tr><td>${s.label}</td><td class="n">${tk(s.amt)}</td></tr>`).join('')}
+        ${tl.june.special.map(s => `<tr><td>${s.label} <span style="color:#777;font-size:11px">(${s.note}; ০১ জুলাই ২০২৬ থেকে বাদ)</span></td><td class="n">${tk(s.amt)}</td></tr>`).join('')}
         <tr class="sum"><td>মোট</td><td class="n">${tk(tl.june.gross)}</td></tr>
         <tr class="minus"><td>জিপিএফ ও অন্যান্য কর্তন</td><td class="n">− ${tk(tl.june.ded.total)}</td></tr>
         <tr class="sum"><td>সর্বমোট বেতন</td><td class="n">${tk(tl.june.net)}</td></tr>
