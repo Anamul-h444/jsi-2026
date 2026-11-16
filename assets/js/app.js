@@ -151,7 +151,7 @@
     const lab = sel.closest('.field')?.querySelector('label');
     $('#psTitle').textContent = lab ? lab.childNodes[0].textContent.trim() : 'নির্বাচন করুন';
     $('#psList').innerHTML = [...sel.options].filter(o => o.value !== '').map(o =>
-      `<button type="button" role="option" class="ps-opt${o.value === sel.value ? ' on' : ''}" aria-selected="${o.value === sel.value}" data-v="${esc(o.value)}"><span>${esc(o.textContent)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></button>`).join('');
+      `<button type="button" role="option" class="ps-opt${o.value === sel.value ? ' on' : ''}" aria-selected="${o.value === sel.value}" data-v="${esc(o.value)}"><span class="ps-radio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span class="ps-txt">${esc(o.textContent)}</span></button>`).join('');
     $('#pickSheet').hidden = false; document.body.classList.add('no-scroll');
     const on = $('#psList .on'); if (on) on.scrollIntoView({ block: 'center' });
   }
