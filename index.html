@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1210" />
+  <title>জেএসআই ২০২৬ বেতন ও পেনশন ক্যালকুলেটর | সেনাবাহিনী জেসিও ও ওআর</title>
+  <meta name="description" content="জেএসআই ০১/২০২৬ অনুযায়ী সেনাবাহিনীর জেসিও ও ওআর সদস্যদের নতুন মূল বেতন, ধাপে ধাপে বেতন বৃদ্ধি, ভাতা ও পেনশনের হিসাব — পিডিএফ রিপোর্টসহ। ডেভেলপ করেছেন কর্পোরাল (টিএভি) এনামুল হক।" />
+  <meta name="author" content="কর্পোরাল (টিএভি) এনামুল হক — ফুলস্ট্যাক সফটওয়্যার ডেভেলপার" />
+  <meta property="og:title" content="জেএসআই ২০২৬ বেতন ও পেনশন ক্যালকুলেটর" />
+  <meta property="og:description" content="সেনাবাহিনীর জেসিও ও ওআর সদস্যদের জন্য নতুন বেতন, ভাতা ও পেনশনের পূর্ণ হিসাব।" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="preload" href="assets/fonts/hind-siliguri-bengali-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/hind-siliguri-bengali-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header class="appbar">
+  <div class="wrap">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+    </div>
+    <div class="brand">
+      <h1>জেএসআই ২০২৬ ক্যালকুলেটর</h1>
+      <p>সেনাবাহিনী · জেসিও ও ওআর</p>
+    </div>
+    <button class="icon-btn" id="btn-reset" title="সব তথ্য মুছুন" aria-label="সব তথ্য মুছুন">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="dev-ribbon">
+    <div class="in">
+      <div class="avatar">এহ</div>
+      <div>
+        <small>ডেভেলপ করেছেন</small>
+        <b id="dev-name">কর্পোরাল (টিএভি) এনামুল হক</b>
+        <span class="role" id="dev-role">ফুলস্ট্যাক সফটওয়্যার ডেভেলপার</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ভিউ ১: তথ্য ===================== -->
+  <section class="view active" id="view-input">
+    <div class="hero">
+      <span class="chip">★ জেএসআই ০১/২০২৬ · গেজেট ১৫ নভেম্বর ২০২৬</span>
+      <h2>নতুন বেতনস্কেলে আপনার <em>বেতন ও পেনশন</em> জানুন</h2>
+      <p>তথ্যগুলো দিন। জুলাই ২০২৬ থেকে জানুয়ারি ২০২৮ পর্যন্ত প্রতিটি ধাপের মূল বেতন, ভাতা ও হাতে পাওয়া বেতনের পূর্ণ হিসাব পাবেন। অবসর ও পেনশনের হিসাবও পাবেন।</p>
+    </div>
+
+    <div class="notice info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <div>আপনার সব তথ্য শুধু আপনার মোবাইলেই সংরক্ষিত থাকে। কোনো সার্ভারে পাঠানো হয় না।</div>
+    </div>
+
+    <form id="form" autocomplete="off" onsubmit="return false">
+
+      <!-- ১. ব্যক্তিগত তথ্য -->
+      <div class="card acc open" data-acc>
+        <button type="button" class="acc-head">
+          <span class="num">১</span>
+          <span class="t"><b>ব্যক্তিগত তথ্য</b><small>নাম, পদবি, জন্মতারিখ ও যোগদানের তারিখ</small></span>
+          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="acc-body"><div><div class="acc-inner">
+          <div class="grid">
+            <div class="field full"><label>নাম</label><input class="input" id="name" placeholder="যেমন: মোঃ আব্দুল করিম" /></div>
+            <div class="field"><label>বিএ নম্বর <span class="hint">(ঐচ্ছিক)</span></label><input class="input" id="baNo" inputmode="numeric" placeholder="ঐচ্ছিক" /></div>
+            <div class="field"><label>ইউনিট <span class="hint">(ঐচ্ছিক)</span></label><input class="input" id="unit" placeholder="ঐচ্ছিক" /></div>
+            <div class="field full"><label>বর্তমান পদবি <span class="req">*</span></label><select class="input" id="rank"></select></div>
+            <div class="field"><label>জন্মতারিখ <span class="req">*</span></label><input class="input" type="date" id="dob" /></div>
+            <div class="field"><label>চাকরিতে যোগদান <span class="req">*</span></label><input class="input" type="date" id="joinDate" /></div>
+          </div>
+          <p class="hint" style="margin:10px 0 0">জন্মতারিখ দিয়ে চিকিৎসা ভাতা ও কম্যুটেশনের গুণক বের করা হয়। যোগদানের তারিখ দিয়ে প্রতিরক্ষা সার্ভিস ভাতার ধাপ ও পেনশনযোগ্য চাকরিকাল হিসাব হয়।</p>
+        </div></div></div>
+      </div>
+
+      <!-- ২. মূল বেতন -->
+      <div class="card acc open" data-acc>
+        <button type="button" class="acc-head">
+          <span class="num">২</span>
+          <span class="t"><b>৩০ জুন ২০২৬-এর মূল বেতন</b><small>জেএসআই ০১/২০১৬ অনুযায়ী আহরিত মূল বেতন</small></span>
+          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="acc-body"><div><div class="acc-inner">
+          <div class="grid">
+            <div class="field"><label>বর্তমান মূল বেতন (৳) <span class="req">*</span></label><input class="input" id="oldBasic" inputmode="numeric" placeholder="যেমন: ২৪২০০" /></div>
+            <div class="field"><label>পুরোনো স্কেলের প্রথম ধাপ (৳)</label><input class="input" id="oldStart" inputmode="numeric" /></div>
+          </div>
+          <p class="hint" id="oldStartHint" style="margin:8px 0 0"></p>
+        </div></div></div>
+      </div>
+
+      <!-- ৩. পরিবার ও কর্মস্থল -->
+      <div class="card acc" data-acc>
+        <button type="button" class="acc-head">
+          <span class="num">৩</span>
+          <span class="t"><b>পরিবার ও কর্মস্থল</b><small>বাড়ি ভাড়া, শিক্ষা ও যাতায়াত ভাতার জন্য</small></span>
+          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="acc-body"><div><div class="acc-inner">
+          <div class="field"><label>বৈবাহিক অবস্থা</label>
+            <div class="seg" data-seg="marital"><button type="button" data-v="MARRIED">বিবাহিত</button><button type="button" data-v="UNMARRIED">অবিবাহিত</button></div>
+          </div>
+          <div class="field"><label>বাসস্থান</label>
+            <div class="seg" data-seg="quarter"><button type="button" data-v="0">বাইরের সাধারণ বাসা</button><button type="button" data-v="1">সরকারি বাসা বরাদ্দ</button></div>
+          </div>
+          <div class="field"><label>কর্মস্থল</label><select class="input" id="location"></select></div>
+          <div class="grid" style="margin-top:12px">
+            <div class="field"><label>সন্তান সংখ্যা (২৩ বছরের নিচে)</label><div class="stepper" data-step="children"><button type="button" data-d="-1">−</button><output>০</output><button type="button" data-d="1">+</button></div></div>
+            <div class="field"><label>নিবন্ধিত প্রতিবন্ধী সন্তান</label><div class="stepper" data-step="disabledChildren"><button type="button" data-d="-1">−</button><output>০</output><button type="button" data-d="1">+</button></div></div>
+          </div>
+        </div></div></div>
+      </div>
+
+      <!-- ৪. বেতন উপাদান -->
+      <div class="card acc" data-acc>
+        <button type="button" class="acc-head">
+          <span class="num">৪</span>
+          <span class="t"><b>দক্ষতা ও অন্যান্য বেতন উপাদান</b><small>দক্ষতা বেতন, ব্যাজ, নিযুক্তি ও বিশেষ ভাতা</small></span>
+          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="acc-body"><div><div class="acc-inner">
+          <div class="grid">
+            <div class="field"><label>দক্ষতা বেতন</label><select class="input" id="skill"></select></div>
+            <div class="field"><label>নিযুক্তি বেতন</label><select class="input" id="appointment"></select></div>
+            <div class="field"><label>সদাচরণ ব্যাজ</label><div class="stepper" data-step="badges"><button type="button" data-d="-1">−</button><output>০</output><button type="button" data-d="1">+</button></div></div>
+            <div class="field"><label>সার্ভিস ওয়ার্ডিনেস বেতন (৳)</label><input class="input" id="serviceWardenship" inputmode="numeric" placeholder="না থাকলে ফাঁকা" /></div>
+          </div>
+          <div class="field"><label>বিশেষ দক্ষতা বেতন</label><div class="chips" id="specials"></div></div>
+          <div class="field"><label>অন্যান্য প্রাপ্যতা</label>
+            <div class="chips">
+              <label class="chipbox"><input type="checkbox" id="kit" checked /><span>কিট রক্ষণাবেক্ষণ ভাতা</span></label>
+              <label class="chipbox"><input type="checkbox" id="haor" /><span>হাওড়/দ্বীপ/চর এলাকা</span></label>
+              <label class="chipbox"><input type="checkbox" id="radiation" /><span>র‍্যাডার/রূপপুরে কর্মরত</span></label>
+            </div>
+          </div>
+          <div class="grid" style="margin-top:12px">
+            <div class="field"><label>পাহাড়ি ভাতা</label><select class="input" id="hill">
+              <option value="NONE">প্রযোজ্য নয়</option><option value="SADAR">পার্বত্য জেলা সদর/সদর উপজেলা</option><option value="OTHER">পার্বত্য জেলার অন্যান্য উপজেলা</option>
+            </select></div>
+            <div class="field"><label>অন্যান্য নতুন ভাতা (৳/মাস)</label><input class="input" id="otherNew" inputmode="numeric" placeholder="ঐচ্ছিক" /></div>
+          </div>
+        </div></div></div>
+      </div>
+
+      <!-- ৫. জুন ২০২৬-এর ভাতা -->
+      <div class="card acc" data-acc>
+        <button type="button" class="acc-head">
+          <span class="num">৫</span>
+          <span class="t"><b>জুন ২০২৬-এর ভাতা ও বিশেষ সুবিধা</b><small>পে-স্লিপ দেখে মিলিয়ে নিন (ঐচ্ছিক)</small></span>
+          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="acc-body"><div><div class="acc-inner">
+          <div class="notice" style="margin:14px 0 4px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+            <div>০১ জুলাই ২০২৬ থেকে ৩১ ডিসেম্বর ২০২৭ পর্যন্ত ভাতাগুলো ৩০ জুন ২০২৬ তারিখে আহরিত অঙ্কেই চলবে। ঘরগুলোতে ধূসর রঙে স্বয়ংক্রিয় আনুমানিক মান দেখানো আছে। পে-স্লিপের সঠিক অঙ্ক লিখলে হিসাব আরও নির্ভুল হবে।</div>
+          </div>
+          <div class="grid" id="oldAllowGrid"></div>
+          <h4 style="margin:18px 0 0;font-size:14.5px">বিশেষ সুবিধা <span class="hint">(০১ জুলাই ২০২৬ থেকে বিলুপ্ত)</span></h4>
+          <div class="grid" style="margin-top:10px">
+            <div class="field"><label>প্রণোদনা (৳)</label><input class="input" id="ov_pronodona" inputmode="numeric" /></div>
+            <div class="field"><label>মহার্ঘ ভাতা (৳)</label><input class="input" id="ov_mohargho" inputmode="numeric" /></div>
+          </div>
+        </div></div></div>
+      </div>
+
+      <!-- ৬. কর্তন -->
+      <div class="card acc" data-acc>
+        <button type="button" class="acc-head">
+          <span class="num">৬</span>
+          <span class="t"><b>মাসিক কর্তন</b><small>জিপিএফ, ঋণের কিস্তি, মেস বিল ইত্যাদি</small></span>
+          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="acc-body"><div><div class="acc-inner">
+          <div class="grid">
+            <div class="field"><label>জিপিএফ চাঁদা (মূল বেতনের %)</label><input class="input" id="gpfPercent" inputmode="numeric" placeholder="৫" /></div>
+            <div class="field"><label>অন্যান্য কর্তন (৳/মাস)</label><input class="input" id="otherDeductions" inputmode="numeric" placeholder="যেমন: ঋণ, মেস" /></div>
+          </div>
+          <p class="hint" style="margin:8px 0 0">জিপিএফে সর্বনিম্ন ৫% ও সর্বোচ্চ ২৫% চাঁদা দেওয়া যায়।</p>
+        </div></div></div>
+      </div>
+
+      <div class="sticky-cta">
+        <button type="button" class="btn btn-primary btn-block" id="btn-calc">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h4"/></svg>
+          বেতন হিসাব করুন
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ===================== ভিউ ২: বেতন ===================== -->
+  <section class="view" id="view-salary">
+    <div id="salary-out"></div>
+  </section>
+
+  <!-- ===================== ভিউ ৩: অবসর ===================== -->
+  <section class="view" id="view-pension">
+    <div class="hero">
+      <span class="chip">★ অবসর ও পেনশন</span>
+      <h2>অবসরে আপনার <em>সম্ভাব্য পেনশন</em></h2>
+      <p>অবসরের সম্ভাব্য তারিখ ও তখনকার পদবি দিন। পথে কোনো পদোন্নতির সম্ভাবনা থাকলে সেটাও যোগ করুন।</p>
+    </div>
+    <div class="card">
+      <div class="grid">
+        <div class="field full"><label>পেনশনে যাওয়ার সম্ভাব্য তারিখ <span class="req">*</span></label><input class="input" type="date" id="retireDate" /></div>
+      </div>
+      <div class="field"><label>সম্ভাব্য পদোন্নতি (তারিখসহ)</label>
+        <div id="promoList"></div>
+        <button type="button" class="btn btn-ghost btn-block" id="btn-add-promo" style="height:46px;margin-top:10px;font-size:14.5px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> পদোন্নতি যোগ করুন
+        </button>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <div class="field"><label>কম্যুটেশন (গ্রস পেনশনের %)</label><input class="input" id="commutePct" inputmode="numeric" placeholder="৫০" /></div>
+        <div class="field"><label>রেশন: প্রাপ্তবয়স্ক সদস্য</label><div class="stepper" data-step="rationAdults"><button type="button" data-d="-1">−</button><output>০</output><button type="button" data-d="1">+</button></div></div>
+        <div class="field"><label>রেশন: ১২ বছরের নিচের সন্তান</label><div class="stepper" data-step="rationChildren"><button type="button" data-d="-1">−</button><output>০</output><button type="button" data-d="1">+</button></div></div>
+      </div>
+      <p class="hint" style="margin:10px 0 0">নিজেসহ পরিবারের প্রাপ্তবয়স্ক সদস্য গুনুন। ১২ বছর ও তার বেশি বয়সী সন্তানও প্রাপ্তবয়স্ক হিসেবে ধরা হয়।</p>
+      <button type="button" class="btn btn-green btn-block" id="btn-pension" style="margin-top:16px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg> পেনশন হিসাব করুন
+      </button>
+    </div>
+    <div id="pension-out"></div>
+  </section>
+
+  <!-- ===================== ভিউ ৪: রিপোর্ট ===================== -->
+  <section class="view" id="view-report">
+    <div class="hero">
+      <span class="chip">★ পিডিএফ রিপোর্ট</span>
+      <h2>সম্পূর্ণ হিসাব <em>পিডিএফ আকারে</em> ডাউনলোড করুন</h2>
+      <p>প্রতিটি রিপোর্টে বিস্তারিত হিসাব, সূত্র ও প্রযোজ্য অনুচ্ছেদের উল্লেখ থাকে।</p>
+    </div>
+    <button class="report-btn" data-report="salary">
+      <span class="ri g1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg></span>
+      <span class="rt"><b>বেতন রিপোর্ট (জুলাই ২০২৬ – জানুয়ারি ২০২৮)</b><small>বেতন নির্ধারণ, চার ধাপের মূল বেতন, বৃদ্ধি, ভাতা, কর্তন ও হাতে পাওয়া বেতন</small></span>
+    </button>
+    <button class="report-btn" data-report="pension">
+      <span class="ri g2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg></span>
+      <span class="rt"><b>অবসর ও পেনশন রিপোর্ট</b><small>শেষ মূল বেতন, গ্রস ও নিট পেনশন, কম্যুটেশন, ছুটি নগদায়ন ও অন্যান্য সুবিধা</small></span>
+    </button>
+    <button class="report-btn" data-report="all">
+      <span class="ri g3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h10l6 6v10a0 0 0 0 1 0 0H4z"/><path d="M8 13h8M8 17h5M14 4v6h6"/></svg></span>
+      <span class="rt"><b>সম্পূর্ণ রিপোর্ট (সব একসাথে)</b><small>বেতন ও পেনশনের সব হিসাব একটি পিডিএফে</small></span>
+    </button>
+    <div class="notice" style="margin-top:6px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <div>রিপোর্ট তৈরির আগে "তথ্য" অংশে প্রয়োজনীয় তথ্য দিন। পেনশন রিপোর্টের জন্য "অবসর" অংশে অবসরের তারিখও দিতে হবে।</div>
+    </div>
+  </section>
+
+  <a class="ad" id="ad" target="_blank" rel="noopener">
+    <span class="tag">বিজ্ঞাপন</span>
+    <div class="row">
+      <div class="house"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div>
+      <div><h4 id="ad-title">ভাড়া হবে</h4><p id="ad-tag"></p></div>
+    </div>
+    <span class="go"><span id="ad-cta">ওয়েবসাইট দেখুন</span> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+  </a>
+
+  <footer class="footer">
+    <div>ডিজাইন ও ডেভেলপমেন্ট</div>
+    <div class="devname">কর্পোরাল (টিএভি) এনামুল হক</div>
+    <div>ফুলস্ট্যাক সফটওয়্যার ডেভেলপার</div>
+    <div style="margin-top:10px;font-size:11.5px;color:var(--dim)">এটি একটি বেসরকারি, আনুমানিক হিসাব সহায়ক। চূড়ান্ত বেতন ও পেনশন সংশ্লিষ্ট পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</div>
+  </footer>
+</main>
+
+<nav class="bottom-nav">
+  <div class="wrap">
+    <span class="nav-ind" id="navInd"></span>
+    <button class="nav-btn active" data-view="input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>তথ্য</button>
+    <button class="nav-btn" data-view="salary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/><path d="M6 10v5M18 10v5"/></svg>বেতন</button>
+    <button class="nav-btn" data-view="pension"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>অবসর</button>
+    <button class="nav-btn" data-view="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg>রিপোর্ট</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay"><div class="loader"><div class="spinner"></div><div id="overlay-text">পিডিএফ তৈরি হচ্ছে…</div></div></div>
+<div id="pdf-stage" aria-hidden="true"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/calc.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/vendor/html2pdf.bundle.min.js" defer></script>
+</body>
+</html>
