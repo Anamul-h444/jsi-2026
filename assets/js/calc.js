@@ -22,7 +22,7 @@ function bn(num, decimals = 0) {
   s = s.replace(/\d/g, d => BN_DIGITS[d]);
   return (neg ? '−' : '') + s;
 }
-const tk = (n, d = 0) => `৳ ${bn(n, d)}`;
+const tk = (n, d = 0) => `৳\u00A0${bn(n, d)}`;
 
 /** বাংলা/ইংরেজি অঙ্ক মিশ্রিত স্ট্রিং → সংখ্যা */
 function toNum(v) {
