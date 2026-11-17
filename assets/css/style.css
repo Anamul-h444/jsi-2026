@@ -599,3 +599,32 @@ body.no-scroll { overflow: hidden; }
 .appbar .brand { min-width: 0; flex: 1; }
 .appbar .brand h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 360px) { .appbar .brand h1 { font-size: 15px; } .appbar .wrap { gap: 8px; } .appbar .icon-btn { width: 36px; height: 36px; } }
+
+/* ===== ফেসবুক ফলো ===== */
+.fb-card { border: 1px solid rgba(24,119,242,.45); background: linear-gradient(145deg, #0f1a26, #101b17); border-radius: 18px; padding: 16px; margin: 6px 0 14px; animation: rise .55s var(--ease) both; }
+.fb-row { display: flex; gap: 12px; align-items: center; }
+.fb-ic { width: 46px; height: 46px; border-radius: 50%; background: #1877F2; display: grid; place-items: center; flex: none; color: #fff; box-shadow: 0 6px 18px rgba(24,119,242,.35); }
+.fb-ic svg { width: 26px; height: 26px; }
+.fb-row b { display: block; font-size: 16px; }
+.fb-row small { display: block; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.fb-btn { margin-top: 12px; height: 46px; border-radius: 12px; background: #1877F2; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 15.5px; text-decoration: none; transition: transform .2s var(--ease), background .2s; }
+.fb-btn:active { transform: scale(.97); }
+.fb-btn:hover { background: #166fe0; }
+.fb-btn svg { width: 19px; height: 19px; }
+.fb-pop-wrap { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: rgba(6,10,9,.6); backdrop-filter: blur(4px); opacity: 0; transition: opacity .25s; }
+.fb-pop-wrap.show { opacity: 1; }
+.fb-pop-wrap[hidden] { display: none; }
+.fb-pop { width: 100%; max-width: 340px; background: #13201b; border: 1px solid var(--border); border-radius: 20px; padding: 20px; position: relative; transform: translateY(16px) scale(.97); transition: transform .35s var(--ease); box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+.fb-pop-wrap.show .fb-pop { transform: none; }
+.fb-pop-x { position: absolute; right: 10px; top: 8px; width: 36px; height: 36px; border: 0; background: none; color: var(--muted); font-size: 24px; cursor: pointer; }
+.fb-pop-ok { display: flex; align-items: center; gap: 8px; color: var(--green-2); font-size: 13.5px; font-weight: 600; }
+.fb-pop-ok svg { width: 20px; height: 20px; }
+.fb-pop p { margin: 12px 0 0; font-size: 15.5px; line-height: 1.6; }
+.fb-pop-btns { display: flex; gap: 10px; margin-top: 16px; }
+.fb-pop-btns .fb-btn { flex: 1; margin: 0; height: 44px; }
+.fb-later { flex: 1; height: 44px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 15px; cursor: pointer; }
+/* পিডিএফে ফেসবুক */
+.rpt .rfb { margin-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 11px; color: #5b6762; }
+.rpt .rfb b { color: #1877F2; font-size: 12px; }
+.rpt .rqr { width: 64px; height: 64px; flex: none; }
+.rpt .rqr img { width: 64px; height: 64px; display: block; image-rendering: pixelated; }

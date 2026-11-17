@@ -24,6 +24,11 @@ const SITE_CONFIG = {
     features: ['ভর্তি ও শিক্ষার্থীর তথ্য', 'হাজিরা', 'বেতন ও ফি আদায়', 'পরীক্ষা ও ফলাফল', 'আয়-ব্যয়ের হিসাব'],
     url: 'https://github.com/Anamul-h444/Niyontrok',
   },
+  /* ফেসবুক ফলো: ফলাফলের নিচে কার্ড, পিডিএফ ডাউনলোডের সময় পপআপ (একবারই), পিডিএফে লিংক ও QR কোড */
+  facebook: {
+    url: 'https://www.facebook.com/anamul.haque.22772',
+    display: 'facebook.com/anamul.haque.22772',
+  },
 };
 
 /* ---------- পদবি ও বেতনস্কেল ----------

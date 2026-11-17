@@ -330,6 +330,17 @@
   </div>
 </nav>
 
+<div class="fb-pop-wrap" id="fbPop" hidden>
+  <div class="fb-pop" role="dialog" aria-modal="true" aria-labelledby="fbPopTitle">
+    <button type="button" class="fb-pop-x" id="fbPopX" aria-label="বন্ধ করুন">×</button>
+    <div class="fb-pop-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>আপনার রিপোর্ট ডাউনলোড হচ্ছে</div>
+    <p id="fbPopTitle">জেএসআই সংশোধনী ও বকেয়ার নতুন আপডেট মিস করতে না চাইলে ফেসবুকে ফলো করুন</p>
+    <div class="fb-pop-btns">
+      <a class="fb-btn" id="fbPopGo" target="_blank" rel="noopener">ফলো করুন</a>
+      <button type="button" class="fb-later" id="fbPopLater">পরে</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <div class="overlay" id="overlay"><div class="loader"><div class="spinner"></div><div id="overlay-text">পিডিএফ তৈরি হচ্ছে…</div></div></div>
 <div id="pdf-stage" aria-hidden="true"></div>
@@ -338,6 +349,7 @@
 <script src="assets/js/calc.js?v=dev"></script>
 <script src="assets/js/app.js?v=dev"></script>
 <script src="assets/vendor/html2pdf.bundle.min.js" defer></script>
+<script src="assets/vendor/qrcode-generator.min.js" defer></script>
 <script src="assets/js/counter.js?v=dev" defer></script>
 </body>
 </html>

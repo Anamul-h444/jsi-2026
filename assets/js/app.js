@@ -646,6 +646,7 @@
       </table>
     </div>
 
+    ${fbCard()}
     <div class="btn-row" style="margin-top:6px">
       <button class="btn btn-primary" onclick="window.__jsiPdf('salary')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>পিডিএফ</button>
       <button class="btn btn-green" onclick="document.querySelector('[data-view=pension]').click()">অবসরের হিসাব →</button>
@@ -727,6 +728,7 @@
       <table class="tbl">${rt.growth.map((g, i) => `<tr><td>${i === 0 ? 'অবসরের বছর' : bn(i) + ' বছর পর'} (${bnPlain(g.year)})</td><td class="n">${tk(g.net)}</td></tr>`).join('')}</table>
     </div>
 
+    ${fbCard()}
     <div class="btn-row">
       <button class="btn btn-green" onclick="window.__jsiPdf('pension')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>পেনশন পিডিএফ</button>
       <button class="btn btn-ghost" onclick="window.__jsiPdf('all')">সম্পূর্ণ রিপোর্ট</button>
@@ -751,7 +753,38 @@
       <div><b>বৈবাহিক অবস্থা:</b> ${inp.marital === 'MARRIED' ? 'বিবাহিত' : 'অবিবাহিত'}</div>
     </div>`;
   }
-  const rptFooter = () => `<div class="rf"><span>এটি একটি আনুমানিক হিসাব। চূড়ান্ত অঙ্ক পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</span><span>ইঞ্জিনিয়ার: <b>${devNameHTML()}</b></span></div>`;
+
+  /* ---------------- ফেসবুক ফলো ---------------- */
+  const FB_SEEN = 'jsi2026_fb_prompted';
+  const fbCard = () => SITE_CONFIG.facebook ? `
+    <div class="fb-card">
+      <div class="fb-row">
+        <span class="fb-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8.2h2.8l.4-3.2h-3.2V8.6c0-.9.3-1.6 1.6-1.6h1.7V4.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.3v3.2h2.8V22h3.4Z"/></svg></span>
+        <div><b>হিসাবটি কাজে লাগলো?</b><small>জেএসআই সংশোধনী ও বকেয়ার নতুন আপডেট পেতে ফেসবুকে ফলো করুন</small></div>
+      </div>
+      <a class="fb-btn" href="${SITE_CONFIG.facebook.url}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+        ফেসবুকে ফলো করুন</a>
+    </div>` : '';
+  /** পিডিএফ ডাউনলোডের সময় একবারই পপআপ; "পরে" বা "ফলো" চাপলে আর দেখাবে না */
+  function maybeFbPopup() {
+    if (!SITE_CONFIG.facebook) return;
+    try { if (localStorage.getItem(FB_SEEN)) return; localStorage.setItem(FB_SEEN, '1'); } catch (e) { return; }
+    const pop = $('#fbPop');
+    $('#fbPopGo').href = SITE_CONFIG.facebook.url;
+    const close = () => { pop.classList.remove('show'); setTimeout(() => { pop.hidden = true; }, 250); };
+    $('#fbPopX').onclick = close; $('#fbPopLater').onclick = close; $('#fbPopGo').onclick = close;
+    pop.onclick = e => { if (e.target === pop) close(); };
+    pop.hidden = false; requestAnimationFrame(() => pop.classList.add('show'));
+  }
+  /** পিডিএফের জন্য QR কোড (SVG) */
+  function fbQr() {
+    if (!SITE_CONFIG.facebook || typeof qrcode === 'undefined') return '';
+    try { const q = qrcode(0, 'M'); q.addData(SITE_CONFIG.facebook.url); q.make(); return `<img src="${q.createDataURL(4, 2)}" alt="QR" />`; }
+    catch (e) { return ''; }
+  }
+
+  const rptFooter = () => `<div class="rf"><span>এটি একটি আনুমানিক হিসাব। চূড়ান্ত অঙ্ক পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</span><span>ইঞ্জিনিয়ার: <b>${devNameHTML()}</b></span></div>${SITE_CONFIG.facebook ? `<div class="rfb avoid"><div>নতুন আপডেট পেতে ফেসবুকে ফলো করুন:<br><b>${SITE_CONFIG.facebook.display}</b></div>${fbQr() ? `<div class="rqr">${fbQr()}</div>` : ''}</div>` : ''}`;
 
   function rptSalary(tl) {
     const inp = tl.input, R = tl.rank, fx = tl.fix;
@@ -894,6 +927,7 @@
         pagebreak: { mode: ['css', 'legacy'], avoid: ['.avoid', 'h2', 'h3', 'tr', '.kv', '.formula'] },
       }).from(stage.firstElementChild).save();
       toast('পিডিএফ ডাউনলোড হয়েছে');
+      setTimeout(maybeFbPopup, 600);
     } catch (e) {
       console.error(e);
       toast('পিডিএফ তৈরি করা যায়নি। আবার চেষ্টা করুন।');

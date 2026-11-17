@@ -11,6 +11,7 @@ const CORE = [
   './assets/js/calc.js',
   './assets/js/app.js',
   './assets/vendor/html2pdf.bundle.min.js',
+  './assets/vendor/qrcode-generator.min.js',
   './assets/icon.svg',
   './assets/img/icon-192.png',
   './assets/img/developer.jpg',
