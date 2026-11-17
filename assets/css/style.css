@@ -568,3 +568,8 @@ body.no-scroll { overflow: hidden; }
 .visit-count svg { width: 16px; height: 16px; color: var(--green-2); }
 .visit-count b { color: var(--gold-2); font-size: 14px; }
 .visit-badge { height: 18px; vertical-align: middle; border-radius: 4px; }
+
+/* তারিখের ঘর (দিন-মাস-বছর, শুধু টাইপ) */
+.input.date-in { letter-spacing: .5px; font-variant-numeric: tabular-nums; }
+.input.date-in::placeholder { letter-spacing: 0; }
+.input.bad, .input.bad:focus { border-color: rgba(239,107,107,.85); box-shadow: 0 0 0 4px rgba(239,107,107,.14); }

@@ -53,6 +53,34 @@
   const deltaCls = n => n > 0 ? 'up' : n < 0 ? 'down' : '';
 
   /* ---------------- ফর্ম সেটআপ ---------------- */
+  /* ---------------- তারিখ: দিন-মাস-বছর (শুধু টাইপ করে) ----------------
+     ঘরে দেখায় ২৫-০৩-১৯৮৬ বা 25-03-1986; ভেতরে সংরক্ষণ হয় 1986-03-25 (হিসাবের জন্য) */
+  const EN = s => String(s).replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+  function isoToDmy(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+  }
+  function dmyToIso(v) {
+    const m = /^(\d{2})-(\d{2})-(\d{4})$/.exec(EN(v));
+    if (!m) return '';
+    const d = +m[1], mo = +m[2], y = +m[3];
+    const dt = new Date(y, mo - 1, d);
+    if (y < 1940 || y > 2100 || dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return '';
+    return `${m[3]}-${m[2]}-${m[1]}`;
+  }
+  /** টাইপ করার সময় নিজে থেকে "-" বসায়; ভুল তারিখ হলে লাল দাগ */
+  function maskDate(el) {
+    const digits = EN(el.value).replace(/\D/g, '').slice(0, 8);
+    let out = digits.slice(0, 2);
+    if (digits.length > 2) out += '-' + digits.slice(2, 4);
+    if (digits.length > 4) out += '-' + digits.slice(4);
+    if (out !== el.value) el.value = out;
+    const iso = digits.length === 8 ? dmyToIso(out) : '';
+    el.dataset.iso = iso;
+    el.classList.toggle('bad', digits.length === 8 && !iso);
+    el.title = digits.length === 8 && !iso ? 'সঠিক তারিখ লিখুন (দিন-মাস-বছর)' : '';
+  }
+
   function initForm() {
     // কনফিগ
     $('#dev-name').innerHTML = devNameHTML();
@@ -82,7 +110,7 @@
 
     // স্টেট → ফর্ম
     ['name','baNo','unit','rank','dob','joinDate','oldBasic','skill','appointment','serviceWardenship','otherNew','retireDate']
-      .forEach(id => { const el = $('#' + id); if (el) el.value = S[id] ?? ''; });
+      .forEach(id => { const el = $('#' + id); if (el) el.value = el.classList.contains('date-in') ? isoToDmy(S[id]) : (S[id] ?? ''); });
     if (S.rank && !RANKS[S.rank]) S.rank = '';
     if (!S.rank || (RANKS[S.rank].oldScale && !RANKS[S.rank].oldScale.includes(num(S.oldBasic)))) S.oldBasic = '';
     $('#oldBasic').value = S.oldBasic;
@@ -259,11 +287,13 @@
 
   function onInput(e) {
     const el = e.target;
+    if (el.classList && el.classList.contains('date-in')) maskDate(el);
+    const val = el.classList && el.classList.contains('date-in') ? (el.dataset.iso || '') : el.value;
     if (!el.id && !el.closest('#specials') && !el.dataset.promo) return;
     if (el.closest('#specials')) {
       S.specials = $$('#specials input:checked').map(i => i.value);
     } else if (el.dataset.promo !== undefined) {
-      const i = Number(el.dataset.idx); S.promotions[i][el.dataset.promo] = el.value;
+      const i = Number(el.dataset.idx); S.promotions[i][el.dataset.promo] = val;
     } else if (el.id.startsWith('ov_')) {
       S.ov[el.id.slice(3)] = el.value;
     } else if (el.type === 'checkbox') {
@@ -279,7 +309,7 @@
     } else if (el.id === 'oldBasicSel') {
       S.oldBasic = el.value; $('#oldBasic').value = el.value;
     } else if (el.id in S) {
-      S[el.id] = el.value;
+      S[el.id] = val;
     }
     save();
     if (e.type === 'change' || el.id === 'oldBasic' || el.id === 'oldBasicSel') refreshPlaceholders();
@@ -354,7 +384,7 @@
     $('#promoList').innerHTML = S.promotions.map((p, i) => `
       <div class="promo-row">
         <div class="field" style="margin:0"><label>পদবি</label><select class="input" data-promo="rank" data-idx="${i}"><option value="">নির্বাচন করুন</option>${opts}</select></div>
-        <div class="field" style="margin:0"><label>তারিখ</label><input class="input" type="date" data-promo="date" data-idx="${i}" value="${esc(p.date)}" /></div>
+        <div class="field" style="margin:0"><label>তারিখ</label><input class="input date-in" type="text" inputmode="numeric" maxlength="10" placeholder="দিন-মাস-বছর" autocomplete="off" data-promo="date" data-idx="${i}" value="${esc(isoToDmy(p.date))}" /></div>
         <button type="button" class="x" data-del="${i}" aria-label="মুছুন">×</button>
       </div>`).join('');
     $$('#promoList select').forEach((s, i) => { s.value = S.promotions[i].rank || ''; enhanceSelect(s); });
