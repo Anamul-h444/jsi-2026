@@ -29,33 +29,33 @@
     <div class="st-hero">
       <span class="chip">★ যাচাইযোগ্য পরিসংখ্যান</span>
       <h2>জেএসআই ২০২৬ ক্যালকুলেটর: ভিজিটর পরিসংখ্যান</h2>
-      <p style="margin:0;color:var(--muted)">প্রতিদিন রাত ১১:৫৫-এ স্বয়ংক্রিয়ভাবে রেকর্ড করা মোট ইউনিক ভিজিটর</p>
+      <p style="margin:0;color:var(--muted)">প্রতিদিন রাত ১১:৫৫-এ স্বয়ংক্রিয়ভাবে রেকর্ড করা মোট ভিজিট (পেজ ভিউ)</p>
     </div>
 
     <div class="st-kpis">
-      <div class="st-kpi"><small>এখন পর্যন্ত মোট ভিজিটর</small><b id="kTotal">…</b></div>
+      <div class="st-kpi"><small>এখন পর্যন্ত মোট ভিজিট</small><b id="kTotal">…</b></div>
       <div class="st-kpi g"><small>শেষ ৭ দিনে নতুন</small><b id="k7">…</b></div>
       <div class="st-kpi"><small>প্রথম রেকর্ড</small><b id="kFirst" style="font-size:17px">…</b></div>
       <div class="st-kpi"><small>রেকর্ডকৃত দিন</small><b id="kDays">…</b></div>
     </div>
 
     <div class="card">
-      <div class="section-title" style="margin-top:0"><h3>দিনভিত্তিক মোট ভিজিটর</h3><span class="line"></span></div>
-      <svg class="chart" id="chart" viewBox="0 0 600 220" preserveAspectRatio="none" role="img" aria-label="দিনভিত্তিক মোট ভিজিটরের গ্রাফ"></svg>
+      <div class="section-title" style="margin-top:0"><h3>দিনভিত্তিক মোট ভিজিট</h3><span class="line"></span></div>
+      <svg class="chart" id="chart" viewBox="0 0 600 220" preserveAspectRatio="none" role="img" aria-label="দিনভিত্তিক মোট ভিজিটের গ্রাফ"></svg>
       <p class="hint" id="chartNote" style="margin:6px 0 0"></p>
     </div>
 
     <div class="card">
       <div class="section-title" style="margin-top:0"><h3>দৈনিক রেকর্ড</h3><span class="line"></span></div>
-      <table class="tbl" id="tbl"><tr><th>তারিখ</th><th class="n">মোট ভিজিটর</th><th class="n">সেদিন নতুন</th></tr></table>
+      <table class="tbl" id="tbl"><tr><th>তারিখ</th><th class="n">মোট ভিজিট</th><th class="n">সেদিন নতুন</th></tr></table>
     </div>
 
     <div class="card src">
       <b style="color:var(--text)">উৎস ও যাচাই</b><br>
-      লাইভ কাউন্টার: <a id="liveLink" href="https://api.counterapi.dev/v1/anamul-h444-jsi-2026/visitors/" target="_blank" rel="noopener">api.counterapi.dev/v1/anamul-h444-jsi-2026/visitors</a><br>
+      লাইভ কাউন্টার (hits.sh): <img id="liveBadge" alt="মোট ভিজিট" style="height:18px;vertical-align:middle;border-radius:4px" src="https://hits.sh/anamul-h444.github.io/jsi-2026.svg?view=total&style=flat-square&label=%E0%A6%AE%E0%A7%8B%E0%A6%9F%20%E0%A6%AD%E0%A6%BF%E0%A6%9C%E0%A6%BF%E0%A6%9F&color=1f7e5a" /><br>
       দৈনিক রেকর্ডের ইতিহাস (GitHub কমিট, তারিখসহ): <a href="https://github.com/Anamul-h444/jsi-2026/commits/main/stats/visitors.csv" target="_blank" rel="noopener">github.com/Anamul-h444/jsi-2026 › stats/visitors.csv</a><br>
       ওয়েবসাইট: <a href="./">anamul-h444.github.io/jsi-2026</a><br>
-      একই ব্রাউজার থেকে প্রথমবার এলেই কেবল একজন ভিজিটর গোনা হয়।
+      প্রতিবার সাইট খোলাকে একটি ভিজিট (পেজ ভিউ) হিসেবে গোনা হয়; একই ব্যক্তি একাধিকবার খুললে একাধিক ভিজিট গণ্য হয়।
     </div>
 
     <footer class="footer">
@@ -101,7 +101,7 @@
     document.getElementById('kDays').textContent = toBn(rows.length);
 
     // টেবিল (নতুন থেকে পুরোনো)
-    var html = '<tr><th>তারিখ</th><th class="n">মোট ভিজিটর</th><th class="n">সেদিন নতুন</th></tr>';
+    var html = '<tr><th>তারিখ</th><th class="n">মোট ভিজিট</th><th class="n">সেদিন নতুন</th></tr>';
     for (var i = rows.length - 1; i >= 0; i--) {
       var inc = i > 0 ? rows[i].n - rows[i - 1].n : null;
       html += '<tr><td>' + dlabel(rows[i].d) + (rows[i].live ? ' <small>(এখন)</small>' : '') + '</td><td class="n">' + fmt(rows[i].n) + '</td><td class="n up">' + (inc === null ? '—' : '+' + fmt(inc)) + '</td></tr>';
