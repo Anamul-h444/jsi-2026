@@ -375,3 +375,68 @@ function computeRetirement(inp, tl) {
   });
   return out;
 }
+
+/* =========================================================================
+   বিদ্যমান পেনশনভোগী (১ জুলাই ২০২৬-এর আগে অবসরপ্রাপ্ত)
+   জেএসআই ০১/২০২৬, চতুর্থ অংশ: অনুচ্ছেদ ২৩ (চিকিৎসা), ২৪ (রেশন), ২৫ (উৎসব),
+   ২৬ (নববর্ষ), ২৭ (অবসরভাতা বৃদ্ধি)
+   ========================================================================= */
+const EXISTING_PENSION_SLABS = [
+  { upto: 9000,     rate: 1.00, min: 10000, max: 18000, label: 'সর্বনিম্ন – ৯,০০০' },
+  { upto: 20000,    rate: 0.75, min: 18001, max: 35000, label: '৯,০০১ – ২০,০০০' },
+  { upto: 30000,    rate: 0.65, min: 35001, max: 49000, label: '২০,০০১ – ৩০,০০০' },
+  { upto: 40000,    rate: 0.60, min: 49001, max: 62000, label: '৩০,০০১ – ৪০,০০০' },
+  { upto: Infinity, rate: 0.55, min: 62001, max: 70200, label: '৪০,০০১ ও তদূর্ধ্ব' },
+];
+const EXISTING_PENSION_CAP = 70200;
+
+/** ৩১ ডিসেম্বর ২০২৭ পর্যন্ত চিকিৎসা ভাতা (জেএসআই ০১/২০১৬) */
+const penMedOld = age => (age > 65 ? 2500 : 1500);
+/** ০১ জানুয়ারি ২০২৮ থেকে চিকিৎসা ভাতা */
+const penMedNew = age => (age <= 50 ? 3000 : age <= 60 ? 4000 : age <= 70 ? 5000 : 6000);
+
+function computeExistingPension(inp) {
+  const out = { ok: false, errors: [] };
+  const net30 = inp.net30;
+  if (!net30 || net30 < 1000 || net30 > 300000) { out.errors.push('৩০ জুন ২০২৬-এর মাসিক নিট পেনশন সঠিকভাবে দিন'); return out; }
+  if (!inp.dob) { out.errors.push('পেনশনভোগীর জন্মতারিখ দিন'); return out; }
+
+  const slab = EXISTING_PENSION_SLABS.find(s => net30 <= s.upto);
+  const aboveCap = net30 > EXISTING_PENSION_CAP;
+  const raw = net30 * (1 + slab.rate);
+  const target = aboveCap ? net30 : Math.round(Math.min(slab.max, Math.max(slab.min, raw)));
+  const inc = target - net30;
+  const big = net30 > 20000;                 // টীকা-ক (৪০% → ৭০%) বনাম টীকা-খ (৫০% → ৭৫%)
+  const pA = big ? 0.40 : 0.50, pB = big ? 0.70 : 0.75;
+
+  const ration = (inp.adults || 0) * PENSION.rationAdult + (inp.children || 0) * PENSION.rationChild;
+  const mk = (key, label, range, date, net, note, newMed) => {
+    const age = ageOn(inp.dob, date);
+    const med = newMed ? penMedNew(age) : penMedOld(age);
+    return { key, label, range, date, net: Math.round(net), note, age, med, medNew: newMed, ration, total: Math.round(net) + med + ration };
+  };
+  const p0 = mk('JUN26', 'জুন ২০২৬', '৩০ জুন ২০২৬ পর্যন্ত', new Date(2026, 5, 30), net30, 'আগের নিট পেনশন', false);
+  const p1 = mk('JUL26', 'জুলাই ২০২৬', '০১ জুলাই – ৩১ ডিসেম্বর ২০২৬', new Date(2026, 6, 1), net30 + inc * pA,
+    aboveCap ? 'বিদ্যমান পেনশন অপরিবর্তিত' : `আগের পেনশন + বৃদ্ধির ${bnPlain(pA * 100)}%`, false);
+  const p2 = mk('JAN27', 'জানুয়ারি ২০২৭', '০১ জানুয়ারি – ৩০ জুন ২০২৭', new Date(2027, 0, 1), net30 + inc * pB,
+    aboveCap ? 'বিদ্যমান পেনশন অপরিবর্তিত' : `আগের পেনশন + বৃদ্ধির ${bnPlain(pB * 100)}%`, false);
+  const n3 = Math.round(target * (1 + PENSION.annualIncrease));
+  const p3 = mk('JUL27', 'জুলাই ২০২৭', '০১ জুলাই – ৩১ ডিসেম্বর ২০২৭', new Date(2027, 6, 1), n3, 'শতভাগ নির্ধারিত পেনশন + ৫% ইনক্রিমেন্ট', false);
+  const p4 = mk('JAN28', 'জানুয়ারি ২০২৮', '০১ জানুয়ারি ২০২৮ থেকে', new Date(2028, 0, 1), n3, 'নতুন হারে চিকিৎসা ভাতা চালু', true);
+  const periods = [p1, p2, p3, p4];
+  let prev = p0;
+  periods.forEach(p => { p.prev = prev; p.netRise = p.net - prev.net; p.totalRise = p.total - prev.total; prev = p; });
+
+  const growth = [];
+  let g = n3;
+  for (let y = 2027; y <= 2032; y++) { growth.push({ year: y, net: Math.round(g) }); g *= 1 + PENSION.annualIncrease; }
+
+  Object.assign(out, {
+    ok: true, input: inp, net30, slab, aboveCap, raw, target, inc, pA, pB, big,
+    clampedMin: !aboveCap && raw < slab.min, clampedMax: !aboveCap && raw > slab.max,
+    p0, periods, ration, growth,
+    festivalYearly: n3 * 2,
+    noboborsho: Math.round(n3 * PENSION.noboborsho),
+  });
+  return out;
+}

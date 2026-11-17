@@ -628,3 +628,23 @@ body.no-scroll { overflow: hidden; }
 .rpt .rfb b { color: #1877F2; font-size: 12px; }
 .rpt .rqr { width: 64px; height: 64px; flex: none; }
 .rpt .rqr img { width: 64px; height: 64px; display: block; image-rendering: pixelated; }
+
+/* ===== চাকরিরত / পেনশনভোগী বাছাই ===== */
+.mode-pick { margin: 4px 0 16px; animation: rise .5s var(--ease) both; }
+.mode-q { font-size: 14px; color: var(--muted); margin: 0 0 8px 2px; font-weight: 500; }
+.mode-seg { padding: 5px; border-radius: 16px; }
+.mode-seg button { height: 52px; font-size: 15.5px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px; }
+.mode-seg button svg { width: 20px; height: 20px; flex: none; }
+.fade-in { animation: viewIn .45s var(--ease) both; }
+.pen-card { padding: 18px 16px; }
+.pen-head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.pen-head .num { width: 32px; height: 32px; border-radius: 10px; flex: none; display: grid; place-items: center; font-weight: 700; font-size: 14px; background: rgba(227,185,78,.12); color: var(--gold-2); border: 1px solid rgba(227,185,78,.3); }
+.pen-head b { display: block; font-size: 16px; }
+.pen-head small { color: var(--muted); font-size: 12.5px; }
+.input.pen-big { height: 56px; font-size: 22px; font-weight: 700; letter-spacing: .3px; color: var(--gold-2); }
+.input.pen-big::placeholder { font-size: 16px; font-weight: 400; color: var(--dim); }
+/* পেনশনভোগী মোডে "অবসর" ট্যাব */
+.retired-note { display: none; }
+body.retired #view-pension > :not(.retired-note) { display: none; }
+body.retired #view-pension > .retired-note { display: block; }
+#penForm[hidden], #form[hidden] { display: none; }

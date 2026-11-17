@@ -15,6 +15,7 @@
     skill: 'NONE', appointment: 'NONE', badges: 0, serviceWardenship: '', specials: [],
     otherNew: '',
         retireDate: '', promotions: [], commutePct: '', rationAdults: 2, rationChildren: 0,
+    mode: 'SERVING', penName: '', penType: 'SELF', penNet: '', penDob: '', penAdults: 2, penChildren: 0,
   };
   let S = load();
   let lastTL = null, lastRT = null;
@@ -195,7 +196,7 @@
 
 
     // স্টেট → ফর্ম
-    ['name','baNo','unit','rank','dob','joinDate','oldBasic','skill','appointment','serviceWardenship','otherNew','retireDate']
+    ['name','baNo','unit','rank','dob','joinDate','oldBasic','skill','appointment','serviceWardenship','otherNew','retireDate','penName','penNet','penDob']
       .forEach(id => { const el = $('#' + id); if (el) el.value = el.classList.contains('date-in') ? isoToDmy(S[id]) : (S[id] ?? ''); });
     if (S.rank && !RANKS[S.rank]) S.rank = '';
     if (!S.rank || (RANKS[S.rank].oldScale && !RANKS[S.rank].oldScale.includes(num(S.oldBasic)))) S.oldBasic = '';
@@ -206,7 +207,7 @@
     $$('[data-step]').forEach(st => st.querySelector('output').textContent = bn(S[st.dataset.step] || 0));
     renderPromos();
     $$('#form select.input').forEach(enhanceSelect);
-    $$('#dob, #joinDate, #retireDate').forEach(enhanceDate);
+    $$('#dob, #joinDate, #retireDate, #penDob').forEach(enhanceDate);
     updateOldStartHint();
     refreshPlaceholders();
 
@@ -215,9 +216,12 @@
     $('#form').addEventListener('change', onInput);
     $('#view-pension').addEventListener('input', onInput);
     $('#view-pension').addEventListener('change', onInput);
+    $('#penForm').addEventListener('input', onInput);
+    $('#penForm').addEventListener('change', onInput);
 
     $$('[data-seg] button').forEach(b => b.addEventListener('click', () => {
       const seg = b.parentElement; S[seg.dataset.seg] = b.dataset.v; setSeg(seg, b.dataset.v); save(); refreshPlaceholders();
+      if (seg.dataset.seg === 'mode') applyMode(true);
     }));
     $$('[data-step] button').forEach(b => b.addEventListener('click', () => {
       const st = b.parentElement, k = st.dataset.step;
@@ -225,6 +229,8 @@
       st.querySelector('output').textContent = bn(S[k]); save(); refreshPlaceholders();
     }));
     $('#btn-calc').addEventListener('click', () => { if (calcSalary(true)) go('salary'); });
+    $('#btn-pen-calc').addEventListener('click', () => { if (calcRetired(true)) go('salary'); });
+    applyMode(false);
     $('#btn-pension').addEventListener('click', () => calcPension(true));
     $('#btn-add-promo').addEventListener('click', () => { S.promotions.push({ rank: '', date: '' }); renderPromos(); save(); });
     $('#btn-reset').addEventListener('click', () => {
@@ -506,6 +512,7 @@
 
   /* ---------------- বেতন ফলাফল ---------------- */
   function calcSalary(fromBtn) {
+    if (S.mode === 'RETIRED') return calcRetired(fromBtn);
     const inp = collect();
     const errs = validate(inp, true);
     const out = $('#salary-out');
@@ -754,6 +761,162 @@
     </div>`;
   }
 
+
+  /* ======================= পেনশনভোগী মোড ======================= */
+  function applyMode(animate) {
+    const ret = S.mode === 'RETIRED';
+    document.body.classList.toggle('retired', ret);
+    $('#form').hidden = ret;
+    $('#penForm').hidden = !ret;
+    $$('.serv-only').forEach(x => { x.hidden = ret; });
+    $$('.pen-only').forEach(x => { x.hidden = !ret; });
+    const lbl = $('.nav-btn[data-view=salary]');
+    if (lbl && lbl.lastChild) lbl.lastChild.textContent = ret ? 'পেনশন' : 'বেতন';
+    if (animate) { const t = ret ? $('#penForm') : $('#form'); t.classList.remove('fade-in'); void t.offsetWidth; t.classList.add('fade-in'); }
+  }
+  function collectPen() {
+    return {
+      name: (S.penName || '').trim(), type: S.penType, net30: num(S.penNet),
+      dob: parseDate(S.penDob), adults: S.penAdults || 0, children: S.penChildren || 0,
+    };
+  }
+  function calcRetired(fromBtn) {
+    const out = $('#salary-out');
+    const r = computeExistingPension(collectPen());
+    if (!r.ok) {
+      if (fromBtn) { toast(r.errors[0]); return false; }
+      out.innerHTML = `<div class="card empty"><div class="em">📝</div><b>এখনো হিসাব করা হয়নি</b><p>"তথ্য" অংশে পেনশনের তথ্য দিয়ে <b>পেনশন হিসাব করুন</b> বাটনে চাপুন।</p><button class="btn btn-primary" onclick="document.querySelector('[data-view=input]').click()">তথ্য দিন</button></div>`;
+      return false;
+    }
+    out.innerHTML = retiredHTML(r);
+    countUp($('#hero-big'), r.periods[3].total);
+    $$('.details-btn', out).forEach(b => b.addEventListener('click', () => {
+      const d = b.nextElementSibling; d.classList.toggle('open');
+      b.querySelector('span').textContent = d.classList.contains('open') ? 'বিস্তারিত লুকান' : 'বিস্তারিত হিসাব দেখুন';
+    }));
+    return true;
+  }
+  function retiredHTML(r) {
+    const inp = r.input, p4 = r.periods[3];
+    const typeTxt = inp.type === 'FAMILY' ? 'পারিবারিক পেনশন' : 'নিজের পেনশন';
+    const pctTxt = `${bn(r.pA * 100)}% → ${bn(r.pB * 100)}% → ১০০%`;
+    const card = (p, i) => {
+      const fin = i === 3;
+      return `
+      <div class="tl-item ${fin ? 'final' : ''}">
+        <div class="card period">
+          <div class="ph">
+            <div><h4>${p.label}</h4><small>${p.range}</small></div>
+            <span class="badge ${fin ? 'green' : 'gold'}">${fin ? 'নতুন চিকিৎসা ভাতা' : i === 2 ? '১০০% + ৫%' : `বৃদ্ধির ${bn((i === 0 ? r.pA : r.pB) * 100)}%`}</span>
+          </div>
+          <div class="metrics">
+            <div class="metric"><div class="ic a">১</div><div class="t"><small>মাসিক নিট পেনশন</small><b>${tk(p.net)}</b><small>${esc(p.note)}</small></div><span class="delta ${deltaCls(p.netRise)}">${signed(p.netRise)}</span></div>
+            <div class="metric"><div class="ic b">২</div><div class="t"><small>${i === 0 ? 'জুন ২০২৬-এর তুলনায় মোট বৃদ্ধি' : p.prev.label + '-এর তুলনায় মোট বৃদ্ধি'}</small><b class="${deltaCls(p.totalRise)}">${signed(p.totalRise)}</b><small>পেনশন, চিকিৎসা ও রেশন ভাতা মিলিয়ে</small></div></div>
+            <div class="metric"><div class="ic c">৩</div><div class="t"><small>মাসে মোট হাতে পাবেন</small><b>${tk(p.total)}</b><small>পেনশন ${tk(p.net)} + চিকিৎসা ${tk(p.med)} + রেশন ${tk(p.ration)}</small></div></div>
+          </div>
+          <button class="details-btn"><span>বিস্তারিত হিসাব দেখুন</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="details"><div>
+            ${i < 2 && !r.aboveCap ? `<div class="formula">নিট পেনশন = ${tk(r.net30)} + (${tk(r.target)} − ${tk(r.net30)}) × ${bn((i === 0 ? r.pA : r.pB) * 100)}%<br>= ${tk(r.net30)} + ${tk(r.inc * (i === 0 ? r.pA : r.pB))} = <b>${tk(p.net)}</b></div>` : ''}
+            ${i === 2 ? `<div class="formula">নিট পেনশন = ${tk(r.target)} + ৫% বার্ষিক বৃদ্ধি = <b>${tk(p.net)}</b></div>` : ''}
+            <table class="tbl">
+              <tr><th>বিবরণ</th><th class="n">টাকা</th></tr>
+              <tr><td>মাসিক নিট পেনশন</td><td class="n">${tk(p.net)}</td></tr>
+              <tr><td>চিকিৎসা ভাতা<small>বয়স ${bn(p.age)} বছর · ${p.medNew ? 'জেএসআই ০১/২০২৬-এর নতুন হার' : 'জেএসআই ০১/২০১৬-এর হার (৩১ ডিসেম্বর ২০২৭ পর্যন্ত)'}</small></td><td class="n">${tk(p.med)}</td></tr>
+              ${p.ration ? `<tr><td>রেশন ভাতা<small>${bn(inp.adults)} প্রাপ্তবয়স্ক × ৳১,০০০ + ${bn(inp.children)} শিশু × ৳৫০০</small></td><td class="n">${tk(p.ration)}</td></tr>` : ''}
+              <tr class="sum"><td>মাসে মোট</td><td class="n">${tk(p.total)}</td></tr>
+            </table>
+          </div></div>
+        </div>
+      </div>`;
+    };
+    return `
+    <div class="summary-hero">
+      <div class="who"><span><b>${esc(inp.name || 'নাম দেওয়া হয়নি')}</b></span><span>${typeTxt}</span></div>
+      <div class="lbl">জানুয়ারি ২০২৮ থেকে মাসে মোট হাতে পাবেন</div>
+      <div class="big" id="hero-big">${tk(0)}</div>
+      <div class="sub">পেনশন, চিকিৎসা ও রেশন ভাতাসহ · জুন ২০২৬-এর তুলনায় ${signed(p4.total - r.p0.total)}</div>
+      <div class="kpis">
+        <div class="kpi"><small>৩০ জুন ২০২৬ নিট পেনশন</small><b>${tk(r.net30)}</b></div>
+        <div class="kpi"><small>নতুন নির্ধারিত নিট পেনশন</small><b>${tk(r.target)}</b></div>
+        <div class="kpi"><small>জুলাই ২০২৭ থেকে (+৫%)</small><b>${tk(r.periods[2].net)}</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title" style="margin-top:0"><h3>নতুন নিট পেনশন নির্ধারণ</h3><span class="line"></span></div>
+      ${r.aboveCap ? `<div class="formula">আপনার নিট পেনশন ${tk(EXISTING_PENSION_CAP)}-এর বেশি। জেএসআই অনুযায়ী ১ জুলাই ২০২৭-এর বার্ষিক বৃদ্ধির আগ পর্যন্ত বিদ্যমান পেনশনই পাবেন।</div>` : `
+      <div class="formula">
+        ৩০ জুন ২০২৬-এর নিট পেনশন: <b>${tk(r.net30)}</b> (স্ল্যাব: ${r.slab.label})<br>
+        বৃদ্ধির হার: <b>${bn(r.slab.rate * 100)}%</b> → ${tk(r.net30)} × ${bn(1 + r.slab.rate, 2)} = ${tk(r.raw)}<br>
+        এই স্ল্যাবে নতুন পেনশনের সীমা: ${tk(r.slab.min)} – ${tk(r.slab.max)}<br>
+        ${r.clampedMin ? 'হিসাবের অঙ্ক ন্যূনতম সীমার কম, তাই ন্যূনতম সীমা প্রযোজ্য।<br>' : r.clampedMax ? 'হিসাবের অঙ্ক সর্বোচ্চ সীমার বেশি, তাই সর্বোচ্চ সীমা প্রযোজ্য।<br>' : ''}
+        নতুন নির্ধারিত নিট পেনশন: <b>${tk(r.target)}</b> (মোট বৃদ্ধি ${tk(r.inc)})
+      </div>`}
+      <div class="notice info" style="margin:10px 0 0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <div>${r.big ? '২০,০০১ টাকা ও তদূর্ধ্ব' : '২০,০০০ টাকা ও তদনিম্ন'} স্ল্যাবের জন্য বাড়তি অংশ ধাপে ধাপে দেওয়া হবে: ${pctTxt}। ১ জুলাই ২০২৭ থেকে ৫% বার্ষিক বৃদ্ধিসহ পূর্ণ পেনশন (অনুচ্ছেদ ২৭)।</div>
+      </div>
+    </div>
+
+    <div class="section-title"><h3>প্রতিটি ধাপে পেনশন ও ভাতা</h3><span class="line"></span></div>
+    <div class="timeline">${r.periods.map(card).join('')}</div>
+
+    <div class="card">
+      <div class="section-title" style="margin-top:0"><h3>বছরে একবার যা পাবেন (২০২৮)</h3><span class="line"></span></div>
+      <table class="tbl">
+        <tr><td>উৎসব ভাতা (২টি, প্রতিটি নিট পেনশনের সমান)</td><td class="n">${tk(r.festivalYearly)}</td></tr>
+        <tr><td>বাংলা নববর্ষ ভাতা (নিট পেনশনের ১৫%)</td><td class="n">${tk(r.noboborsho)}</td></tr>
+      </table>
+      <h4 style="margin:16px 0 4px;font-size:14.5px">প্রতি বছর ১ জুলাই ৫% বৃদ্ধিতে নিট পেনশন</h4>
+      <table class="tbl">${r.growth.map(g => `<tr><td>০১ জুলাই ${bnPlain(g.year)}</td><td class="n">${tk(g.net)}</td></tr>`).join('')}</table>
+    </div>
+
+    ${fbCard()}
+    <div class="btn-row" style="margin-top:6px">
+      <button class="btn btn-primary" onclick="window.__jsiPdf('retired')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>পিডিএফ ডাউনলোড</button>
+    </div>`;
+  }
+  function rptRetired(r) {
+    const inp = r.input, today = new Date();
+    return `
+    <div class="rh">
+      <div><h1>পেনশনভোগীর হিসাব: জুলাই ২০২৬ – জানুয়ারি ২০২৮</h1><p>জেএসআই ০১/২০২৬ (বাংলাদেশ গেজেট, অতিরিক্ত, ১৫ নভেম্বর ২০২৬), চতুর্থ অংশ অনুযায়ী · প্রস্তুতের তারিখ: ${bnDate(today)}</p></div>
+      <div class="devbox"><img src="assets/img/developer.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${devNameHTML()}</b>${SITE_CONFIG.developer.title}</div></div>
+    </div>
+    <div class="info">
+      <div><b>নাম:</b> ${esc(inp.name || '—')}</div>
+      <div><b>পেনশনের ধরন:</b> ${inp.type === 'FAMILY' ? 'পারিবারিক পেনশন' : 'নিজের পেনশন'}</div>
+      <div><b>জন্মতারিখ:</b> ${bnDate(inp.dob)}</div>
+      <div><b>৩০ জুন ২০২৬ নিট পেনশন:</b> ${tk(r.net30)}</div>
+    </div>
+    <h2>১. নতুন নিট পেনশন নির্ধারণ (অনুচ্ছেদ ২৭)</h2>
+    <table class="fixed">
+      <tr><th style="width:44%">বিষয়</th><th>বিবরণ</th></tr>
+      <tr><td>৩০ জুন ২০২৬-এর নিট পেনশন</td><td>${tk(r.net30)}</td></tr>
+      ${r.aboveCap ? `<tr><td>নির্ধারণ</td><td>${tk(EXISTING_PENSION_CAP)}-এর বেশি হওয়ায় ১ জুলাই ২০২৭-এর আগ পর্যন্ত বিদ্যমান পেনশন</td></tr>` : `
+      <tr><td>স্ল্যাব ও বৃদ্ধির হার</td><td>${r.slab.label} · ${bn(r.slab.rate * 100)}%</td></tr>
+      <tr><td>হিসাব</td><td>${tk(r.net30)} × ${bn(1 + r.slab.rate, 2)} = ${tk(r.raw)}</td></tr>
+      <tr><td>স্ল্যাবের সীমা</td><td>${tk(r.slab.min)} – ${tk(r.slab.max)}</td></tr>`}
+      <tr><td>নতুন নির্ধারিত নিট পেনশন</td><td><b>${tk(r.target)}</b> (বৃদ্ধি ${tk(r.inc)})</td></tr>
+      <tr><td>ধাপে ধাপে প্রাপ্যতা</td><td>জুলাই–ডিসেম্বর ২০২৬ ${bn(r.pA * 100)}%, জানুয়ারি–জুন ২০২৭ ${bn(r.pB * 100)}%, জুলাই ২০২৭ থেকে ১০০% + ৫% বার্ষিক বৃদ্ধি</td></tr>
+    </table>
+    <h2>২. প্রতিটি ধাপে মাসিক প্রাপ্যতা</h2>
+    <table class="avoid"><tr><th>সময়কাল</th><th class="n">নিট পেনশন</th><th class="n">চিকিৎসা ভাতা</th><th class="n">রেশন ভাতা</th><th class="n">মাসে মোট</th><th class="n">বৃদ্ধি</th></tr>
+      <tr><td>জুন ২০২৬</td><td class="n">${tk(r.p0.net)}</td><td class="n">${tk(r.p0.med)}</td><td class="n">${tk(r.p0.ration)}</td><td class="n">${tk(r.p0.total)}</td><td class="n">—</td></tr>
+      ${r.periods.map(p => `<tr><td>${p.label}<br><span style="color:#6b7772;font-size:10.5px">${p.range}</span></td><td class="n">${tk(p.net)}</td><td class="n">${tk(p.med)}</td><td class="n">${tk(p.ration)}</td><td class="n"><b>${tk(p.total)}</b></td><td class="n">${signed(p.totalRise)}</td></tr>`).join('')}
+    </table>
+    <div class="avoid"><h3>বছরে একবার (২০২৮)</h3>
+    <table><tr><td>উৎসব ভাতা (২টি, প্রতিটি নিট পেনশনের সমান)</td><td class="n">${tk(r.festivalYearly)}</td></tr><tr><td>বাংলা নববর্ষ ভাতা (নিট পেনশনের ১৫%)</td><td class="n">${tk(r.noboborsho)}</td></tr></table></div>
+    <div class="avoid"><h3>প্রতি বছর ৫% বৃদ্ধিতে নিট পেনশন</h3>
+    <table>${r.growth.map(g => `<tr><td>০১ জুলাই ${bnPlain(g.year)}</td><td class="n">${tk(g.net)}</td></tr>`).join('')}</table></div>
+    <div class="avoid"><h3>অনুমান ও সতর্কতা</h3><ul class="note">
+      <li>চিকিৎসা ভাতা ৩১ ডিসেম্বর ২০২৭ পর্যন্ত জেএসআই ০১/২০১৬-এর হারে এবং ০১ জানুয়ারি ২০২৮ থেকে নতুন হারে ধরা হয়েছে (অনুচ্ছেদ ২৩)।</li>
+      <li>রেশন ভাতা অনুচ্ছেদ ২৪-এর হারে (প্রাপ্তবয়স্ক ১,০০০, শিশু ৫০০ টাকা) সব ধাপে ধরা হয়েছে।</li>
+      <li>একাধিক পারিবারিক পেনশনভোগী থাকলে চিকিৎসা ভাতা আনুপাতিক হারে ভাগ হবে।</li>
+      <li>এটি একটি আনুমানিক হিসাব; চূড়ান্ত অঙ্ক সংশ্লিষ্ট হিসাবরক্ষণ অফিস কর্তৃক নির্ধারিত হবে।</li>
+    </ul></div>`;
+  }
+
   /* ---------------- ফেসবুক ফলো ---------------- */
   const FB_SEEN = 'jsi2026_fb_prompted';
   const fbCard = () => SITE_CONFIG.facebook ? `
@@ -890,24 +1053,34 @@
   }
 
   async function makePdf(type) {
-    const inp = collect();
-    const errs = validate(inp, true);
-    if (errs.length) { toast(errs[0]); go('input'); return; }
-    const tl = computeTimeline(inp);
-    let rt = null;
-    if (type !== 'salary') {
-      rt = computeRetirement(inp, tl);
-      if (!rt.ok) { toast(rt.errors[0]); go('pension'); return; }
-    }
-    if (typeof html2pdf === 'undefined') { toast('পিডিএফ লাইব্রেরি লোড হয়নি, একটু পরে আবার চেষ্টা করুন'); return; }
+    let inp, body;
+    if (S.mode === 'RETIRED') {
+      type = 'retired';
+      const r = computeExistingPension(collectPen());
+      if (!r.ok) { toast(r.errors[0]); go('input'); return; }
+      if (typeof html2pdf === 'undefined') { toast('পিডিএফ লাইব্রেরি লোড হয়নি, একটু পরে আবার চেষ্টা করুন'); return; }
+      inp = r.input;
+      body = rptRetired(r) + rptFooter();
+    } else {
+      inp = collect();
+      const errs = validate(inp, true);
+      if (errs.length) { toast(errs[0]); go('input'); return; }
+      const tl = computeTimeline(inp);
+      let rt = null;
+      if (type !== 'salary') {
+        rt = computeRetirement(inp, tl);
+        if (!rt.ok) { toast(rt.errors[0]); go('pension'); return; }
+      }
+      if (typeof html2pdf === 'undefined') { toast('পিডিএফ লাইব্রেরি লোড হয়নি, একটু পরে আবার চেষ্টা করুন'); return; }
 
-    const title = type === 'salary' ? 'বেতন রিপোর্ট: জুলাই ২০২৬ – জানুয়ারি ২০২৮'
-      : type === 'pension' ? 'অবসর ও পেনশন রিপোর্ট' : 'বেতন ও পেনশনের সম্পূর্ণ রিপোর্ট';
-    let body = rptHeader(inp, title);
-    if (type !== 'pension') body += rptSalary(tl);
-    if (type === 'all') body += '<div class="pb"></div>';
-    if (type !== 'salary') body += rptPension(rt, inp);
-    body += rptNotes(tl) + rptFooter();
+      const title = type === 'salary' ? 'বেতন রিপোর্ট: জুলাই ২০২৬ – জানুয়ারি ২০২৮'
+        : type === 'pension' ? 'অবসর ও পেনশন রিপোর্ট' : 'বেতন ও পেনশনের সম্পূর্ণ রিপোর্ট';
+      body = rptHeader(inp, title);
+      if (type !== 'pension') body += rptSalary(tl);
+      if (type === 'all') body += '<div class="pb"></div>';
+      if (type !== 'salary') body += rptPension(rt, inp);
+      body += rptNotes(tl) + rptFooter();
+    }
 
     const stage = $('#pdf-stage');
     stage.innerHTML = `<div class="rpt">${body}</div>`;
@@ -917,7 +1090,7 @@
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     try {
       await document.fonts.ready;
-      const fname = `JSI-2026-${type === 'salary' ? 'Salary' : type === 'pension' ? 'Pension' : 'Full'}-Report${inp.name ? '-' + inp.name.replace(/[^\p{L}\p{N}]+/gu, '_') : ''}.pdf`;
+      const fname = `JSI-2026-${type === 'retired' ? 'Pensioner' : type === 'salary' ? 'Salary' : type === 'pension' ? 'Pension' : 'Full'}-Report${inp.name ? '-' + inp.name.replace(/[^\p{L}\p{N}]+/gu, '_') : ''}.pdf`;
       await html2pdf().set({
         margin: [8, 0, 10, 0],
         filename: fname,

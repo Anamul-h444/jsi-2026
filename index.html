@@ -99,6 +99,14 @@
       <div>আপনার সব তথ্য শুধু আপনার মোবাইলেই সংরক্ষিত থাকে। কোনো সার্ভারে পাঠানো হয় না।</div>
     </div>
 
+    <div class="mode-pick" role="radiogroup" aria-label="আপনি কে">
+      <div class="mode-q">আপনি কে?</div>
+      <div class="seg mode-seg" data-seg="mode">
+        <button type="button" data-v="SERVING"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z"/></svg>চাকরিরত সদস্য</button>
+        <button type="button" data-v="RETIRED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>পেনশনভোগী</button>
+      </div>
+    </div>
+
     <form id="form" autocomplete="off" onsubmit="return false">
 
       <!-- ১. ব্যক্তিগত তথ্য -->
@@ -178,6 +186,36 @@
         </button>
       </div>
     </form>
+
+    <!-- ===== পেনশনভোগী (১ জুলাই ২০২৬-এর আগে অবসরপ্রাপ্ত) ===== -->
+    <div id="penForm" hidden>
+      <div class="card pen-card">
+        <div class="pen-head">
+          <span class="num">১</span>
+          <div><b>পেনশনের তথ্য</b><small>১ জুলাই ২০২৬-এর আগে অবসরপ্রাপ্তদের জন্য</small></div>
+        </div>
+        <div class="field"><label>পেনশনভোগীর নাম <span class="hint">(ঐচ্ছিক)</span></label><input class="input" id="penName" placeholder="যেমন: মোঃ আব্দুল করিম" /></div>
+        <div class="field"><label>পেনশনের ধরন</label>
+          <div class="seg" data-seg="penType"><button type="button" data-v="SELF">নিজের পেনশন</button><button type="button" data-v="FAMILY">পারিবারিক পেনশন</button></div>
+        </div>
+        <div class="field"><label>৩০ জুন ২০২৬ তারিখে মাসিক নিট পেনশন (৳) <span class="req">*</span></label>
+          <input class="input pen-big" id="penNet" inputmode="numeric" placeholder="যেমন: ১৫০০০" />
+          <span class="hint">পেনশন বই বা ব্যাংকের হিসাবে জুন ২০২৬-এ যত টাকা মাসিক পেনশন পেয়েছেন (চিকিৎসা ভাতা ছাড়া)</span>
+        </div>
+        <div class="field"><label>পেনশনভোগীর জন্মতারিখ <span class="req">*</span></label><input class="input date-in" type="text" inputmode="numeric" maxlength="10" placeholder="দিন-মাস-বছর" autocomplete="off" id="penDob" /></div>
+        <div class="grid" style="margin-top:12px">
+          <div class="field"><label>রেশন: প্রাপ্তবয়স্ক সদস্য</label><div class="stepper" data-step="penAdults"><button type="button" data-d="-1">−</button><output>০</output><button type="button" data-d="1">+</button></div></div>
+          <div class="field"><label>রেশন: ১২ বছরের নিচের সন্তান</label><div class="stepper" data-step="penChildren"><button type="button" data-d="-1">−</button><output>০</output><button type="button" data-d="1">+</button></div></div>
+        </div>
+        <p class="hint" style="margin:10px 0 0">নিজেসহ পরিবারের প্রাপ্তবয়স্ক সদস্য গুনুন। ১২ বছর ও তার বেশি বয়সী সন্তানও প্রাপ্তবয়স্ক হিসেবে ধরা হয়।</p>
+      </div>
+      <div class="form-submit">
+        <button type="button" class="btn btn-primary btn-block" id="btn-pen-calc">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h4"/></svg>
+          পেনশন হিসাব করুন
+        </button>
+      </div>
+    </div>
   </section>
 
   <!-- ===================== ভিউ ২: বেতন ===================== -->
@@ -187,6 +225,14 @@
 
   <!-- ===================== ভিউ ৩: অবসর ===================== -->
   <section class="view" id="view-pension">
+    <div class="card retired-note">
+      <div class="empty">
+        <div class="em">👴</div>
+        <b>আপনি পেনশনভোগী হিসেবে তথ্য দিয়েছেন</b>
+        <p>এই অংশটি চাকরিরত সদস্যদের ভবিষ্যৎ পেনশনের জন্য। আপনার নতুন পেনশনের হিসাব "পেনশন" ট্যাবে দেখুন।</p>
+        <button class="btn btn-primary" onclick="document.querySelector('[data-view=salary]').click()">আমার পেনশনের হিসাব</button>
+      </div>
+    </div>
     <div class="hero">
       <span class="chip">★ অবসর ও পেনশন</span>
       <h2>অবসরে আপনার <em>সম্ভাব্য পেনশন</em></h2>
@@ -221,15 +267,19 @@
       <h2>সম্পূর্ণ হিসাব <em>পিডিএফ আকারে</em> ডাউনলোড করুন</h2>
       <p>প্রতিটি রিপোর্টে বিস্তারিত হিসাব, সূত্র ও প্রযোজ্য অনুচ্ছেদের উল্লেখ থাকে।</p>
     </div>
-    <button class="report-btn" data-report="salary">
+    <button class="report-btn pen-only" data-report="retired" hidden>
+      <span class="ri g2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg></span>
+      <span class="rt"><b>পেনশনভোগীর রিপোর্ট (জুলাই ২০২৬ – জানুয়ারি ২০২৮)</b><small>নতুন নিট পেনশন, প্রতিটি ধাপের বৃদ্ধি, চিকিৎসা ও রেশন ভাতা এবং বার্ষিক ভাতা</small></span>
+    </button>
+    <button class="report-btn serv-only" data-report="salary">
       <span class="ri g1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg></span>
       <span class="rt"><b>বেতন রিপোর্ট (জুলাই ২০২৬ – জানুয়ারি ২০২৮)</b><small>বেতন নির্ধারণ, চার ধাপের মূল বেতন, বৃদ্ধি, ভাতা, কর্তন ও হাতে পাওয়া বেতন</small></span>
     </button>
-    <button class="report-btn" data-report="pension">
+    <button class="report-btn serv-only" data-report="pension">
       <span class="ri g2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg></span>
       <span class="rt"><b>অবসর ও পেনশন রিপোর্ট</b><small>শেষ মূল বেতন, মাসিক পেনশন, এককালীন আনুতোষিক, ছুটি নগদায়ন ও অন্যান্য সুবিধা</small></span>
     </button>
-    <button class="report-btn" data-report="all">
+    <button class="report-btn serv-only" data-report="all">
       <span class="ri g3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h10l6 6v10a0 0 0 0 1 0 0H4z"/><path d="M8 13h8M8 17h5M14 4v6h6"/></svg></span>
       <span class="rt"><b>সম্পূর্ণ রিপোর্ট (সব একসাথে)</b><small>বেতন ও পেনশনের সব হিসাব একটি পিডিএফে</small></span>
     </button>
