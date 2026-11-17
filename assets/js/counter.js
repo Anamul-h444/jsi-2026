@@ -1,34 +1,63 @@
 /* =========================================================================
-   ভিজিটর কাউন্টার (ফ্রি, সার্ভার ছাড়া) — api.counterapi.dev
-   একই ব্রাউজার থেকে প্রথমবার এলেই কেবল সংখ্যা বাড়ে (ইউনিক ভিজিটর)।
-   কোনো কারণে সার্ভিস কাজ না করলে কাউন্টারটি লুকানো থাকবে, সাইটের কিছু আটকাবে না।
+   ফুটার: মোট ভিজিটর ও শেষ আপডেট
+   ভিজিটর: প্রথমে api.counterapi.dev (একই ব্রাউজার একবারই গোনা হয়);
+   সেটা কাজ না করলে hits.sh-এর ছবি-কাউন্টার দেখানো হয়।
+   শেষ আপডেট: ডিপ্লয়ের সময় GitHub Actions __UPDATED__ বদলে আসল সময় বসায়।
    ========================================================================= */
 (function () {
   'use strict';
-  var NS = 'anamul-h444-jsi-2026';
-  var KEY = 'visitors';
-  var SEEN = 'jsi2026_seen_v1';
-  var base = 'https://api.counterapi.dev/v1/' + NS + '/' + KEY;
+  var BN = '০১২৩৪৫৬৭৮৯';
+  var toBn = function (s) { return String(s).replace(/\d/g, function (d) { return BN[d]; }); };
+  var fmt = function (n) { return typeof bn === 'function' ? bn(n) : toBn(n.toLocaleString('en-IN')); };
+
+  /* ---------- শেষ আপডেট ---------- */
+  (function () {
+    var box = document.getElementById('lastUpdated');
+    if (!box) return;
+    var raw = box.getAttribute('data-updated');
+    var d = new Date(raw);
+    if (!raw || raw.indexOf('__') === 0 || isNaN(d)) return; // লোকাল কপিতে লুকানো থাকবে
+    var M = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+    // বাংলাদেশ সময় (UTC+৬)
+    var bd = new Date(d.getTime() + 6 * 3600 * 1000);
+    var h = bd.getUTCHours(), m = bd.getUTCMinutes();
+    var part = h < 5 ? 'রাত' : h < 12 ? 'সকাল' : h < 15 ? 'দুপুর' : h < 18 ? 'বিকাল' : h < 20 ? 'সন্ধ্যা' : 'রাত';
+    var h12 = h % 12 || 12;
+    document.getElementById('lastUpdatedText').textContent =
+      toBn(bd.getUTCDate()) + ' ' + M[bd.getUTCMonth()] + ' ' + toBn(bd.getUTCFullYear()) +
+      ', ' + part + ' ' + toBn(h12) + ':' + toBn(String(m).padStart(2, '0'));
+    box.hidden = false;
+  })();
+
+  /* ---------- মোট ভিজিটর ---------- */
+  var NS = 'anamul-h444-jsi-2026', KEY = 'visitors', SEEN = 'jsi2026_seen_v1';
+  var numEl = document.getElementById('visitNum');
+  if (!numEl) return;
+
+  function badgeFallback() {
+    // ছবি-কাউন্টার: কোনো স্ক্রিপ্ট/CORS লাগে না
+    var img = new Image();
+    img.alt = 'ভিজিটর সংখ্যা';
+    img.className = 'visit-badge';
+    img.src = 'https://hits.sh/anamul-h444.github.io/jsi-2026.svg?view=total&style=flat-square&label=%20&color=1c2a25&labelColor=1c2a25';
+    img.onload = function () { numEl.textContent = ''; numEl.appendChild(img); };
+    img.onerror = function () { numEl.textContent = '—'; };
+  }
 
   var seen = false;
   try { seen = localStorage.getItem(SEEN) === '1'; } catch (e) {}
-  var url = seen ? base + '/' : base + '/up';
-
+  var base = 'https://api.counterapi.dev/v1/' + NS + '/' + KEY;
   var ctrl = 'AbortController' in window ? new AbortController() : null;
   var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 6000);
 
-  fetch(url, { signal: ctrl ? ctrl.signal : undefined, cache: 'no-store' })
+  fetch(seen ? base + '/' : base + '/up', { signal: ctrl ? ctrl.signal : undefined, cache: 'no-store' })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (d) {
       clearTimeout(timer);
       var n = Number(d && d.count);
-      if (!isFinite(n) || n <= 0) return;
+      if (!isFinite(n) || n <= 0) throw new Error('bad');
       if (!seen) { try { localStorage.setItem(SEEN, '1'); } catch (e) {} }
-      var el = document.getElementById('visitNum');
-      var box = document.getElementById('visitCount');
-      if (!el || !box) return;
-      el.textContent = typeof bn === 'function' ? bn(n) : n.toLocaleString('bn-BD');
-      box.hidden = false;
+      numEl.textContent = fmt(n);
     })
-    .catch(function () { clearTimeout(timer); });
+    .catch(function () { clearTimeout(timer); badgeFallback(); });
 })();

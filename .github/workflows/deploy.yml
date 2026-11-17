@@ -31,6 +31,9 @@ jobs:
           SITE="https://$(echo "$GITHUB_REPOSITORY_OWNER" | tr 'A-Z' 'a-z').github.io/${GITHUB_REPOSITORY#*/}/"
           sed -i "s#__SITE__#${SITE}#g" index.html
           grep -o 'og:url" content="[^"]*' index.html
+      # ফুটারে "শেষ আপডেট" — ডিপ্লয়ের সময়
+      - name: Last updated time
+        run: sed -i "s/__UPDATED__/$(date -u +%Y-%m-%dT%H:%M:%SZ)/" index.html
       - uses: actions/configure-pages@v5
         with:
           enablement: true
