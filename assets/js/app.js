@@ -15,7 +15,7 @@
     skill: 'NONE', appointment: 'NONE', badges: 0, serviceWardenship: '', specials: [],
     otherNew: '',
         retireDate: '', promotions: [], commutePct: '', rationAdults: 2, rationChildren: 0,
-    mode: 'SERVING', penName: '', penType: 'SELF', penNet: '', penDob: '', penAdults: 2, penChildren: 0,
+    firstNewPay: '', mode: 'SERVING', penName: '', penType: 'SELF', penNet: '', penDob: '', penAdults: 2, penChildren: 0,
   };
   let S = load();
   let lastTL = null, lastRT = null;
@@ -524,8 +524,9 @@
     const tl = computeTimeline(inp);
     lastTL = tl;
     out.innerHTML = salaryHTML(tl);
+    mountArrears(out, fnp => computeArrearsServing(tl, new Date(), fnp), 'serving');
     countUp($('#hero-big'), tl.periods[3].net);
-    $$('.details-btn', out).forEach(b => b.addEventListener('click', () => {
+    $$('.details-btn', out).filter(b => !b.closest('#arrearsHost')).forEach(b => b.addEventListener('click', () => {
       const d = b.nextElementSibling; d.classList.toggle('open');
       b.querySelector('span').textContent = d.classList.contains('open') ? 'বিস্তারিত লুকান' : 'বিস্তারিত হিসাব দেখুন';
     }));
@@ -601,6 +602,8 @@
         <div class="kpi"><small>জুলাই ২০২৭ মূল বেতন (ইনক্রিমেন্টসহ)</small><b>${tk(p3.basic)}</b></div>
       </div>
     </div>
+
+    <div id="arrearsHost"></div>
 
     <div class="card voucher">
       <div class="v-head">
@@ -762,6 +765,80 @@
   }
 
 
+
+  /* ======================= বকেয়া ======================= */
+  function arrearsOptions() {
+    const today = new Date(), opts = [`<option value="">এখনো পাইনি (আজ পর্যন্ত হিসাব)</option>`];
+    for (let d = new Date(2026, 10, 1); d <= today; d = new Date(d.getFullYear(), d.getMonth() + 1, 1))
+      opts.push(`<option value="${ymKey(d)}">${bnMonthYear(d)}</option>`);
+    return opts.join('');
+  }
+  function arrearsCardHTML(a, kind) {
+    const ret = kind === 'retired';
+    const lastRow = a.rows[a.rows.length - 1];
+    const until = a.firstNewPay
+      ? (lastRow ? `${bnMonthYear(lastRow.date)} পর্যন্ত` : '—')
+      : `আজ ${bnDate(a.today)} পর্যন্ত`;
+    const neg = a.total < 0;
+    return `
+    <div class="card arrears">
+      <div class="ar-top">
+        <span class="ar-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h4"/></svg></span>
+        <div><b>বকেয়া হিসাব</b><small>০১ জুলাই ২০২৬ থেকে ${until}</small></div>
+      </div>
+      <div class="ar-amt ${neg ? 'neg' : ''}">${neg ? '−' : ''}${tk(Math.abs(a.total))}</div>
+      <div class="ar-sub">${neg ? 'অতিরিক্ত উত্তোলিত অংশ (বকেয়া থেকে সমন্বয় হবে)' : `মোট ${bn(a.rows.length)} মাসের সম্ভাব্য বকেয়া${lastRow && lastRow.partial ? ` (চলতি মাসের ${bn(lastRow.days)} দিনসহ)` : ''}`}</div>
+      ${!ret ? `<div class="ar-mini">
+        <div><small>এর মধ্যে মূল বেতন বাবদ</small><b>${tk(a.basicTotal)}</b></div>
+        <div><small>সম্ভাব্য জিপিএফ কর্তন (৫%)</small><b>− ${tk(a.gpf)}</b></div>
+      </div>` : ''}
+      <div class="field" style="margin-top:14px"><label>নতুন হারে প্রথম ${ret ? 'পেনশন' : 'বেতন'} কোন মাসে পেয়েছেন?</label>
+        <select class="input" id="firstNewPay">${arrearsOptions()}</select>
+        <span class="hint">নতুন হারে ${ret ? 'পেনশন' : 'বেতন'} পাওয়া শুরু হলে মাসটি বাছাই করুন; সেই মাস থেকে আর বকেয়া ধরা হবে না।</span>
+      </div>
+      <button class="details-btn"><span>মাসভিত্তিক বকেয়া দেখুন</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="details"><div>
+        <table class="tbl">
+          <tr><th>মাস</th><th class="n">প্রাপ্য</th><th class="n">তোলা হয়েছে</th><th class="n">বকেয়া</th></tr>
+          ${a.rows.map(r => `<tr><td>${r.label}${r.partial ? `<small>${bn(r.days)} দিন</small>` : ''}</td><td class="n">${tk(r.due)}</td><td class="n">${tk(r.got)}</td><td class="n ${deltaCls(r.diff)}">${signed(r.diff)}</td></tr>`).join('')}
+          <tr class="sum"><td>মোট</td><td class="n"></td><td class="n"></td><td class="n">${signed(a.total)}</td></tr>
+        </table>
+        <p class="hint" style="margin-top:8px">${ret
+          ? '"তোলা হয়েছে" ধরা হয়েছে ৩০ জুন ২০২৬-এর নিট পেনশন, পুরোনো হারের চিকিৎসা ভাতা ও রেশন ভাতা।'
+          : `"তোলা হয়েছে" ধরা হয়েছে জুন ২০২৬-এর মোট বেতন (${tk(a.drawnMonthly)}/মাস)${a.specialMonthly ? `, যার মধ্যে বিলুপ্ত বিশেষ সুবিধা ${tk(a.specialMonthly)}/মাস বকেয়া থেকে সমন্বয় হয়ে গেছে` : ''}।`}
+          উৎসব ভাতার পার্থক্য এই হিসাবে ধরা হয়নি। চূড়ান্ত বকেয়া ${ret ? 'হিসাবরক্ষণ অফিস' : 'পে-অফিস'} নির্ধারণ করবে।</p>
+      </div></div>
+    </div>`;
+  }
+  function mountArrears(out, compute, kind) {
+    const host = $('#arrearsHost', out);
+    if (!host) return;
+    const draw = () => {
+      host.innerHTML = arrearsCardHTML(compute(S.firstNewPay || ''), kind);
+      const sel = $('#firstNewPay', host);
+      sel.value = S.firstNewPay || '';
+      if (sel.value !== (S.firstNewPay || '')) { S.firstNewPay = ''; sel.value = ''; }
+      sel.addEventListener('change', () => { S.firstNewPay = sel.value; save(); draw(); });
+      const b = $('.details-btn', host);
+      b.addEventListener('click', () => {
+        const d = b.nextElementSibling; d.classList.toggle('open');
+        b.querySelector('span').textContent = d.classList.contains('open') ? 'মাসভিত্তিক বকেয়া লুকান' : 'মাসভিত্তিক বকেয়া দেখুন';
+      });
+    };
+    draw();
+  }
+  function arrearsRpt(a, kind) {
+    const ret = kind === 'retired';
+    const lastRow = a.rows[a.rows.length - 1];
+    return `<div class="avoid"><h2>বকেয়া হিসাব (০১ জুলাই ২০২৬ থেকে ${a.firstNewPay ? (lastRow ? bnMonthYear(lastRow.date) : '—') : bnDate(a.today)} পর্যন্ত)</h2>
+      <table><tr><th>মাস</th><th class="n">প্রাপ্য</th><th class="n">তোলা হয়েছে</th><th class="n">বকেয়া</th></tr>
+      ${a.rows.map(r => `<tr><td>${r.label}${r.partial ? ` (${bn(r.days)} দিন)` : ''}</td><td class="n">${tk(r.due)}</td><td class="n">${tk(r.got)}</td><td class="n">${signed(r.diff)}</td></tr>`).join('')}
+      <tr class="sum"><td>মোট সম্ভাব্য বকেয়া</td><td class="n"></td><td class="n"></td><td class="n">${signed(a.total)}</td></tr>
+      ${!ret ? `<tr><td>এর মধ্যে মূল বেতন বাবদ</td><td></td><td></td><td class="n">${tk(a.basicTotal)}</td></tr><tr class="minus"><td>সম্ভাব্য জিপিএফ কর্তন (৫%)</td><td></td><td></td><td class="n">− ${tk(a.gpf)}</td></tr>` : ''}
+      </table>
+      <p class="note">"তোলা হয়েছে" ধরা হয়েছে ${ret ? '৩০ জুন ২০২৬-এর হারে পেনশন, চিকিৎসা ও রেশন ভাতা' : 'জুন ২০২৬-এর হারে মোট বেতন (বিলুপ্ত বিশেষ সুবিধাসহ, যা বকেয়া থেকে সমন্বয় হয়)'}। চলতি মাস দিনের হিসাবে আনুপাতিক। উৎসব ভাতার পার্থক্য ধরা হয়নি।</p></div>`;
+  }
+
   /* ======================= পেনশনভোগী মোড ======================= */
   function applyMode(animate) {
     const ret = S.mode === 'RETIRED';
@@ -789,8 +866,9 @@
       return false;
     }
     out.innerHTML = retiredHTML(r);
+    mountArrears(out, fnp => computeArrearsRetired(r, new Date(), fnp), 'retired');
     countUp($('#hero-big'), r.periods[3].total);
-    $$('.details-btn', out).forEach(b => b.addEventListener('click', () => {
+    $$('.details-btn', out).filter(b => !b.closest('#arrearsHost')).forEach(b => b.addEventListener('click', () => {
       const d = b.nextElementSibling; d.classList.toggle('open');
       b.querySelector('span').textContent = d.classList.contains('open') ? 'বিস্তারিত লুকান' : 'বিস্তারিত হিসাব দেখুন';
     }));
@@ -841,6 +919,8 @@
         <div class="kpi"><small>জুলাই ২০২৭ থেকে (+৫%)</small><b>${tk(r.periods[2].net)}</b></div>
       </div>
     </div>
+
+    <div id="arrearsHost"></div>
 
     <div class="card">
       <div class="section-title" style="margin-top:0"><h3>নতুন নিট পেনশন নির্ধারণ</h3><span class="line"></span></div>
@@ -905,6 +985,7 @@
       <tr><td>জুন ২০২৬</td><td class="n">${tk(r.p0.net)}</td><td class="n">${tk(r.p0.med)}</td><td class="n">${tk(r.p0.ration)}</td><td class="n">${tk(r.p0.total)}</td><td class="n">—</td></tr>
       ${r.periods.map(p => `<tr><td>${p.label}<br><span style="color:#6b7772;font-size:10.5px">${p.range}</span></td><td class="n">${tk(p.net)}</td><td class="n">${tk(p.med)}</td><td class="n">${tk(p.ration)}</td><td class="n"><b>${tk(p.total)}</b></td><td class="n">${signed(p.totalRise)}</td></tr>`).join('')}
     </table>
+    ${arrearsRpt(computeArrearsRetired(r, new Date(), S.firstNewPay || ''), 'retired')}
     <div class="avoid"><h3>বছরে একবার (২০২৮)</h3>
     <table><tr><td>উৎসব ভাতা (২টি, প্রতিটি নিট পেনশনের সমান)</td><td class="n">${tk(r.festivalYearly)}</td></tr><tr><td>বাংলা নববর্ষ ভাতা (নিট পেনশনের ১৫%)</td><td class="n">${tk(r.noboborsho)}</td></tr></table></div>
     <div class="avoid"><h3>প্রতি বছর ৫% বৃদ্ধিতে নিট পেনশন</h3>
@@ -999,6 +1080,7 @@
         ${tl.periods.map((p, i) => `<tr><td>${PERIODS[i].label}</td><td class="n">${tk(p.basic)}</td><td class="n">${tk(p.gross)}</td><td class="n">${signed(p.gross - p.prev.gross)}</td><td class="n">${tk(p.net)}</td></tr>`).join('')}
       </table>
       ${tl.periods.map(per).join('')}
+      ${arrearsRpt(computeArrearsServing(tl, new Date(), S.firstNewPay || ''), 'serving')}
       <div class="avoid"><h3>বছরে একবার (২০২৮)</h3>
       <table><tr><td>উৎসব ভাতা (২টি)</td><td class="n">${tk(tl.yearlyExtras.festival)}</td></tr><tr><td>বাংলা নববর্ষ ভাতা (মূল বেতনের ১৫%)</td><td class="n">${tk(tl.yearlyExtras.noboborsho)}</td></tr></table></div>`;
   }

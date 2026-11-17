@@ -440,3 +440,65 @@ function computeExistingPension(inp) {
   });
   return out;
 }
+
+/* =========================================================================
+   বকেয়া (Arrears): ০১ জুলাই ২০২৬ থেকে হিসাবের দিন পর্যন্ত
+   প্রতি মাসের বকেয়া = নতুন নিয়মে প্রাপ্য − আগের হারে যা তোলা হয়েছে।
+   চলতি মাস দিনের হিসাবে আনুপাতিক। নতুন হারে প্রথম বেতন/পেনশন পাওয়া মাস থেকে
+   আর বকেয়া হয় না।
+   ========================================================================= */
+/** 'YYYY-MM' → Date(মাসের ১ তারিখ) */
+const ymToDate = ym => { const m = /^(\d{4})-(\d{2})$/.exec(ym || ''); return m ? new Date(+m[1], +m[2] - 1, 1) : null; };
+const ymKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+const bnMonthYear = d => `${BN_MONTHS[d.getMonth()]} ${bnPlain(d.getFullYear())}`;
+
+/** ০১ জুলাই ২০২৬ থেকে today (অথবা firstNewPay-এর আগের মাস) পর্যন্ত মাসের তালিকা */
+function arrearsMonths(today, firstNewPay) {
+  const start = new Date(2026, 6, 1);
+  const stop = ymToDate(firstNewPay);          // এই মাস ও পরের মাসগুলো বাদ
+  const list = [];
+  for (let d = new Date(start); d <= today; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
+    if (stop && d >= stop) break;
+    const dim = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    const isCurrent = d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth();
+    const days = isCurrent ? today.getDate() : dim;
+    list.push({ date: new Date(d), dim, days, frac: days / dim, partial: isCurrent && days < dim });
+  }
+  return list;
+}
+
+/** চাকরিরত সদস্য: প্রাপ্য মোট বেতন (মূল বেতন + ভাতা) − জুন ২০২৬-এর হারে তোলা মোট (বিশেষ সুবিধাসহ) */
+function computeArrearsServing(tl, today, firstNewPay) {
+  const [p1, p2, p3, p4] = tl.periods;
+  const pick = d => d < new Date(2027, 0, 1) ? p1 : d < new Date(2027, 6, 1) ? p2 : d < new Date(2028, 0, 1) ? p3 : p4;
+  const drawn = tl.june.gross;
+  const rows = arrearsMonths(today, firstNewPay).map(m => {
+    const p = pick(m.date);
+    const due = Math.round(p.gross * m.frac), got = Math.round(drawn * m.frac);
+    return { ...m, label: bnMonthYear(m.date), due, got, diff: due - got, basicDiff: Math.round((p.basic - tl.june.basic) * m.frac) };
+  });
+  const total = rows.reduce((s, r) => s + r.diff, 0);
+  const basicTotal = rows.reduce((s, r) => s + r.basicDiff, 0);
+  const specialMonthly = tl.june.specialTotal || 0;
+  return { today, firstNewPay, rows, total, basicTotal, gpf: Math.round(basicTotal * 0.05), drawnMonthly: drawn, specialMonthly };
+}
+
+/** পেনশনভোগী: প্রাপ্য (নিট পেনশন + চিকিৎসা + রেশন) − ৩০ জুন ২০২৬-এর হারে তোলা */
+function computeArrearsRetired(r, today, firstNewPay) {
+  const [p1, p2, p3] = r.periods;
+  const growthAt = d => { // ০১ জুলাই ২০২৮ থেকে প্রতি বছর ৫%
+    let n = p3.net, y = 2027;
+    while (new Date(y + 1, 6, 1) <= d) { n = Math.round(n * (1 + PENSION.annualIncrease)); y++; }
+    return n;
+  };
+  const netAt = d => d < new Date(2027, 0, 1) ? p1.net : d < new Date(2027, 6, 1) ? p2.net : growthAt(d);
+  const rows = arrearsMonths(today, firstNewPay).map(m => {
+    const age = ageOn(r.input.dob, m.date);
+    const medDue = m.date >= new Date(2028, 0, 1) ? penMedNew(age) : penMedOld(age);
+    const medGot = penMedOld(age);
+    const due = Math.round((netAt(m.date) + medDue + r.ration) * m.frac);
+    const got = Math.round((r.net30 + medGot + r.ration) * m.frac);
+    return { ...m, label: bnMonthYear(m.date), due, got, diff: due - got };
+  });
+  return { today, firstNewPay, rows, total: rows.reduce((s, x) => s + x.diff, 0) };
+}
