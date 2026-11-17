@@ -1,43 +1,64 @@
-# জেএসআই ২০২৬ বেতন ও পেনশন ক্যালকুলেটর
+# JSI 2026 Pay & Pension Calculator
 
-> 📄 **[Case Study (English)](CASE_STUDY.md)** · 🌐 [Live site](https://anamul-h444.github.io/jsi-2026/) · 📊 [Stats](https://anamul-h444.github.io/jsi-2026/stats.html)
+> 📄 **[Case Study](CASE_STUDY.md)** · 🌐 [Live site](https://anamul-h444.github.io/jsi-2026/) · 📊 [Stats](https://anamul-h444.github.io/jsi-2026/stats.html)
 
-সেনাবাহিনীর জেসিও ও ওআর সদস্যদের জন্য জেএসআই ০১/২০২৬ (বাংলাদেশ গেজেট, ১৫ নভেম্বর ২০২৬) অনুযায়ী বেতন ও পেনশন হিসাবের মোবাইল-বান্ধব ওয়েবসাইট।
+A mobile-first web app that calculates new pay, arrears and pension for Bangladesh Army junior commissioned officers (JCOs), other ranks and pensioners, under the Joint Services Instructions JSI 01/2026 (Bangladesh Gazette, 15 November 2026). The interface and PDF reports are in Bangla for its users.
 
-**ডেভেলপ করেছেন:** কর্পোরাল (টিএভি) এনামুল হক, ফুলস্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার
+**Built by:** Corporal (TAV) Anamul Haque, EME · Full-Stack Software Engineer
 
-## ফিচার
-- জুলাই ২০২৬, জানুয়ারি ২০২৭, জুলাই ২০২৭ ও জানুয়ারি ২০২৮: প্রতি ধাপের মূল বেতন, বৃদ্ধি ও হাতে পাওয়া বেতন
-- পদোন্নতিসহ অবসরের সম্ভাব্য মূল বেতন, মাসিক পেনশন, এককালীন আনুতোষিক ও অন্যান্য সুবিধা
-- বেতন, পেনশন ও সম্পূর্ণ পিডিএফ রিপোর্ট
-- সব তথ্য ব্রাউজারের লোকাল স্টোরেজে থাকে, কোনো ডাটাবেজ বা সার্ভার নেই
+## Features
 
-## লাইভ করার নিয়ম (একবারই করতে হবে)
-1. GitHub-এ নতুন একটি **Public** রিপোজিটরি খুলুন (যেমন `jsi-2026`)।
-2. এই ফোল্ডারের সব ফাইল `main` ব্রাঞ্চে পুশ করুন:
-   ```bash
-   git init
-   git add .
-   git commit -m "first release"
-   git branch -M main
-   git remote add origin https://github.com/<আপনার-ইউজারনেম>/jsi-2026.git
-   git push -u origin main
-   ```
-3. রিপোজিটরির **Settings → Pages → Source**-এ **GitHub Actions** নির্বাচন করুন।
-4. কয়েক মিনিটের মধ্যে সাইট লাইভ হবে: `https://<আপনার-ইউজারনেম>.github.io/jsi-2026/`
+- **Pay in four phases:** basic pay, raise and take-home pay for July 2026, January 2027, July 2027 and January 2028
+- **Arrears:** month-by-month arrears from July 2026 up to the current day
+- **Retirement and pension:** final basic pay including promotions, monthly pension, lump-sum commutation and other benefits
+- **Pensioner mode:** new slab-based pension, medical and ration allowances for people who retired before July 2026
+- **PDF reports:** salary, pension and full reports with formulas and gazette references
+- **Privacy:** all data stays in the browser's local storage; no database, no server
+- **Installable app (PWA):** works offline once opened
 
-এরপর যেকোনো পরিবর্তন `main`-এ পুশ করলেই সাইট স্বয়ংক্রিয়ভাবে আপডেট হবে। পুরো প্রক্রিয়া বিনামূল্যে।
+## Tech stack
 
-## পরিবর্তন করতে চাইলে
-- ডেভেলপারের নাম ও দুটি বিজ্ঞাপন (ভাড়া হবে, নিয়ন্ত্রক): `assets/js/data.js`-এর শুরুতে `SITE_CONFIG`
-- ডেভেলপারের ছবি, লোগো ও লিংক প্রিভিউয়ের ছবি (og-image.jpg, ১২০০×৬৩০): `assets/img/`
-- শেয়ার: উপরের শেয়ার বাটন ও বিজ্ঞাপনের আগের শেয়ার কার্ড; লিংক প্রিভিউয়ের লেখা `index.html`-এর og: ট্যাগে
-- মোবাইলে অ্যাপ হিসেবে ইনস্টল (PWA): `manifest.webmanifest` ও `sw.js`; ইন্টারনেট ছাড়াও চলে
-- বেতনস্কেল, ভাতার হার, কম্যুটেশন টেবিল: `assets/js/data.js`
-- হিসাবের নিয়ম: `assets/js/calc.js`
+HTML5, CSS3, vanilla JavaScript · Service Worker + Web App Manifest · html2pdf.js · qrcode-generator · GitHub Pages · GitHub Actions
 
-## লক্ষ্য রাখুন
-- সব পদবির পুরোনো বেতনস্কেল ২০১৬ সালের যৌথ বাহিনী নির্দেশাবলী (অধ্যায়-২, ক্রোড়পত্র-ক, পৃষ্ঠা ২২) থেকে নেওয়া। ব্যবহারকারী তালিকা থেকে নিজের মূল বেতন বাছাই করেন।
-- জুন ২০২৬-এর ভাতা মূল বেতন থেকে স্বয়ংক্রিয়ভাবে হিসাব হয় (বাড়ি ভাড়া, প্রতিরক্ষা সার্ভিস ভাতা, চিকিৎসা, টিফিন, যাতায়াত, শিক্ষা সহায়ক ভাতা ইত্যাদি ২০১৬-এর হারে)। বিশেষ সুবিধা (প্রণোদনা): সর্বশেষ মূল বেতনের ১৫%, ন্যূনতম ২,০০০ টাকা, যা ০১ জুলাই ২০২৬ থেকে বাদ যায়। মহার্ঘ ভাতা বাতিল।
-- নির্ধারিত অনুমান: ফ্যামিলি কোয়ার্টারের বাইরে বসবাস, "অন্যান্য স্থান"-এর হারে বাড়ি ভাড়া, সর্বনিম্ন কর্তন (জিপিএফ ৫%)। কিট, পাহাড়ি, হাওড় ও তেজস্ক্রিয় ঝুঁকি ভাতা ধরা হয় না।
-- এটি একটি সহায়ক টুল। চূড়ান্ত অঙ্ক পে-অফিস (iBAS++) নির্ধারণ করে।
+## Project structure
+
+| Path | Purpose |
+| --- | --- |
+| `index.html` | The app (all views) |
+| `assets/js/data.js` | Pay scales, allowance rates, commutation table, and `SITE_CONFIG` (developer name, ads, Facebook link) |
+| `assets/js/calc.js` | Calculation rules: pay fixation, phased raises, allowances, arrears, pension |
+| `assets/js/app.js` | UI, local storage, results and PDF generation |
+| `assets/js/counter.js` | Visitor counter and "last updated" footer |
+| `assets/css/style.css` | Dark theme and animations |
+| `assets/img/` | Developer photo, logo and link-preview image (1200×630) |
+| `manifest.webmanifest`, `sw.js` | PWA install and offline support |
+| `stats.html`, `stats/visitors.csv` | Traffic statistics page and daily record |
+| `.github/workflows/deploy.yml` | Deploys to GitHub Pages on every push to `main` |
+| `.github/workflows/visitor-stats.yml` | Records the visitor count every night at 11:55 pm (Bangladesh time) |
+
+## Run locally
+
+No build step or install is needed. Open `index.html` in a browser, or serve the folder:
+
+```bash
+npx serve .
+```
+
+## Deploy
+
+1. Push the files to the `main` branch of a public GitHub repository.
+2. In **Settings → Pages → Source**, select **GitHub Actions**.
+3. The site goes live at `https://<username>.github.io/<repo>/` within a few minutes.
+
+Every later push to `main` updates the site automatically, at no cost.
+
+## Calculation notes
+
+- Old pay scales for every rank come from JSI 2016 (Chapter 2, Annex A). Users pick their basic pay from a list.
+- June 2026 allowances are calculated automatically from basic pay at 2016 rates. The special benefit (15% of basic pay, minimum Tk 2,000) ends on 1 July 2026.
+- Default assumptions: living outside family quarters, house rent at the "other places" rate, minimum GPF deduction (5%).
+- This is a helper tool. Final amounts are set by the pay office (iBAS++).
+
+## License
+
+All rights reserved © Anamul Haque.
