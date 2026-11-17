@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1210" />
   <meta name="robots" content="noindex" />
-  <title>ভিজিটর পরিসংখ্যান | জেএসআই ২০২৬ ক্যালকুলেটর</title>
+  <title>Traffic Statistics | JSI 2026 Pay &amp; Pension Calculator</title>
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
-    body { padding-bottom: 30px; }
+    body { padding-bottom: 30px; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+    .st-hero h2, .section-title h3 { font-family: inherit !important; font-weight: 700 !important; }
     .st-hero { padding: 22px 0 8px; }
-    .st-hero h2 { font-family: var(--font-head); font-weight: 400; font-size: 26px; margin: 10px 0 4px; }
+    .st-hero h2 { font-size: 25px; margin: 10px 0 4px; line-height: 1.3; }
     .st-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
     .st-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
     .st-kpi small { display: block; color: var(--muted); font-size: 12.5px; }
@@ -19,7 +20,7 @@
     .st-kpi.g b { color: var(--green-2); }
     .chart { width: 100%; height: 220px; display: block; }
     .chart .grid line { stroke: rgba(255,255,255,.07); }
-    .chart text { fill: var(--dim); font-size: 11px; font-family: var(--font); }
+    .chart text { fill: var(--dim); font-size: 11px; font-family: inherit; }
     .src { font-size: 12px; color: var(--dim); line-height: 1.6; }
     .src a { color: var(--gold-2); word-break: break-all; }
   </style>
@@ -27,57 +28,50 @@
 <body>
   <main class="wrap">
     <div class="st-hero">
-      <span class="chip">★ যাচাইযোগ্য পরিসংখ্যান</span>
-      <h2>জেএসআই ২০২৬ ক্যালকুলেটর: ভিজিটর পরিসংখ্যান</h2>
-      <p style="margin:0;color:var(--muted)">প্রতিদিন রাত ১১:৫৫-এ স্বয়ংক্রিয়ভাবে রেকর্ড করা মোট ভিজিট (পেজ ভিউ)</p>
+      <span class="chip">★ Traffic statistics</span>
+      <h2>JSI 2026 Pay &amp; Pension Calculator: Traffic</h2>
+      <p style="margin:0;color:var(--muted)">Total page views, recorded automatically every night at 11:55 pm (Bangladesh time)</p>
     </div>
 
     <div class="st-kpis">
-      <div class="st-kpi"><small>এখন পর্যন্ত মোট ভিজিট</small><b id="kTotal">…</b></div>
-      <div class="st-kpi g"><small>শেষ ৭ দিনে নতুন</small><b id="k7">…</b></div>
-      <div class="st-kpi"><small>প্রথম রেকর্ড</small><b id="kFirst" style="font-size:17px">…</b></div>
-      <div class="st-kpi"><small>রেকর্ডকৃত দিন</small><b id="kDays">…</b></div>
+      <div class="st-kpi"><small>Total page views</small><b id="kTotal">…</b></div>
+      <div class="st-kpi g"><small>New in last 7 days</small><b id="k7">…</b></div>
+      <div class="st-kpi"><small>First record</small><b id="kFirst" style="font-size:17px">…</b></div>
+      <div class="st-kpi"><small>Days recorded</small><b id="kDays">…</b></div>
     </div>
 
     <div class="card">
-      <div class="section-title" style="margin-top:0"><h3>দিনভিত্তিক মোট ভিজিট</h3><span class="line"></span></div>
-      <svg class="chart" id="chart" viewBox="0 0 600 220" preserveAspectRatio="none" role="img" aria-label="দিনভিত্তিক মোট ভিজিটের গ্রাফ"></svg>
+      <div class="section-title" style="margin-top:0"><h3>Total page views by day</h3><span class="line"></span></div>
+      <svg class="chart" id="chart" viewBox="0 0 600 220" preserveAspectRatio="none" role="img" aria-label="Chart of total page views by day"></svg>
       <p class="hint" id="chartNote" style="margin:6px 0 0"></p>
     </div>
 
     <div class="card">
-      <div class="section-title" style="margin-top:0"><h3>দৈনিক রেকর্ড</h3><span class="line"></span></div>
-      <table class="tbl" id="tbl"><tr><th>তারিখ</th><th class="n">মোট ভিজিট</th><th class="n">সেদিন নতুন</th></tr></table>
+      <div class="section-title" style="margin-top:0"><h3>Daily record</h3><span class="line"></span></div>
+      <table class="tbl" id="tbl"><tr><th>Date</th><th class="n">Total views</th><th class="n">New that day</th></tr></table>
     </div>
 
     <div class="card src">
-      <b style="color:var(--text)">উৎস ও যাচাই</b><br>
-      লাইভ কাউন্টার (hits.sh): <img id="liveBadge" alt="মোট ভিজিট" style="height:18px;vertical-align:middle;border-radius:4px" src="https://hits.sh/anamul-h444.github.io/jsi-2026.svg?view=total&style=flat-square&label=%E0%A6%AE%E0%A7%8B%E0%A6%9F%20%E0%A6%AD%E0%A6%BF%E0%A6%9C%E0%A6%BF%E0%A6%9F&color=1f7e5a" /><br>
-      দৈনিক রেকর্ডের ইতিহাস (GitHub কমিট, তারিখসহ): <a href="https://github.com/Anamul-h444/jsi-2026/commits/main/stats/visitors.csv" target="_blank" rel="noopener">github.com/Anamul-h444/jsi-2026 › stats/visitors.csv</a><br>
-      ওয়েবসাইট: <a href="./">anamul-h444.github.io/jsi-2026</a><br>
-      প্রতিবার সাইট খোলাকে একটি ভিজিট (পেজ ভিউ) হিসেবে গোনা হয়; একই ব্যক্তি একাধিকবার খুললে একাধিক ভিজিট গণ্য হয়।
+      <b style="color:var(--text)">Sources</b><br>
+      Live counter (hits.sh): <img id="liveBadge" alt="Total views" style="height:18px;vertical-align:middle;border-radius:4px" src="https://hits.sh/anamul-h444.github.io/jsi-2026.svg?view=total&style=flat-square&label=views&color=1f7e5a" /><br>
+      Daily record history (dated GitHub commits): <a href="https://github.com/Anamul-h444/jsi-2026/commits/main/stats/visitors.csv" target="_blank" rel="noopener">github.com/Anamul-h444/jsi-2026 › stats/visitors.csv</a><br>
+      Website: <a href="./">anamul-h444.github.io/jsi-2026</a><br>
+      Each time the site is opened counts as one page view, so one person opening it several times is counted each time.
     </div>
 
     <footer class="footer">
-      <div>ডিজাইন ও ডেভেলপমেন্ট</div>
-      <div class="devname">কর্পোরাল (টিএভি) এনামুল হক</div>
-      <div>ফুলস্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার</div>
+      <div>Designed and developed by</div>
+      <div class="devname">Anamul Haque</div>
+      <div>Full-Stack Software Engineer</div>
     </footer>
   </main>
 
 <script>
 (function () {
   'use strict';
-  var BN = '০১২৩৪৫৬৭৮৯';
-  var toBn = function (s) { return String(s).replace(/\d/g, function (d) { return BN[d]; }); };
-  var fmt = function (n) {
-    var s = String(Math.round(n)), head = s.slice(0, -3), tail = s.slice(-3), parts = [];
-    if (s.length <= 3) return toBn(s);
-    while (head.length > 2) { parts.unshift(head.slice(-2)); head = head.slice(0, -2); }
-    if (head) parts.unshift(head);
-    return toBn(parts.join(',') + ',' + tail);
-  };
-  var M = ['জানু','ফেব্রু','মার্চ','এপ্রি','মে','জুন','জুলা','আগ','সেপ্টে','অক্টো','নভে','ডিসে'];
+  var toBn = function (s) { return String(s); };
+  var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+  var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var dlabel = function (iso) { var p = iso.split('-'); return toBn(+p[2]) + ' ' + M[+p[1] - 1] + ' ' + toBn(p[0]); };
   var dshort = function (iso) { var p = iso.split('-'); return toBn(+p[2]) + ' ' + M[+p[1] - 1]; };
   var parseN = function (v) {
@@ -92,7 +86,7 @@
       if (rows.length && rows[rows.length - 1].d === iso) rows[rows.length - 1].n = live;
       else rows.push({ d: iso, n: live, live: true });
     }
-    if (!rows.length) { document.getElementById('chartNote').textContent = 'প্রথম রেকর্ড আজ রাতে যোগ হবে।'; return; }
+    if (!rows.length) { document.getElementById('chartNote').textContent = 'The first record is added tonight.'; return; }
     var last = rows[rows.length - 1];
     document.getElementById('kTotal').textContent = fmt(last.n);
     var wk = rows.length > 7 ? rows[rows.length - 8].n : rows[0].n;
@@ -100,15 +94,15 @@
     document.getElementById('kFirst').textContent = dlabel(rows[0].d);
     document.getElementById('kDays').textContent = toBn(rows.length);
 
-    // টেবিল (নতুন থেকে পুরোনো)
-    var html = '<tr><th>তারিখ</th><th class="n">মোট ভিজিট</th><th class="n">সেদিন নতুন</th></tr>';
+    // Table (newest first)
+    var html = '<tr><th>Date</th><th class="n">Total views</th><th class="n">New that day</th></tr>';
     for (var i = rows.length - 1; i >= 0; i--) {
       var inc = i > 0 ? rows[i].n - rows[i - 1].n : null;
-      html += '<tr><td>' + dlabel(rows[i].d) + (rows[i].live ? ' <small>(এখন)</small>' : '') + '</td><td class="n">' + fmt(rows[i].n) + '</td><td class="n up">' + (inc === null ? '—' : '+' + fmt(inc)) + '</td></tr>';
+      html += '<tr><td>' + dlabel(rows[i].d) + (rows[i].live ? ' <small>(now)</small>' : '') + '</td><td class="n">' + fmt(rows[i].n) + '</td><td class="n up">' + (inc === null ? '—' : '+' + fmt(inc)) + '</td></tr>';
     }
     document.getElementById('tbl').innerHTML = html;
 
-    // গ্রাফ
+    // Chart
     var W = 600, H = 220, L = 46, R = 10, T = 12, B = 26;
     var max = Math.max.apply(null, rows.map(function (r) { return r.n; })) * 1.08 || 1;
     var x = function (i) { return rows.length === 1 ? (L + W - R) / 2 : L + (W - L - R) * i / (rows.length - 1); };
@@ -116,7 +110,7 @@
     var g = '<g class="grid">';
     for (var k = 0; k <= 4; k++) {
       var v = max * k / 4, yy = y(v);
-      g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + yy + '" y2="' + yy + '"/><text x="' + (L - 6) + '" y="' + (yy + 4) + '" text-anchor="end">' + (v >= 1000 ? toBn(Math.round(v / 1000)) + 'হা' : toBn(Math.round(v))) + '</text>';
+      g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + yy + '" y2="' + yy + '"/><text x="' + (L - 6) + '" y="' + (yy + 4) + '" text-anchor="end">' + (v >= 1000 ? toBn(Math.round(v / 1000)) + 'k' : toBn(Math.round(v))) + '</text>';
     }
     g += '</g>';
     var pts = rows.map(function (r, i) { return x(i) + ',' + y(r.n); }).join(' ');
@@ -128,7 +122,7 @@
     document.getElementById('chart').innerHTML =
       '<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3b94e" stop-opacity=".35"/><stop offset="1" stop-color="#e3b94e" stop-opacity="0"/></linearGradient></defs>' +
       g + '<path d="' + area + '" fill="url(#ga)"/><polyline points="' + pts + '" fill="none" stroke="#e3b94e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' + dots + labels;
-    document.getElementById('chartNote').textContent = rows.length < 3 ? 'প্রতিদিন রেকর্ড যোগ হলে গ্রাফটি আরও স্পষ্ট হবে।' : '';
+    document.getElementById('chartNote').textContent = rows.length < 3 ? 'The chart fills in as daily records are added.' : '';
   }
 
   var csvUrl = 'https://raw.githubusercontent.com/Anamul-h444/jsi-2026/main/stats/visitors.csv?t=' + Date.now();
