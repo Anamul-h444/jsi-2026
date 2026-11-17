@@ -788,9 +788,12 @@
       </div>
       <div class="ar-amt ${neg ? 'neg' : ''}">${neg ? '−' : ''}${tk(Math.abs(a.total))}</div>
       <div class="ar-sub">${neg ? 'অতিরিক্ত উত্তোলিত অংশ (বকেয়া থেকে সমন্বয় হবে)' : `মোট ${bn(a.rows.length)} মাসের সম্ভাব্য বকেয়া${lastRow && lastRow.partial ? ` (চলতি মাসের ${bn(lastRow.days)} দিনসহ)` : ''}`}</div>
-      ${!ret ? `<div class="ar-mini">
-        <div><small>এর মধ্যে মূল বেতন বাবদ</small><b>${tk(a.basicTotal)}</b></div>
-        <div><small>সম্ভাব্য জিপিএফ কর্তন (৫%)</small><b>− ${tk(a.gpf)}</b></div>
+      ${!ret ? `<div class="ar-break">
+        <div class="ab-row"><span>মূল বেতন বৃদ্ধির বকেয়া<small>নতুন মূল বেতন − পুরোনো মূল বেতন, প্রতি মাসে</small></span><b class="up">+ ${tk(a.basicTotal)}</b></div>
+        ${Math.abs(a.allowDiff) >= 1 ? `<div class="ab-row"><span>ভাতার পার্থক্য<small>০১ জানুয়ারি ২০২৮ থেকে নতুন হারের ভাতা</small></span><b class="${deltaCls(a.allowDiff)}">${signed(a.allowDiff)}</b></div>` : ''}
+        ${a.specialAdj ? `<div class="ab-row"><span>বিশেষ সুবিধা (প্রণোদনা) সমন্বয়<small>বিলুপ্ত হলেও জুলাই ২০২৬ থেকে তোলা হয়েছে (${tk(a.specialMonthly)}/মাস), তাই বকেয়া থেকে কাটা যাবে</small></span><b class="down">− ${tk(a.specialAdj)}</b></div>` : ''}
+        <div class="ab-row ab-sum"><span>মোট বকেয়া</span><b>${tk(a.total)}</b></div>
+        <div class="ab-row ab-note"><span>সম্ভাব্য জিপিএফ কর্তন<small>মূল বেতন বৃদ্ধির বকেয়ার ৫%; এটি আপনার জিপিএফ হিসাবে জমা থাকবে</small></span><b>− ${tk(a.gpf)}</b></div>
       </div>` : ''}
       <div class="field" style="margin-top:14px"><label>নতুন হারে প্রথম ${ret ? 'পেনশন' : 'বেতন'} কোন মাসে পেয়েছেন?</label>
         <select class="input" id="firstNewPay">${arrearsOptions()}</select>
@@ -834,7 +837,7 @@
       <table><tr><th>মাস</th><th class="n">প্রাপ্য</th><th class="n">তোলা হয়েছে</th><th class="n">বকেয়া</th></tr>
       ${a.rows.map(r => `<tr><td>${r.label}${r.partial ? ` (${bn(r.days)} দিন)` : ''}</td><td class="n">${tk(r.due)}</td><td class="n">${tk(r.got)}</td><td class="n">${signed(r.diff)}</td></tr>`).join('')}
       <tr class="sum"><td>মোট সম্ভাব্য বকেয়া</td><td class="n"></td><td class="n"></td><td class="n">${signed(a.total)}</td></tr>
-      ${!ret ? `<tr><td>এর মধ্যে মূল বেতন বাবদ</td><td></td><td></td><td class="n">${tk(a.basicTotal)}</td></tr><tr class="minus"><td>সম্ভাব্য জিপিএফ কর্তন (৫%)</td><td></td><td></td><td class="n">− ${tk(a.gpf)}</td></tr>` : ''}
+      ${!ret ? `<tr><td colspan="3">মূল বেতন বৃদ্ধির বকেয়া</td><td class="n">+ ${tk(a.basicTotal)}</td></tr>${Math.abs(a.allowDiff) >= 1 ? `<tr><td colspan="3">ভাতার পার্থক্য (০১ জানুয়ারি ২০২৮ থেকে)</td><td class="n">${signed(a.allowDiff)}</td></tr>` : ''}${a.specialAdj ? `<tr class="minus"><td colspan="3">বিশেষ সুবিধা (প্রণোদনা) সমন্বয় (${tk(a.specialMonthly)}/মাস)</td><td class="n">− ${tk(a.specialAdj)}</td></tr>` : ''}<tr class="minus"><td colspan="3">সম্ভাব্য জিপিএফ কর্তন (মূল বেতন বৃদ্ধির ৫%, জিপিএফে জমা)</td><td class="n">− ${tk(a.gpf)}</td></tr>` : ''}
       </table>
       <p class="note">"তোলা হয়েছে" ধরা হয়েছে ${ret ? '৩০ জুন ২০২৬-এর হারে পেনশন, চিকিৎসা ও রেশন ভাতা' : 'জুন ২০২৬-এর হারে মোট বেতন (বিলুপ্ত বিশেষ সুবিধাসহ, যা বকেয়া থেকে সমন্বয় হয়)'}। চলতি মাস দিনের হিসাবে আনুপাতিক। উৎসব ভাতার পার্থক্য ধরা হয়নি।</p></div>`;
   }

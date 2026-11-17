@@ -480,7 +480,11 @@ function computeArrearsServing(tl, today, firstNewPay) {
   const total = rows.reduce((s, r) => s + r.diff, 0);
   const basicTotal = rows.reduce((s, r) => s + r.basicDiff, 0);
   const specialMonthly = tl.june.specialTotal || 0;
-  return { today, firstNewPay, rows, total, basicTotal, gpf: Math.round(basicTotal * 0.05), drawnMonthly: drawn, specialMonthly };
+  // বিলুপ্ত বিশেষ সুবিধা (প্রণোদনা) যা জুলাই ২০২৬-এর পরও তোলা হয়েছে — বকেয়া থেকে সমন্বয় হয়
+  const specialAdj = Math.round(rows.reduce((s, r) => s + specialMonthly * r.frac, 0));
+  // ভাতার পার্থক্য (০১ জানুয়ারি ২০২৮ থেকে নতুন হারের ভাতা); আগে শূন্য
+  const allowDiff = total - basicTotal + specialAdj;
+  return { today, firstNewPay, rows, total, basicTotal, specialAdj, allowDiff, gpf: Math.round(basicTotal * 0.05), drawnMonthly: drawn, specialMonthly };
 }
 
 /** পেনশনভোগী: প্রাপ্য (নিট পেনশন + চিকিৎসা + রেশন) − ৩০ জুন ২০২৬-এর হারে তোলা */
