@@ -1,0 +1,60 @@
+name: Daily visitor stats
+
+# প্রতিদিন রাত ১১:৫৫ (বাংলাদেশ সময়) মোট ভিজিটর সংখ্যা stats/visitors.csv ফাইলে লিখে রাখে।
+# প্রতিটি দিনের রেকর্ড GitHub-এর কমিট হিসেবে তারিখসহ সংরক্ষিত থাকে — পরিবর্তন করা যায় না।
+on:
+  schedule:
+    - cron: '55 17 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: visitor-stats
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch visitor count
+        id: count
+        run: |
+          set -e
+          N=""
+          J=$(curl -fsS -m 20 "https://api.counterapi.dev/v1/anamul-h444-jsi-2026/visitors/" || true)
+          if [ -n "$J" ]; then
+            N=$(echo "$J" | python3 -c 'import sys,json; print(int(json.load(sys.stdin).get("count",0)))' 2>/dev/null || true)
+            SRC=counterapi
+          fi
+          if [ -z "$N" ] || [ "$N" = "0" ]; then
+            SVG=$(curl -fsS -m 20 "https://hits.sh/anamul-h444.github.io/jsi-2026.svg?view=total" || true)
+            N=$(echo "$SVG" | grep -oE '>[0-9][0-9,.]*[kKmM]?<' | tail -1 | tr -d '<>,' || true)
+            SRC=hits.sh
+          fi
+          if [ -z "$N" ]; then echo "Could not read count"; exit 1; fi
+          echo "n=$N" >> "$GITHUB_OUTPUT"
+          echo "src=$SRC" >> "$GITHUB_OUTPUT"
+          echo "Visitors: $N ($SRC)"
+
+      - name: Append to CSV and commit
+        env:
+          N: ${{ steps.count.outputs.n }}
+          SRC: ${{ steps.count.outputs.src }}
+        run: |
+          F=stats/visitors.csv
+          [ -f "$F" ] || echo "date,time_bd,visitors,source" > "$F"
+          D=$(TZ=Asia/Dhaka date +%Y-%m-%d)
+          T=$(TZ=Asia/Dhaka date +%H:%M)
+          # একই দিনে আবার চালালে সেই দিনের লাইন হালনাগাদ হবে
+          grep -v "^$D," "$F" > "$F.tmp" || true
+          mv "$F.tmp" "$F"
+          echo "$D,$T,$N,$SRC" >> "$F"
+          git config user.name "visitor-stats-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$F"
+          git diff --cached --quiet || git commit -m "ভিজিটর রেকর্ড: $D — $N"
+          git push
