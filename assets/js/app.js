@@ -81,6 +81,92 @@
     el.title = digits.length === 8 && !iso ? 'সঠিক তারিখ লিখুন (দিন-মাস-বছর)' : '';
   }
 
+
+  /** তারিখের ঘরকে OTP/কোডের মতো ৮টি আলাদা খোপে রূপান্তর: [দি][ন] - [মা][স] - [ব][ছ][র][  ]
+      আসল ইনপুটটি লুকানো থাকে এবং আগের মতোই মান সংরক্ষণ ও হিসাবের কাজ করে। */
+  function enhanceDate(input) {
+    if (input.dataset.otp) return;
+    input.dataset.otp = '1';
+    input.classList.add('otp-src');
+    input.tabIndex = -1;
+    input.setAttribute('aria-hidden', 'true');
+    const wrap = document.createElement('div');
+    wrap.className = 'otp-date';
+    const groups = [['দিন', 2], ['মাস', 2], ['বছর', 4]];
+    const boxes = [];
+    groups.forEach(([label, n], gi) => {
+      const g = document.createElement('div');
+      g.className = 'otp-group g' + gi;
+      const row = document.createElement('div');
+      row.className = 'otp-row';
+      for (let k = 0; k < n; k++) {
+        const b = document.createElement('input');
+        b.className = 'otp-box';
+        b.type = 'text';
+        b.inputMode = 'numeric';
+        b.autocomplete = 'off';
+        b.maxLength = 1;
+        b.size = 1;
+        b.setAttribute('aria-label', label + ' ' + (k + 1));
+        boxes.push(b); row.appendChild(b);
+      }
+      const cap = document.createElement('small');
+      cap.textContent = label;
+      g.append(row, cap);
+      wrap.appendChild(g);
+      if (gi < 2) { const sep = document.createElement('span'); sep.className = 'otp-sep'; sep.textContent = '-'; wrap.appendChild(sep); }
+    });
+    input.after(wrap);
+
+    const digitsOf = v => EN(v || '').replace(/\D/g, '');
+    const fill = (load) => {
+      const d = digitsOf(input.value);
+      if (load) boxes.forEach((b, i) => { b.value = d[i] || ''; });
+      boxes.forEach(b => b.classList.toggle('on', !!b.value));
+      wrap.classList.toggle('bad', input.classList.contains('bad'));
+      wrap.classList.toggle('done', d.length === 8 && boxes.every(b => b.value) && !input.classList.contains('bad'));
+    };
+    const commit = () => {
+      input.value = boxes.map(b => b.value).join('');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      fill();
+    };
+    const put = (start, text) => {
+      const d = digitsOf(text);
+      let i = start;
+      for (const ch of d) { if (i >= 8) break; boxes[i++].value = ch; }
+      commit();
+      boxes[Math.min(i, 7)].focus();
+    };
+
+    boxes.forEach((b, i) => {
+      b.addEventListener('focus', () => { setTimeout(() => b.select(), 0); });
+      b.addEventListener('input', () => {
+        const d = digitsOf(b.value);
+        if (!d) { b.value = ''; commit(); return; }
+        if (d.length > 1) { b.value = ''; put(i, d); return; }   // একসাথে কয়েকটি অঙ্ক (অটোফিল)
+        b.value = d; commit();
+        if (i < 7) boxes[i + 1].focus(); else b.blur();
+      });
+      b.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !b.value && i > 0) { e.preventDefault(); boxes[i - 1].value = ''; commit(); boxes[i - 1].focus(); }
+        else if (e.key === 'ArrowLeft' && i > 0) { e.preventDefault(); boxes[i - 1].focus(); }
+        else if (e.key === 'ArrowRight' && i < 7) { e.preventDefault(); boxes[i + 1].focus(); }
+      });
+      b.addEventListener('paste', e => {
+        e.preventDefault();
+        put(i, (e.clipboardData || window.clipboardData).getData('text'));
+      });
+    });
+    // খালি জায়গায় চাপ দিলে প্রথম ফাঁকা খোপে যাবে
+    wrap.addEventListener('click', e => {
+      if (e.target.classList.contains('otp-box')) return;
+      (boxes.find(b => !b.value) || boxes[7]).focus();
+    });
+    fill(true);
+  }
+
   function initForm() {
     // কনফিগ
     $('#dev-name').innerHTML = devNameHTML();
@@ -120,6 +206,7 @@
     $$('[data-step]').forEach(st => st.querySelector('output').textContent = bn(S[st.dataset.step] || 0));
     renderPromos();
     $$('#form select.input').forEach(enhanceSelect);
+    $$('#dob, #joinDate, #retireDate').forEach(enhanceDate);
     updateOldStartHint();
     refreshPlaceholders();
 
@@ -384,10 +471,11 @@
     $('#promoList').innerHTML = S.promotions.map((p, i) => `
       <div class="promo-row">
         <div class="field" style="margin:0"><label>পদবি</label><select class="input" data-promo="rank" data-idx="${i}"><option value="">নির্বাচন করুন</option>${opts}</select></div>
-        <div class="field" style="margin:0"><label>তারিখ</label><input class="input date-in" type="text" inputmode="numeric" maxlength="10" placeholder="দিন-মাস-বছর" autocomplete="off" data-promo="date" data-idx="${i}" value="${esc(isoToDmy(p.date))}" /></div>
         <button type="button" class="x" data-del="${i}" aria-label="মুছুন">×</button>
+        <div class="field promo-date" style="margin:0"><label>তারিখ</label><input class="input date-in" type="text" inputmode="numeric" maxlength="10" placeholder="দিন-মাস-বছর" autocomplete="off" data-promo="date" data-idx="${i}" value="${esc(isoToDmy(p.date))}" /></div>
       </div>`).join('');
     $$('#promoList select').forEach((s, i) => { s.value = S.promotions[i].rank || ''; enhanceSelect(s); });
+    $$('#promoList .date-in').forEach(enhanceDate);
     $$('#promoList [data-del]').forEach(b => b.addEventListener('click', () => {
       S.promotions.splice(Number(b.dataset.del), 1); renderPromos(); save();
     }));

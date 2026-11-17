@@ -337,7 +337,7 @@ input[type=date].input { color-scheme: dark; }
 .events li.promo { color: var(--gold-2); }
 
 /* প্রমোশন রো */
-.promo-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 8px; margin-top: 10px; align-items: end; animation: rise .35s var(--ease) both; }
+.promo-row { display: grid; grid-template-columns: 1fr 48px; gap: 8px; margin-top: 10px; align-items: end; animation: rise .35s var(--ease) both; }
 .promo-row .x { height: 48px; border-radius: 12px; border: 1px solid var(--border); background: rgba(239,107,107,.08); color: var(--red); cursor: pointer; font-size: 18px; }
 
 /* অ্যাড */
@@ -573,3 +573,29 @@ body.no-scroll { overflow: hidden; }
 .input.date-in { letter-spacing: .5px; font-variant-numeric: tabular-nums; }
 .input.date-in::placeholder { letter-spacing: 0; }
 .input.bad, .input.bad:focus { border-color: rgba(239,107,107,.85); box-shadow: 0 0 0 4px rgba(239,107,107,.14); }
+
+/* ===== তারিখ: কোডের মতো আলাদা খোপ ===== */
+.otp-src { display: none !important; }
+.otp-date { display: flex; align-items: flex-start; gap: 6px; width: 100%; cursor: text; }
+.otp-group { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.otp-group.g0, .otp-group.g1 { flex: 2; }
+.otp-group.g2 { flex: 4; }
+.otp-row { display: flex; gap: 5px; width: 100%; }
+.otp-group small { font-size: 11px; color: var(--dim); line-height: 1; }
+.otp-sep { align-self: flex-start; height: 48px; display: grid; place-items: center; color: var(--dim); font-size: 18px; font-weight: 600; flex: none; }
+.otp-box {
+  flex: 1 1 0; width: 0; min-width: 0; height: 48px; padding: 0; text-align: center; border-radius: 10px; border: 1px solid var(--border);
+  background: rgba(0,0,0,.25); color: var(--text); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums;
+  outline: none; caret-color: var(--gold); transition: border-color .2s, box-shadow .2s, background .2s, transform .15s var(--ease);
+}
+.otp-box:focus { border-color: rgba(227,185,78,.8); box-shadow: 0 0 0 3px rgba(227,185,78,.15); background: rgba(0,0,0,.35); transform: translateY(-1px); }
+.otp-box.on { border-color: rgba(227,185,78,.35); color: var(--gold-2); }
+.otp-date.done .otp-box { border-color: rgba(87,211,162,.55); color: #d6fbe9; }
+.otp-date.bad .otp-box { border-color: rgba(239,107,107,.8); color: #ffc9c9; }
+.otp-date.bad .otp-group small { color: var(--red); }
+.promo-row .promo-date { grid-column: 1 / -1; }
+@media (max-width: 360px) { .otp-box { height: 44px; font-size: 18px; } .otp-row { gap: 3px; } .otp-date { gap: 4px; } .otp-sep { height: 44px; } }
+/* ছোট ফোনে (৩২০px) হেডার যেন পাশে বেরিয়ে না যায় */
+.appbar .brand { min-width: 0; flex: 1; }
+.appbar .brand h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 360px) { .appbar .brand h1 { font-size: 15px; } .appbar .wrap { gap: 8px; } .appbar .icon-btn { width: 36px; height: 36px; } }
