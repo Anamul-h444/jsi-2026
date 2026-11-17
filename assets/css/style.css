@@ -556,3 +556,13 @@ body.no-scroll { overflow: hidden; }
   .brand p { font-size: 11.5px; }
   .appbar .wrap { gap: 8px; }
 }
+
+/* ভিজিটর কাউন্টার */
+.visit-count {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; padding: 6px 14px; border-radius: 999px;
+  font-size: 13px; color: var(--muted); background: var(--surface); border: 1px solid var(--border);
+  animation: rise .5s var(--ease) both;
+}
+.visit-count[hidden] { display: none; }
+.visit-count svg { width: 16px; height: 16px; color: var(--green-2); }
+.visit-count b { color: var(--gold-2); font-size: 14px; }
