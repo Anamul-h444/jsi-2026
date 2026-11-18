@@ -690,3 +690,15 @@ body.retired #view-pension > .retired-note { display: block; }
 .inst-or { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
 .inst-copy { width: 100%; margin-top: 12px; }
 @media (max-width: 360px) { .icon-btn.dl-btn { width: 36px; height: 36px; } }
+
+/* হেডার শিরোনাম যেন কেটে না যায় — ছোট পর্দায় দুই লাইনে ভাঙবে */
+.appbar .brand h1 { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; }
+@media (max-width: 440px) {
+  .appbar .wrap { gap: 8px; height: auto; min-height: 62px; padding-top: 8px; padding-bottom: 8px; }
+  .appbar .logo { width: 38px; height: 38px; }
+  .appbar .brand h1 { font-size: 15.5px; }
+  .appbar .brand p { font-size: 11.5px; }
+  .appbar .icon-btn { width: 38px; height: 38px; flex: none; }
+  .appbar .icon-btn svg { width: 18px; height: 18px; }
+}
+@media (max-width: 360px) { .appbar .brand h1 { font-size: 14px; } .appbar .icon-btn { width: 34px; height: 34px; } }
