@@ -346,6 +346,53 @@
   const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
   const isMobile = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || matchMedia('(pointer: coarse)').matches;
   const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const inAppBrowser = () => /FBAN|FBAV|FB_IAB|FBIOS|Messenger|Instagram|Line\/|MicroMessenger|; wv\)/i.test(navigator.userAgent);
+  const isAndroid = () => /Android/i.test(navigator.userAgent);
+  /** উপরের ডাউনলোড বাটন: যেকোনো সময় অ্যাপ ইনস্টলের উপায় দেখায় */
+  async function openInstall() {
+    if (isStandalone()) { toast('অ্যাপটি ইতিমধ্যে ইনস্টল করা আছে'); return; }
+    if (installEvt) {
+      installEvt.prompt();
+      const r = await installEvt.userChoice.catch(() => null);
+      installEvt = null;
+      if (r && r.outcome === 'accepted') { $('#installCard').hidden = true; return; }
+    }
+    const url = location.href.split('#')[0];
+    let html;
+    if (inAppBrowser()) {
+      const intent = 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+      html = `<p class="inst-warn">আপনি ফেসবুক/মেসেঞ্জারের ভেতরের ব্রাউজারে আছেন। এখান থেকে অ্যাপ ইনস্টল করা যায় না।</p>
+        ${isAndroid() ? `<a class="fb-btn inst-go" href="${intent}">Chrome-এ খুলুন</a><p class="inst-or">তারপর আবার উপরের ⬇ ডাউনলোড বাটনে চাপুন।</p>` : ''}
+        <ol class="inst-steps">
+          <li>উপরে ডান কোণের <b>⋯</b> বা <b>⋮</b> মেনুতে চাপুন</li>
+          <li><b>${isIOS() ? 'Open in Safari' : 'Open in Chrome / Open in browser'}</b> বাছাই করুন</li>
+          <li>ব্রাউজারে খোলার পর উপরের <b>⬇</b> বাটনে আবার চাপুন</li>
+        </ol>
+        <button type="button" class="fb-later inst-copy" id="instCopy">লিংক কপি করুন</button>`;
+    } else if (isIOS()) {
+      html = `<ol class="inst-steps">
+          <li>Safari-র নিচের <b>শেয়ার</b> বাটনে চাপুন (⬆ চিহ্ন)</li>
+          <li>নিচে স্ক্রল করে <b>Add to Home Screen</b> বাছাই করুন</li>
+          <li>উপরে ডানে <b>Add</b> চাপুন</li>
+        </ol><p class="inst-or">iPhone-এ শুধু Safari থেকেই ইনস্টল করা যায়।</p>`;
+    } else {
+      html = `<ol class="inst-steps">
+          <li>Chrome-এর উপরে ডান কোণের <b>মেনু (⋮)</b>-তে চাপুন</li>
+          <li><b>Install app</b> অথবা <b>Add to Home screen</b> বাছাই করুন</li>
+          <li><b>Install</b> চাপুন, হোম স্ক্রিনে JSI-2026 আইকন চলে আসবে</li>
+        </ol><p class="inst-or">অপশনটি না দেখালে পেজটি একবার রিফ্রেশ করে কয়েক সেকেন্ড পর আবার চেষ্টা করুন।</p>`;
+    }
+    $('#instBody').innerHTML = html;
+    const sh = $('#installSheet');
+    const close = () => { sh.classList.remove('show'); setTimeout(() => { sh.hidden = true; }, 250); };
+    $('#instX').onclick = close; sh.onclick = e => { if (e.target === sh) close(); };
+    const cp = $('#instCopy');
+    if (cp) cp.onclick = async () => {
+      try { await navigator.clipboard.writeText(url); } catch (e) { const ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+      toast('লিংক কপি হয়েছে, ব্রাউজারে পেস্ট করুন');
+    };
+    sh.hidden = false; requestAnimationFrame(() => sh.classList.add('show'));
+  }
   function installDismissed() { try { return localStorage.getItem('jsi2026_install_x') === '1'; } catch (e) { return false; } }
   function showInstall() {
     if (isStandalone() || installDismissed() || !isMobile()) return;
@@ -356,6 +403,8 @@
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
     showInstall();
+    const top = $('#btn-install-top');
+    if (top) { if (isStandalone()) top.hidden = true; top.addEventListener('click', openInstall); }
     $('#installBtn').addEventListener('click', async () => {
       if (installEvt) {
         installEvt.prompt();
@@ -673,7 +722,7 @@
     if (!rt.ok) { if (fromBtn) toast(rt.errors[0]); return false; }
     lastTL = tl; lastRT = rt;
     $('#pension-out').innerHTML = pensionHTML(rt, inp);
-    countUp($('#pen-big'), rt.net);
+    countUp($('#pen-big'), rt.monthlyInHand);
     if (fromBtn) setTimeout(() => $('#pension-out').scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
     return true;
   }
@@ -683,7 +732,7 @@
     return `
     <div class="summary-hero" style="margin-top:6px">
       <div class="who"><span><b>${esc(inp.name || 'নাম দেওয়া হয়নি')}</b></span><span>${esc(rt.finalRank)}</span></div>
-      <div class="lbl">প্রতি মাসে পেনশন পাবেন</div>
+      <div class="lbl">প্রতি মাসে পেনশন পাবেন <b class="incl">(রেশন ভাতা ও মেডিকেল ভাতা সহ)</b></div>
       <div class="big" id="pen-big">${tk(0)}</div>
       <div class="sub">অবসর: ${bnDate(rt.retire)} · চাকরিকাল ${bn(rt.years)} বছর ${bn(rt.months)} মাস</div>
       <div class="kpis">
@@ -691,6 +740,18 @@
         <div class="kpi"><small>পূর্ণ পেনশন</small><b>${tk(rt.gross)}</b></div>
         <div class="kpi"><small>অবসরের সময় এককালীন (আনুতোষিক)</small><b>${tk(rt.lump)}</b></div>
       </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title" style="margin-top:0"><h3>মাসিক পেনশনের বিস্তারিত হিসাব</h3><span class="line"></span></div>
+      <table class="tbl">
+        <tr><th>বিবরণ</th><th class="n">টাকা</th></tr>
+        <tr><td>নিট পেনশন<small>পূর্ণ পেনশন ${tk(rt.gross)}-এর ${bn(100 - rt.cPct * 100)}%; বাকি ${bn(rt.cPct * 100)}% এককালীন আনুতোষিক হিসেবে পাবেন</small></td><td class="n">${tk(rt.net)}</td></tr>
+        <tr><td>মেডিকেল ভাতা<small>অবসরের সময় বয়স ${bn(rt.ageAtRetire)} বছর; বয়স অনুযায়ী ৩,০০০ / ৪,০০০ / ৫,০০০ / ৬,০০০ টাকা</small></td><td class="n">${tk(rt.med)}</td></tr>
+        <tr><td>রেশন ভাতা<small>${bn(inp.rationAdults)} প্রাপ্তবয়স্ক × ৳১,০০০ + ${bn(inp.rationChildren)} শিশু (১২ বছরের নিচে) × ৳৫০০</small></td><td class="n">${tk(rt.ration)}</td></tr>
+        <tr class="sum"><td>প্রতি মাসে মোট পেনশন (রেশন ভাতা ও মেডিকেল ভাতা সহ)</td><td class="n">${tk(rt.monthlyInHand)}</td></tr>
+      </table>
+      <p class="hint" style="margin:8px 0 0">রেশনের সদস্যসংখ্যা উপরের ঘর থেকে বদলাতে পারবেন। বছরে ২টি উৎসব ভাতা ও বাংলা নববর্ষ ভাতা আলাদাভাবে পাবেন (নিচে দেখুন)।</p>
     </div>
     <div class="notice info">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
@@ -1097,6 +1158,13 @@
         <div><small>চাকরিকাল</small><b>${bn(rt.years)} বছর ${bn(rt.months)} মাস</b></div>
         <div><small>শেষ মূল বেতন</small><b>${tk(rt.lastBasic)}</b></div>
       </div>
+      <div class="avoid"><h3>প্রতি মাসে পেনশন (রেশন ভাতা ও মেডিকেল ভাতা সহ)</h3>
+      <table>
+        <tr><td>নিট পেনশন (পূর্ণ পেনশন ${tk(rt.gross)}-এর ${bn(100 - rt.cPct * 100)}%)</td><td class="n">${tk(rt.net)}</td></tr>
+        <tr><td>মেডিকেল ভাতা (অবসরের সময় বয়স ${bn(rt.ageAtRetire)} বছর)</td><td class="n">${tk(rt.med)}</td></tr>
+        <tr><td>রেশন ভাতা (${bn(inp.rationAdults)} প্রাপ্তবয়স্ক × ৳১,০০০ + ${bn(inp.rationChildren)} শিশু × ৳৫০০)</td><td class="n">${tk(rt.ration)}</td></tr>
+        <tr class="sum"><td>প্রতি মাসে মোট পেনশন</td><td class="n">${tk(rt.monthlyInHand)}</td></tr>
+      </table></div>
       <h3>অবসর পর্যন্ত মূল বেতন</h3>
       <table><tr><th>তারিখ</th><th>ঘটনা</th><th>পদবি</th><th class="n">মূল বেতন</th></tr>
         ${rt.events.map(e => `<tr><td>${bnDate(e.date)}</td><td>${esc(e.text)}</td><td>${esc(e.rank)}</td><td class="n">${tk(e.basic)}</td></tr>`).join('')}

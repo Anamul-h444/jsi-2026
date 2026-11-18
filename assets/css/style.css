@@ -673,3 +673,20 @@ body.retired #view-pension > .retired-note { display: block; }
 .ab-row.ab-sum { border-top: 1px solid rgba(87,211,162,.4); }
 .ab-row.ab-sum b, .ab-row.ab-sum span { color: var(--green-2); font-weight: 700; font-size: 15px; }
 .ab-row.ab-note b { color: var(--muted); font-weight: 500; }
+
+/* ===== উপরের ডাউনলোড বাটন ও নির্দেশনা ===== */
+.icon-btn.dl-btn { background: linear-gradient(135deg, var(--gold-2), var(--gold) 55%, #c08f25); color: #1a1405; border-color: transparent; box-shadow: 0 4px 14px rgba(227,185,78,.3); animation: dlPulse 2.6s ease-in-out infinite; }
+.icon-btn.dl-btn[hidden] { display: none; }
+@keyframes dlPulse { 0%, 100% { box-shadow: 0 4px 14px rgba(227,185,78,.3); } 50% { box-shadow: 0 0 0 6px rgba(227,185,78,.12), 0 4px 14px rgba(227,185,78,.3); } }
+.inst-head { display: flex; align-items: center; gap: 12px; padding-right: 26px; }
+.inst-head img { border-radius: 14px; flex: none; }
+.inst-head b { display: block; font-size: 16px; }
+.inst-head small { color: var(--muted); font-size: 12.5px; }
+.inst-steps { margin: 14px 0 0; padding-left: 22px; font-size: 14.5px; line-height: 1.7; }
+.inst-steps li { margin-bottom: 4px; }
+.inst-steps b { color: var(--gold-2); }
+.inst-warn { margin: 14px 0 0; padding: 10px 12px; border-radius: 12px; background: rgba(227,185,78,.1); border: 1px solid rgba(227,185,78,.3); color: #f0dfa8; font-size: 13.5px; line-height: 1.55; }
+.inst-go { margin-top: 12px; }
+.inst-or { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.inst-copy { width: 100%; margin-top: 12px; }
+@media (max-width: 360px) { .icon-btn.dl-btn { width: 36px; height: 36px; } }

@@ -46,6 +46,9 @@
       <h1>জেএসআই ২০২৬ ক্যালকুলেটর</h1>
       <p>সেনাবাহিনী · জেসিও ও ওআর</p>
     </div>
+    <button class="icon-btn dl-btn" id="btn-install-top" title="অ্যাপ ডাউনলোড করুন" aria-label="অ্যাপ ডাউনলোড করুন">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+    </button>
     <button class="icon-btn" id="btn-share" title="শেয়ার করুন" aria-label="শেয়ার করুন">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
     </button>
@@ -389,6 +392,13 @@
       <a class="fb-btn" id="fbPopGo" target="_blank" rel="noopener">ফলো করুন</a>
       <button type="button" class="fb-later" id="fbPopLater">পরে</button>
     </div>
+  </div>
+</div>
+<div class="fb-pop-wrap" id="installSheet" hidden>
+  <div class="fb-pop inst-pop" role="dialog" aria-modal="true" aria-labelledby="instTitle">
+    <button type="button" class="fb-pop-x" id="instX" aria-label="বন্ধ করুন">×</button>
+    <div class="inst-head"><img src="assets/img/icon-192.png" alt="" width="52" height="52" /><div><b id="instTitle">JSI-2026 অ্যাপ ডাউনলোড</b><small>এক চাপে খুলবে, ইন্টারনেট ছাড়াও চলবে</small></div></div>
+    <div id="instBody"></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
