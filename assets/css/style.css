@@ -517,7 +517,8 @@ body.no-scroll { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 /* ============== PDF রিপোর্ট (সাদা, প্রিন্টযোগ্য) ============== */
-#pdf-stage { position: fixed; left: -10000px; top: 0; width: 794px; }
+#pdf-stage { position: absolute; left: 0; top: 0; width: 794px; z-index: -5; pointer-events: none; }
+#pdf-stage:empty { display: none; }
 .rpt { width: 794px; background: #fff; color: #1d2421; font-family: var(--font); font-size: 13px; line-height: 1.55; padding: 34px 40px; }
 .rpt .rh { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1f5a43; padding-bottom: 12px; margin-bottom: 14px; }
 .rpt .rh h1 { margin: 0; font-size: 21px; color: #1f5a43; }

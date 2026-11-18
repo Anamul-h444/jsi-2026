@@ -1244,14 +1244,26 @@
     try {
       await document.fonts.ready;
       const fname = `JSI-2026-${type === 'retired' ? 'Pensioner' : type === 'salary' ? 'Salary' : type === 'pension' ? 'Pension' : 'Full'}-Report${inp.name ? '-' + inp.name.replace(/[^\p{L}\p{N}]+/gu, '_') : ''}.pdf`;
+      const prevScroll = window.scrollY;
+      window.scrollTo(0, 0);
       await html2pdf().set({
         margin: [8, 0, 10, 0],
         filename: fname,
         image: { type: 'jpeg', quality: 0.96 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 794, scrollX: 0, scrollY: 0 },
+        html2canvas: {
+          scale: 2, useCORS: true, backgroundColor: '#ffffff',
+          // বড় স্ক্রিনেও (কম্পিউটার) রিপোর্ট যেন বাঁদিকে কেটে না যায়
+          windowWidth: 794, width: 794, x: 0, y: 0, scrollX: 0, scrollY: 0,
+          onclone: doc => {
+            const st = doc.getElementById('pdf-stage');
+            if (st) { st.style.position = 'absolute'; st.style.left = '0'; st.style.top = '0'; st.style.margin = '0'; st.style.transform = 'none'; }
+            doc.documentElement.style.overflow = 'visible'; doc.body.style.overflow = 'visible';
+          },
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'legacy'], avoid: ['.avoid', 'h2', 'h3', 'tr', '.kv', '.formula'] },
       }).from(stage.firstElementChild).save();
+      window.scrollTo(0, prevScroll);
       toast('পিডিএফ ডাউনলোড হয়েছে');
       setTimeout(maybeFbPopup, 600);
     } catch (e) {
