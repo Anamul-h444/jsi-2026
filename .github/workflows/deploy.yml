@@ -34,6 +34,12 @@ jobs:
       # ফুটারে "শেষ আপডেট" — ডিপ্লয়ের সময়
       - name: Last updated time
         run: sed -i "s/__UPDATED__/$(date -u +%Y-%m-%dT%H:%M:%SZ)/" index.html
+      # প্রতিটি ডিপ্লয়ে CSS/JS-এর নতুন সংস্করণ নম্বর, যাতে মোবাইলে পুরোনো ফাইল ক্যাশে আটকে না থাকে
+      - name: Cache-bust assets
+        run: |
+          V=${GITHUB_SHA::8}
+          sed -i "s/?v=dev\"/?v=$V\"/g" index.html
+          sed -i "s/const CACHE = 'jsi2026-[^']*';/const CACHE = 'jsi2026-$V';/" sw.js
       - uses: actions/configure-pages@v5
         with:
           enablement: true
