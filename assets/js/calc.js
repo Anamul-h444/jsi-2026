@@ -472,18 +472,21 @@ function computeArrearsServing(tl, today, firstNewPay) {
   const [p1, p2, p3, p4] = tl.periods;
   const pick = d => d < new Date(2027, 0, 1) ? p1 : d < new Date(2027, 6, 1) ? p2 : d < new Date(2028, 0, 1) ? p3 : p4;
   const drawn = tl.june.gross;
+  const specialMonthly = tl.june.specialTotal || 0;
+  // প্রতি মাসের তিনটি অংশ আলাদা করে রাউন্ড করে যোগ করা হয়, যাতে মোট আর অংশগুলোর যোগফল হুবহু মেলে
   const rows = arrearsMonths(today, firstNewPay).map(m => {
     const p = pick(m.date);
-    const due = Math.round(p.gross * m.frac), got = Math.round(drawn * m.frac);
-    return { ...m, label: bnMonthYear(m.date), due, got, diff: due - got, basicDiff: Math.round((p.basic - tl.june.basic) * m.frac) };
+    const basicDiff = Math.round((p.basic - tl.june.basic) * m.frac);
+    const allowD = Math.round((p.allowTotal - tl.june.allowTotal) * m.frac);   // ২০২৭ পর্যন্ত শূন্য
+    const specD = Math.round(specialMonthly * m.frac);
+    const diff = basicDiff + allowD - specD;
+    const got = Math.round(drawn * m.frac);
+    return { ...m, label: bnMonthYear(m.date), due: got + diff, got, diff, basicDiff, allowD, specD };
   });
   const total = rows.reduce((s, r) => s + r.diff, 0);
   const basicTotal = rows.reduce((s, r) => s + r.basicDiff, 0);
-  const specialMonthly = tl.june.specialTotal || 0;
-  // বিলুপ্ত বিশেষ সুবিধা (প্রণোদনা) যা জুলাই ২০২৬-এর পরও তোলা হয়েছে — বকেয়া থেকে সমন্বয় হয়
-  const specialAdj = Math.round(rows.reduce((s, r) => s + specialMonthly * r.frac, 0));
-  // ভাতার পার্থক্য (০১ জানুয়ারি ২০২৮ থেকে নতুন হারের ভাতা); আগে শূন্য
-  const allowDiff = total - basicTotal + specialAdj;
+  const allowDiff = rows.reduce((s, r) => s + r.allowD, 0);
+  const specialAdj = rows.reduce((s, r) => s + r.specD, 0);
   return { today, firstNewPay, rows, total, basicTotal, specialAdj, allowDiff, gpf: Math.round(basicTotal * 0.05), drawnMonthly: drawn, specialMonthly };
 }
 
