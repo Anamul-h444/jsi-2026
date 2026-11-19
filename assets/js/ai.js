@@ -103,6 +103,37 @@
     'এলপিআর-এ থাকলে কী নিয়ম?',
   ];
 
+  /* ---------------- উত্তরের ফাঁকে ফেসবুক ফলো / ভাড়া হবে কার্ড ----------------
+     ৩য় উত্তরের পর ফেসবুক, তারপর প্রতি ৩টি উত্তর পরপর পালা করে বিজ্ঞাপন ও ফেসবুক।
+     ফেসবুকে ফলো বোতাম একবার চাপলে আর ফেসবুক কার্ড আসবে না, শুধু বিজ্ঞাপন। */
+  const COUNT_KEY = 'jsi2026_ai_answers';
+  const FB_DONE = 'jsi2026_fb_followed';
+  function nextPromo() {
+    let n = 0;
+    try { n = Number(localStorage.getItem(COUNT_KEY) || 0) + 1; localStorage.setItem(COUNT_KEY, String(n)); } catch (e) { return null; }
+    if (n % 3 !== 0) return null;
+    let followed = false; try { followed = !!localStorage.getItem(FB_DONE); } catch (e) {}
+    const wantFb = (n / 3) % 2 === 1;
+    if (wantFb && SITE_CONFIG.facebook && !followed) return 'fb';
+    return SITE_CONFIG.ad ? 'ad' : null;
+  }
+  function promoHTML(kind) {
+    if (kind === 'fb' && SITE_CONFIG.facebook) return `
+      <div class="ai-promo fb">
+        <div class="ap-row"><span class="ap-ic fb">f</span>
+          <div><b>উত্তরগুলো কাজে লাগছে?</b><small>জেএসআই সংশোধনী, বকেয়া ও নতুন আপডেট সবার আগে পেতে ফেসবুকে ফলো করুন</small></div></div>
+        <a class="ap-btn fb" href="${SITE_CONFIG.facebook.url}" target="_blank" rel="noopener" data-fb-follow>ফেসবুকে ফলো করুন</a>
+      </div>`;
+    if (kind === 'ad' && SITE_CONFIG.ad) return `
+      <a class="ai-promo vh" href="${SITE_CONFIG.ad.url}" target="_blank" rel="noopener">
+        <span class="ap-tag">বিজ্ঞাপন</span>
+        <div class="ap-row"><img src="assets/img/varahobey-logo.png" alt="" width="40" height="40" />
+          <div><b>${esc(SITE_CONFIG.ad.title)}</b><small>${esc(SITE_CONFIG.ad.tagline)}</small></div></div>
+        <span class="ap-btn vh">${esc(SITE_CONFIG.ad.cta || 'ওয়েবসাইট দেখুন')} →</span>
+      </a>`;
+    return '';
+  }
+
   function render() {
     const body = $('#aiBody');
     if (!history.length) {
@@ -115,7 +146,8 @@
         </div>`;
       body.querySelectorAll('.ai-sugg button').forEach(b => b.addEventListener('click', () => { $('#aiQ').value = b.textContent; send(); }));
     } else {
-      body.innerHTML = history.map(m => m.role === 'user'
+      body.innerHTML = history.map(m => m.role === 'promo' ? promoHTML(m.kind)
+        : m.role === 'user'
         ? `<div class="ai-msg me">${esc(m.text)}</div>`
         : `<div class="ai-msg bot${m.err ? ' err' : ''}">${md(m.text)}</div>`).join('') +
         (busy ? '<div class="ai-msg bot typing"><span></span><span></span><span></span></div>' : '');
@@ -171,11 +203,13 @@
     box.value = ''; box.style.height = 'auto';
     history.push({ role: 'user', text: q });
     busy = true; render();
-    const prior = history.filter(m => !m.err).slice(0, -1).slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'model', text: m.text }));
+    const prior = history.filter(m => !m.err && m.role !== 'promo').slice(0, -1).slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'model', text: m.text }));
     try {
       const a = await ask(q, prior);
       useQuota();
       history.push({ role: 'model', text: a });
+      const promo = nextPromo();
+      if (promo) history.push({ role: 'promo', kind: promo });
     } catch (e) {
       history.push({ role: 'model', text: errText(e), err: true });
     } finally {

@@ -228,10 +228,10 @@
       S[k] = Math.max(0, Math.min(k === 'badges' ? 3 : 10, (S[k] || 0) + Number(b.dataset.d)));
       st.querySelector('output').textContent = bn(S[k]); save(); refreshPlaceholders();
     }));
-    $('#btn-calc').addEventListener('click', () => { if (calcSalary(true)) go('salary'); });
-    $('#btn-pen-calc').addEventListener('click', () => { if (calcRetired(true)) go('salary'); });
+    $('#btn-calc').addEventListener('click', () => { if (calcSalary(true)) { go('salary'); adAfterCalc(); } });
+    $('#btn-pen-calc').addEventListener('click', () => { if (calcRetired(true)) { go('salary'); adAfterCalc(); } });
     applyMode(false);
-    $('#btn-pension').addEventListener('click', () => calcPension(true));
+    $('#btn-pension').addEventListener('click', () => { if (calcPension(true) !== false) adAfterCalc(); });
     $('#btn-add-promo').addEventListener('click', () => { S.promotions.push({ rank: '', date: '' }); renderPromos(); save(); });
     $('#btn-reset').addEventListener('click', () => {
       askConfirm({
@@ -1116,6 +1116,41 @@
     pop.onclick = e => { if (e.target === pop) close(); };
     pop.hidden = false; requestAnimationFrame(() => pop.classList.add('show'));
   }
+  /* ফেসবুকের যেকোনো ফলো বোতাম চাপলে মনে রাখা হয় — এআই চ্যাটে আর ফলো কার্ড আসবে না */
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a');
+    if (a && SITE_CONFIG.facebook && a.href === SITE_CONFIG.facebook.url) { try { localStorage.setItem('jsi2026_fb_followed', '1'); } catch (er) {} }
+  });
+
+  /* ---------------- "ভাড়া হবে" পপআপ (মাঝে মাঝে) ----------------
+     হিসাব বোতাম চাপার কয়েক সেকেন্ড পর, অথবা সাইটে কিছুক্ষণ থাকার পর।
+     ৬ ঘণ্টায় সর্বোচ্চ একবার; অন্য কোনো শিট/পপআপ খোলা থাকলে দেখাবে না। */
+  const AD_POP_KEY = 'jsi2026_adpop_at';
+  const AD_POP_GAP = 6 * 3600 * 1000;
+  function busyScreen() {
+    return !!document.querySelector('.fb-pop-wrap:not([hidden]), .ai-sheet.show, .ai-sheet.open, #overlay.show') ||
+      ['#pickSheet', '#shareSheet', '#aiSheet'].some(sel => { const el = $(sel); return el && !el.hidden && el.offsetParent !== null; });
+  }
+  function maybeAdPop() {
+    if (!SITE_CONFIG.ad || document.hidden || busyScreen()) return;
+    try {
+      const last = Number(localStorage.getItem(AD_POP_KEY) || 0);
+      if (Date.now() - last < AD_POP_GAP) return;
+      localStorage.setItem(AD_POP_KEY, String(Date.now()));
+    } catch (e) { return; }
+    const pop = $('#adPop'); if (!pop) return;
+    $('#adPopTitle').textContent = SITE_CONFIG.ad.title;
+    $('#adPopTag').textContent = SITE_CONFIG.ad.tagline;
+    $('#adPopGo').href = SITE_CONFIG.ad.url;
+    $('#adPopGo').textContent = SITE_CONFIG.ad.cta || 'ওয়েবসাইট দেখুন';
+    const close = () => { pop.classList.remove('show'); setTimeout(() => { pop.hidden = true; }, 250); };
+    $('#adPopX').onclick = close; $('#adPopLater').onclick = close; $('#adPopGo').onclick = close;
+    pop.onclick = e => { if (e.target === pop) close(); };
+    pop.hidden = false; requestAnimationFrame(() => pop.classList.add('show'));
+  }
+  const adAfterCalc = () => setTimeout(maybeAdPop, 4000);
+  setTimeout(maybeAdPop, 60000 + Math.floor(Math.random() * 45000));
+
   /** পিডিএফের জন্য QR কোড (SVG) */
   function fbQr() {
     if (!SITE_CONFIG.facebook || typeof qrcode === 'undefined') return '';

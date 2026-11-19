@@ -757,3 +757,26 @@ body.ai-open .ai-fab, body.retired-print .ai-fab { display: none; }
 .ai-input button svg { width: 20px; height: 20px; }
 .ai-note { font-size: 11px; color: var(--dim); margin-top: 8px; line-height: 1.45; text-align: center; }
 @media (min-width: 700px) { .ai-sheet { align-items: center; } .ai-panel { border-radius: 22px; border-bottom: 1px solid var(--border); } }
+
+/* এআই চ্যাটের ভেতরে ফেসবুক/বিজ্ঞাপন কার্ড */
+.ai-promo { align-self: stretch; flex: none; display: block; position: relative; padding: 12px 13px; border-radius: 16px; border: 1px solid var(--border); background: linear-gradient(135deg, rgba(24,119,242,.14), rgba(24,119,242,.04)); color: inherit; text-decoration: none; animation: rise .35s var(--ease) both; }
+.ai-promo.vh { background: linear-gradient(135deg, rgba(46,190,140,.16), rgba(46,190,140,.04)); border-color: rgba(46,190,140,.35); }
+.ai-promo .ap-row { display: flex; gap: 11px; align-items: center; }
+.ai-promo .ap-row b { display: block; font-size: 14.5px; }
+.ai-promo .ap-row small { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.5; margin-top: 2px; }
+.ai-promo img { border-radius: 11px; flex: none; }
+.ap-ic.fb { width: 40px; height: 40px; flex: none; border-radius: 12px; display: grid; place-items: center; background: #1877f2; color: #fff; font: 700 22px/1 system-ui, sans-serif; }
+.ap-btn { display: block; margin-top: 10px; text-align: center; padding: 9px 12px; border-radius: 12px; font-weight: 700; font-size: 14px; text-decoration: none; }
+.ap-btn.fb { background: #1877f2; color: #fff; }
+.ap-btn.vh { background: var(--green, #2ebe8c); color: #06140f; }
+.ap-tag { position: absolute; right: 10px; top: 8px; font-size: 10.5px; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 1px 7px; }
+.ai-promo.vh .ap-row { padding-right: 52px; }
+
+/* মাঝে মাঝে আসা "ভাড়া হবে" পপআপ */
+.ad-pop { border-color: rgba(46,190,140,.4); background: linear-gradient(160deg, #12241d, #101a17); }
+.ad-pop .ap-tag { right: 48px; top: 14px; }
+.ad-pop-head { display: flex; gap: 13px; align-items: center; margin-top: 4px; padding-right: 30px; }
+.ad-pop-head img { width: 56px; height: 56px; border-radius: 15px; flex: none; box-shadow: 0 8px 22px rgba(46,190,140,.35); }
+.ad-pop-head h4 { margin: 0; font-size: 19px; }
+.ad-pop p { font-size: 14.5px !important; color: var(--muted); margin-top: 10px !important; }
+.ad-pop .ad-go { background: var(--green, #2ebe8c); color: #06140f; }
