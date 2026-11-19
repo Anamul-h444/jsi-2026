@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/ask.js": {
+      "includeFiles": "assets/js/**",
+      "maxDuration": 30
+    }
+  }
+}

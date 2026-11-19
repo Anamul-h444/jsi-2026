@@ -1,6 +1,7 @@
 /* =========================================================================
-   এআই-কে প্রশ্ন করুন — Google Gemini (ফ্রি এপিআই), সরাসরি ব্রাউজার থেকে
-   কী: data.js-এর SITE_CONFIG.ai.apiKey (Google Cloud-এ শুধু এই সাইটের ঠিকানায় সীমিত রাখুন)
+   এআই-কে প্রশ্ন করুন — প্রশ্ন যায় Vercel-এর প্রক্সিতে (api/ask.js),
+   সেখান থেকে Google Gemini-তে। এপিআই কী শুধু Vercel-এ থাকে।
+   ঠিকানা: data.js-এর SITE_CONFIG.ai.endpoint
    ========================================================================= */
 (function () {
   'use strict';
@@ -11,7 +12,6 @@
   const DAILY = CFG.dailyLimit || 20;
   let history = [];
   let busy = false;
-  let knowledge = null;
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const toBn = s => String(s).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
@@ -110,7 +110,7 @@
         <div class="ai-welcome">
           <b>আসসালামু আলাইকুম! 👋</b>
           <p>জেএসআই ০১/২০২৬ অনুযায়ী বেতন, ভাতা, বকেয়া, উচ্চতর গ্রেড বা পেনশন নিয়ে যেকোনো প্রশ্ন করুন। আপনি অ্যাপে হিসাব করে থাকলে আপনার নিজের হিসাব ধরে উত্তর দেব।</p>
-          ${CFG.apiKey ? '' : '<p class="ai-off">এআই সহায়কটি শীঘ্রই চালু হবে।</p>'}
+          ${CFG.endpoint ? '' : '<p class="ai-off">এআই সহায়কটি শীঘ্রই চালু হবে।</p>'}
           <div class="ai-sugg">${SUGGEST.map(s => `<button type="button">${esc(s)}</button>`).join('')}</div>
         </div>`;
       body.querySelectorAll('.ai-sugg button').forEach(b => b.addEventListener('click', () => { $('#aiQ').value = b.textContent; send(); }));
@@ -123,58 +123,28 @@
     body.scrollTop = body.scrollHeight;
   }
 
-  /* ---------------- এপিআই ---------------- */
-  function systemPrompt() {
-    if (!knowledge) knowledge = typeof buildAIKnowledge === 'function' ? buildAIKnowledge() : '';
-    let user = '';
-    try { user = typeof window.__jsiSummary === 'function' ? window.__jsiSummary() : ''; } catch (e) { user = ''; }
-    const today = new Date();
-    return [
-      'তুমি "JSI-2026 এআই সহায়ক"। বাংলাদেশ সেনাবাহিনীর জেসিও, ওআর ও পেনশনভোগীদের জেএসআই ০১/২০২৬ (নতুন বেতনস্কেল) বিষয়ে সাহায্য করো।',
-      'নিয়ম:',
-      '- শুধু নিচের "জ্ঞানভান্ডার" ও "ব্যবহারকারীর হিসাব" থেকে উত্তর দাও। সেখানে না থাকলে স্পষ্ট বলো "জেএসআই-এর এই তথ্য আমার কাছে নেই, ইউনিট বা পে-অফিসে জেনে নিন"। নিজে থেকে কোনো সংখ্যা বা নিয়ম বানাবে না।',
-      '- সহজ, ভদ্র, সংক্ষিপ্ত বাংলায় উত্তর দাও (সাধারণত ৩–৮ লাইন)। সংখ্যা বাংলা অঙ্কে, টাকার আগে ৳।',
-      '- টাকার অঙ্ক বললে কীভাবে এল তার ছোট হিসাব দেখাও। ব্যবহারকারীর হিসাব থাকলে সেটাই ব্যবহার করো; নিজে নতুন করে জটিল অঙ্ক কষবে না, দরকার হলে অ্যাপের "বেতন" বা "অবসর" অংশ দেখতে বলো।',
-      '- প্রাসঙ্গিক হলে অনুচ্ছেদের উল্লেখ দাও (যেমন "অধ্যায়-২, অনুচ্ছেদ ১০")।',
-      '- বেতন/পেনশন/জেএসআই-এর বাইরের প্রশ্নে বিনয়ের সঙ্গে বলো যে তুমি শুধু এই বিষয়ে সাহায্য করো।',
-      `- আজকের তারিখ: ${today.toISOString().slice(0, 10)}।`,
-      '',
-      '=== জ্ঞানভান্ডার ===', knowledge,
-      '', '=== ব্যবহারকারীর হিসাব (অ্যাপ থেকে) ===', user || '(ব্যবহারকারী এখনো অ্যাপে হিসাব করেননি)',
-    ].join('\n');
-  }
-
-  async function callGemini(contents) {
-    const models = CFG.models && CFG.models.length ? CFG.models : ['gemini-2.5-flash', 'gemini-2.0-flash'];
-    let lastErr = null;
-    for (const model of models) {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 45000);
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': CFG.apiKey },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt() }] },
-            contents,
-            generationConfig: { temperature: 0.2, maxOutputTokens: 1200 },
-          }),
-          signal: ctrl.signal,
-        });
-        clearTimeout(t);
-        if (res.status === 404 || res.status === 429 || res.status >= 500) { lastErr = { status: res.status }; continue; }
-        const j = await res.json().catch(() => ({}));
-        if (!res.ok) { lastErr = { status: res.status, msg: j && j.error && j.error.message }; break; }
-        const text = (((j.candidates || [])[0] || {}).content || {}).parts;
-        const out = (text || []).map(p => p.text || '').join('').trim();
-        if (out) return out;
-        lastErr = { status: 'empty' };
-      } catch (e) {
-        clearTimeout(t);
-        lastErr = { status: e.name === 'AbortError' ? 'timeout' : 'network' };
-      }
+  /* ---------------- সার্ভার (Vercel প্রক্সি) ---------------- */
+  async function ask(question, prior) {
+    let summary = '';
+    try { summary = typeof window.__jsiSummary === 'function' ? window.__jsiSummary() : ''; } catch (e) { summary = ''; }
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 45000);
+    try {
+      const res = await fetch(CFG.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, history: prior, summary }),
+        signal: ctrl.signal,
+      });
+      clearTimeout(t);
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || !j.answer) throw { status: res.status };
+      return j.answer;
+    } catch (e) {
+      clearTimeout(t);
+      if (e && e.status) throw e;
+      throw { status: e && e.name === 'AbortError' ? 'timeout' : 'network' };
     }
-    throw lastErr || { status: 'unknown' };
   }
 
   function errText(e) {
@@ -182,7 +152,7 @@
     if (s === 429) return 'এই মুহূর্তে অনেকে একসাথে প্রশ্ন করছেন, তাই ফ্রি সীমা শেষ হয়ে গেছে। কিছুক্ষণ পর আবার চেষ্টা করুন।';
     if (s === 'network') return 'ইন্টারনেট সংযোগ পাওয়া যাচ্ছে না। সংযোগ দেখে আবার চেষ্টা করুন।';
     if (s === 'timeout') return 'উত্তর আসতে অনেক দেরি হচ্ছে। একটু পরে আবার চেষ্টা করুন।';
-    if (s === 400 || s === 403) return 'এআই সেবাটি এখন চালু নেই। ডেভেলপারকে জানানো হবে।';
+    if (s === 400 || s === 403 || s === 503) return 'এআই সেবাটি এখন চালু নেই। কিছুক্ষণ পর আবার চেষ্টা করুন।';
     return 'দুঃখিত, এখন উত্তর দেওয়া যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।';
   }
 
@@ -190,7 +160,7 @@
     const box = $('#aiQ');
     const q = box.value.trim();
     if (!q || busy) return;
-    if (!CFG.apiKey) {
+    if (!CFG.endpoint) {
       history.push({ role: 'user', text: q }, { role: 'model', text: 'এআই সহায়কটি শীঘ্রই চালু হবে। ততক্ষণ অ্যাপের "বেতন" ও "অবসর" অংশে আপনার পূর্ণ হিসাব দেখুন।', err: true });
       box.value = ''; render(); return;
     }
@@ -201,9 +171,9 @@
     box.value = ''; box.style.height = 'auto';
     history.push({ role: 'user', text: q });
     busy = true; render();
-    const contents = history.filter(m => !m.err).slice(-8).map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.text }] }));
+    const prior = history.filter(m => !m.err).slice(0, -1).slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'model', text: m.text }));
     try {
-      const a = await callGemini(contents);
+      const a = await ask(q, prior);
       useQuota();
       history.push({ role: 'model', text: a });
     } catch (e) {
