@@ -82,16 +82,24 @@ async function callGemini(key, system, contents) {
 module.exports = async (req, res) => {
   const origin = req.headers.origin || '';
   const allowed = ALLOWED_ORIGINS.includes(origin);
+
   if (allowed) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Access-Control-Max-Age', '86400');
   }
-  if (req.method === 'OPTIONS') return res.status(allowed ? 204 : 403).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'method' });
-  if (!allowed) return res.status(403).json({ error: 'origin' });
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Max-Age', '86400');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(allowed ? 204 : 403).end();
+  }
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'method' });
+  }
+  if (!allowed) {
+    return res.status(403).json({ error: 'origin', received: origin });
+  }
 
   const key = process.env.GEMINI_API_KEY;
   if (!key) return res.status(503).json({ error: 'not_configured' });
