@@ -1,9 +1,5 @@
 /* =========================================================================
    Vercel Serverless Function — এআই সহায়কের প্রক্সি
-   Gemini API কী থাকে শুধু Vercel-এর Environment Variable-এ (GEMINI_API_KEY),
-   তাই সাইট বা GitHub-এ কোথাও দেখা যায় না।
-   জ্ঞানভান্ডার সার্ভারেই তৈরি হয় (assets/js/data.js + ai-kb.js থেকে),
-   যাতে কেউ এই ঠিকানা দিয়ে অন্য কাজে এআই ব্যবহার করতে না পারে।
    ========================================================================= */
 const fs = require('fs');
 const path = require('path');
@@ -11,7 +7,7 @@ const vm = require('vm');
 
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://anamul-h444.github.io')
   .split(',').map(s => s.trim()).filter(Boolean);
-const MODELS = (process.env.GEMINI_MODELS || 'gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash')
+const MODELS = (process.env.GEMINI_MODELS || 'gemini-2.5-flash,gemini-2.5-flash-lite,gemini-3-flash-preview,gemini-2.0-flash')
   .split(',').map(s => s.trim()).filter(Boolean);
 const PER_IP_PER_HOUR = Number(process.env.PER_IP_PER_HOUR || 30);
 
@@ -26,7 +22,7 @@ function knowledge() {
   return KNOWLEDGE;
 }
 
-/* ---------- সাধারণ রেট লিমিট (প্রতি সার্ভার ইনস্ট্যান্সে, যথাসম্ভব) ---------- */
+/* ---------- সাধারণ রেট লিমিট ---------- */
 const hits = new Map();
 function limited(ip) {
   const now = Date.now(), hour = 3600 * 1000;
@@ -54,27 +50,67 @@ function systemPrompt(userSummary) {
   ].join('\n');
 }
 
+async function discoverFlashModels(key) {
+  try {
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models', {
+      headers: { 'x-goog-api-key': key },
+    });
+    if (!r.ok) return [];
+    const j = await r.json().catch(() => ({}));
+    return (j.models || [])
+      .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
+      .map(m => String(m.name || '').replace(/^models\//, ''))
+      .filter(name => name.includes('gemini') && name.includes('flash') && !name.includes('image') && !name.includes('tts') && !name.includes('audio'));
+  } catch (e) {
+    return [];
+  }
+}
+
+async function tryModel(key, model, system, contents) {
+  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: system }] },
+      contents,
+      generationConfig: { temperature: 0.2, maxOutputTokens: 1200 },
+    }),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) return { ok: false, status: r.status, detail: j.error?.message || '' };
+  const parts = (((j.candidates || [])[0] || {}).content || {}).parts || [];
+  const text = parts.map(p => p.text || '').join('').trim();
+  if (text) return { ok: true, status: 200, text, model };
+  return { ok: false, status: 502, detail: 'empty_candidate' };
+}
+
 async function callGemini(key, system, contents) {
-  let last = { status: 500 };
+  let last = { status: 500, detail: '' };
+  const tried = new Set();
+
   for (const model of MODELS) {
+    tried.add(model);
     try {
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents,
-          generationConfig: { temperature: 0.2, maxOutputTokens: 1200 },
-        }),
-      });
-      if (r.status === 404 || r.status === 429 || r.status >= 500) { last = { status: r.status }; continue; }
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) return { status: r.status };
-      const parts = (((j.candidates || [])[0] || {}).content || {}).parts || [];
-      const text = parts.map(p => p.text || '').join('').trim();
-      if (text) return { status: 200, text, model };
-      last = { status: 502 };
-    } catch (e) { last = { status: 502 }; }
+      const res = await tryModel(key, model, system, contents);
+      if (res.ok) return res;
+      last = res;
+      if (res.status !== 404 && res.status !== 429 && res.status < 500) return last;
+    } catch (e) {
+      last = { status: 502, detail: e.message || 'fetch_error' };
+    }
+  }
+
+  // নির্ধারিত মডেলগুলো 404 দিলে API থেকে সচল flash মডেল খুঁজে বের করা
+  if (last.status === 404) {
+    const dynamicModels = await discoverFlashModels(key);
+    for (const model of dynamicModels) {
+      if (tried.has(model)) continue;
+      try {
+        const res = await tryModel(key, model, system, contents);
+        if (res.ok) return res;
+        last = res;
+      } catch (e) {}
+    }
   }
   return last;
 }
@@ -91,15 +127,9 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Max-Age', '86400');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(allowed ? 204 : 403).end();
-  }
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'method' });
-  }
-  if (!allowed) {
-    return res.status(403).json({ error: 'origin', received: origin });
-  }
+  if (req.method === 'OPTIONS') return res.status(allowed ? 204 : 403).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'method' });
+  if (!allowed) return res.status(403).json({ error: 'origin', received: origin });
 
   const key = process.env.GEMINI_API_KEY;
   if (!key) return res.status(503).json({ error: 'not_configured' });
@@ -124,5 +154,9 @@ module.exports = async (req, res) => {
 
   const out = await callGemini(key, system, contents);
   if (out.status === 200) return res.status(200).json({ answer: out.text });
-  return res.status(out.status === 429 ? 429 : 502).json({ error: 'upstream', status: out.status });
+  return res.status(out.status === 429 ? 429 : 502).json({
+    error: 'upstream',
+    status: out.status,
+    detail: out.detail,
+  });
 };
