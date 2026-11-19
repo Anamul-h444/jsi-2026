@@ -117,6 +117,13 @@ function specialAmount(rankKey, key, which) {
 }
 
 /** জুন ২০২৬-এর প্রতিটি ভাতার স্বয়ংক্রিয় প্রস্তাবিত মান */
+/** বিশেষ প্রণোদনা: জেসিও ১০%; সার্জেন্ট ও তদনিম্ন ১৫% (ন্যূনতম ২,০০০) */
+const pronoPct = rankKey => rankLevel(rankKey) === 'JCO' ? 10 : 15;
+function pronoAmount(rankKey, basic) {
+  const v = Math.round(basic * pronoPct(rankKey) / 100);
+  return rankLevel(rankKey) === 'JCO' ? v : Math.max(v, 2000);
+}
+
 function autoOldAllowances(inp) {
   const r = inp.rank;
   const yrs = inp.joinDate ? diffYM(inp.joinDate, new Date(2026, 5, 30)).y : 0;
@@ -142,8 +149,8 @@ function autoOldAllowances(inp) {
     kit: inp.kit ? ALLOW.kit[rankLevel(r) === 'JCO' ? 'JCO' : 'OR'].old : 0,
     serviceWardenship: inp.serviceWardenship || 0,
     hill: hillOld,
-    // বিশেষ সুবিধা (প্রণোদনা): সর্বশেষ মূল বেতনের ১৫%, ন্যূনতম ২,০০০ টাকা; ০১ জুলাই ২০২৬ থেকে বাদ। মহার্ঘ ভাতা আগেই বাতিল।
-    pronodona: Math.max(Math.round(inp.oldBasic * 0.15), 2000),
+    // বিশেষ সুবিধা (প্রণোদনা): জেসিও মূল বেতনের ১০%; সার্জেন্ট ও তদনিম্ন ১৫%, ন্যূনতম ২,০০০ টাকা; ০১ জুলাই ২০২৬ থেকে বাদ। মহার্ঘ ভাতা আগেই বাতিল।
+    pronodona: pronoAmount(r, inp.oldBasic),
   };
 }
 
@@ -240,7 +247,9 @@ function computeTimeline(inp) {
     allowances: oldItems,
     allowTotal: oldAllowTotal,
     special: [{ label: OLD_ALLOW_LABELS.pronodona, amt: prono,
-      note: prono > 2000 ? `আগের মূল বেতন ${bn(inp.oldBasic)} টাকার ১৫%` : `আগের মূল বেতন ${bn(inp.oldBasic)} টাকার ১৫% ২,০০০-এর কম, তাই ন্যূনতম ২,০০০` }].filter(x => x.amt),
+      note: ov.pronodona !== undefined && ov.pronodona !== null && !isNaN(ov.pronodona) ? 'আপনার দেওয়া অঙ্ক'
+        : prono > Math.round(inp.oldBasic * pronoPct(inp.rank) / 100) ? `আগের মূল বেতন ${bn(inp.oldBasic)} টাকার ${bn(pronoPct(inp.rank))}% ২,০০০-এর কম, তাই ন্যূনতম ২,০০০`
+        : `আগের মূল বেতন ${bn(inp.oldBasic)} টাকার ${bn(pronoPct(inp.rank))}%` }].filter(x => x.amt),
     specialTotal: specialBenefit,
   };
   june.gross = june.basic + june.allowTotal + june.specialTotal;
