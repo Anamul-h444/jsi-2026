@@ -654,6 +654,7 @@
 
     <div id="arrearsHost"></div>
 
+    ${inlineAd()}
     <div class="card voucher">
       <div class="v-head">
         <div><small>মূল বেতন নির্ধারণ বিবরণী</small><h3>০১ জুলাই ২০২৬-এ মূল বেতন নির্ধারণ</h3></div>
@@ -782,6 +783,8 @@
       </table>
       <div class="formula">এককালীন আনুতোষিক = ছেড়ে দেওয়া অর্ধেক পেনশন × ১২ × বয়সের গুণক<br>= ${tk(rt.commuted)} × ১২ × ${bn(rt.factor, 3)} = <b>${tk(rt.lump)}</b><br><small>অবসরের পরের জন্মদিনে বয়স ${bn(rt.ageNext)} বছর; বয়স যত কম, গুণক তত বেশি (জেএসআই অনুচ্ছেদ ২৮)</small></div>
     </div>
+
+    ${inlineAd()}
 
     <div class="card">
       <div class="section-title" style="margin-top:0"><h3>অবসরকালীন অন্যান্য সুবিধা</h3><span class="line"></span></div>
@@ -1036,6 +1039,8 @@
     <div class="section-title"><h3>প্রতিটি ধাপে পেনশন ও ভাতা</h3><span class="line"></span></div>
     <div class="timeline">${r.periods.map(card).join('')}</div>
 
+    ${inlineAd()}
+
     <div class="card">
       <div class="section-title" style="margin-top:0"><h3>বছরে একবার যা পাবেন (২০২৮)</h3><span class="line"></span></div>
       <table class="tbl">
@@ -1120,6 +1125,35 @@
   document.addEventListener('click', e => {
     const a = e.target.closest && e.target.closest('a');
     if (a && SITE_CONFIG.facebook && a.href === SITE_CONFIG.facebook.url) { try { localStorage.setItem('jsi2026_fb_followed', '1'); } catch (er) {} }
+  });
+
+  /* ---------------- হিসাবের ফলাফলের ভেতরে "ভাড়া হবে" কার্ড ----------------
+     প্রতিবার হিসাবে ৬০% সম্ভাবনায় দেখায়; × চাপলে ৩ ঘণ্টা আর দেখাবে না। */
+  const INL_AD_KEY = 'jsi2026_inlad_closed';
+  function inlineAd() {
+    if (!SITE_CONFIG.ad) return '';
+    try { if (Date.now() - Number(localStorage.getItem(INL_AD_KEY) || 0) < 3 * 3600 * 1000) return ''; } catch (e) {}
+    if (Math.random() > 0.6) return '';
+    const A = SITE_CONFIG.ad;
+    return `
+    <div class="inl-ad">
+      <button type="button" class="inl-ad-x" aria-label="বিজ্ঞাপন বন্ধ করুন">×</button>
+      <a href="${A.url}" target="_blank" rel="noopener">
+        <span class="inl-ad-tag">বিজ্ঞাপন</span>
+        <div class="inl-ad-row">
+          <img src="assets/img/varahobey-logo.png" alt="ভাড়া হবে লোগো" width="46" height="46" loading="lazy" />
+          <div><b>${A.title}</b><small>${A.tagline}</small></div>
+        </div>
+        <span class="inl-ad-go">${A.cta || 'ওয়েবসাইট দেখুন'} →</span>
+      </a>
+    </div>`;
+  }
+  document.addEventListener('click', e => {
+    const x = e.target.closest && e.target.closest('.inl-ad-x');
+    if (!x) return;
+    e.preventDefault();
+    try { localStorage.setItem(INL_AD_KEY, String(Date.now())); } catch (er) {}
+    document.querySelectorAll('.inl-ad').forEach(el => { el.classList.add('bye'); setTimeout(() => el.remove(), 260); });
   });
 
   /* ---------------- "ভাড়া হবে" পপআপ (মাঝে মাঝে) ----------------
