@@ -33,7 +33,7 @@ const SITE_CONFIG = {
      Environment Variable GEMINI_API_KEY-তে। endpoint খালি থাকলে "শীঘ্রই চালু হবে" দেখাবে। */
   ai: {
     enabled: true,
-    endpoint: 'https://jsi-2026.vercel.app',
+    endpoint: 'https://jsi-2026.vercel.app/api/ask',
     dailyLimit: 20, // প্রতি মোবাইলে দিনে সর্বোচ্চ প্রশ্ন
   },
 };
