@@ -29,6 +29,15 @@ const SITE_CONFIG = {
     url: 'https://www.facebook.com/anamul.haque.22772',
     display: 'facebook.com/anamul.haque.22772',
   },
+  /* এআই সহায়ক (Google Gemini ফ্রি এপিআই)
+     apiKey: aistudio.google.com থেকে নেওয়া কী। Google Cloud Console-এ কী-টিকে
+     "Websites" সীমায় শুধু https://anamul-h444.github.io/* রাখুন। খালি থাকলে "শীঘ্রই চালু হবে" দেখাবে। */
+  ai: {
+    enabled: true,
+    apiKey: '',
+    models: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'],
+    dailyLimit: 20, // প্রতি মোবাইলে দিনে সর্বোচ্চ প্রশ্ন
+  },
 };
 
 /* ---------- পদবি ও বেতনস্কেল ----------

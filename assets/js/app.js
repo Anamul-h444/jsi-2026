@@ -18,7 +18,7 @@
     firstNewPay: '', mode: 'SERVING', penName: '', penType: 'SELF', penNet: '', penDob: '', penAdults: 2, penChildren: 0,
   };
   let S = load();
-  let lastTL = null, lastRT = null;
+  let lastTL = null, lastRT = null, lastRet = null;
 
   function load() {
     try {
@@ -827,6 +827,36 @@
 
 
 
+
+  /* ---------------- এআই সহায়কের জন্য ব্যবহারকারীর হিসাবের সারাংশ ---------------- */
+  window.__jsiSummary = function () {
+    const n = v => Math.round(v);
+    if (S.mode === 'RETIRED') {
+      const r = lastRet || computeExistingPension(collectPen());
+      if (!r || !r.ok) return '';
+      const a = computeArrearsRetired(r, new Date(), S.firstNewPay || '');
+      return [`ধরন: পেনশনভোগী (১ জুলাই ২০২৬-এর আগে অবসরপ্রাপ্ত), ${S.penType === 'FAMILY' ? 'পারিবারিক পেনশন' : 'নিজের পেনশন'}`,
+        `৩০ জুন ২০২৬ নিট পেনশন ${r.net30}; স্ল্যাব বৃদ্ধি ${n(r.slab.rate * 100)}%; নতুন নির্ধারিত নিট পেনশন ${r.target}`,
+        ...r.periods.map(p => `${p.label}: নিট পেনশন ${p.net}, চিকিৎসা ${p.med}, রেশন ${p.ration}, মোট ${p.total}`),
+        `আজ পর্যন্ত সম্ভাব্য বকেয়া ${a.total}`].join('\n');
+    }
+    const inp = collect();
+    if (!inp.oldBasic || !inp.joinDate || !inp.dob) return '';
+    const tl = computeTimeline(inp);
+    const R = tl.rank, ar = computeArrearsServing(tl, new Date(), S.firstNewPay || '');
+    const L = [`পদবি: ${R.name}; চাকরির বয়স (আজ) ${diffYM(inp.joinDate, new Date()).y} বছর; বয়স ${ageOn(inp.dob, new Date())} বছর; কর্মস্থল: ${LOCATIONS[inp.location]}; ${inp.marital === 'MARRIED' ? 'বিবাহিত' : 'অবিবাহিত'}${inp.quarter ? ', সরকারি বাসা' : ''}; সন্তান ${inp.children}`,
+      `৩০ জুন ২০২৬ মূল বেতন ${inp.oldBasic}; পুরোনো স্কেলের প্রারম্ভিক ধাপ ${inp.oldStart}`,
+      `নতুন স্কেলে নির্ধারণ: পার্থক্য ${tl.fix.diff}, লক্ষ্য ${tl.fix.target}, নির্ধারিত ${tl.fix.fixed}; ১ জুলাই ২০২৬ ইনক্রিমেন্টসহ ${tl.newBasic26}`,
+      ...tl.periods.map((p, i) => `${PERIODS[i].label}: মূল বেতন ${p.basic}, ভাতা ${n(p.allowTotal)}, মোট ${n(p.gross)}, কর্তন ${n(p.ded.total)}, হাতে ${n(p.net)}`),
+      `জুন ২০২৬ মোট ${n(tl.june.gross)} (বিশেষ সুবিধা ${n(tl.june.specialTotal)} সহ)`,
+      `আজ পর্যন্ত বকেয়া: মূল বেতন বৃদ্ধি ${ar.basicTotal} − প্রণোদনা সমন্বয় ${ar.specialAdj} = ${ar.total}`];
+    if (S.retireDate) {
+      const rt = lastRT || computeRetirement(inp, tl);
+      if (rt && rt.ok) L.push(`অবসর ${S.retireDate.slice(0, 7)}: শেষ মূল বেতন ${rt.lastBasic}, চাকরি ${rt.years} বছর, গ্রস পেনশন ${n(rt.gross)}, নিট ${n(rt.net)}, এককালীন ${n(rt.lump)}, চিকিৎসা ${rt.med}, রেশন ${rt.ration}, মাসে মোট ${n(rt.monthlyInHand)}`);
+    }
+    return L.join('\n');
+  };
+
   /* ======================= বকেয়া ======================= */
   function arrearsOptions() {
     const today = new Date(), opts = [`<option value="">এখনো পাইনি (আজ পর্যন্ত হিসাব)</option>`];
@@ -924,6 +954,7 @@
   function calcRetired(fromBtn) {
     const out = $('#salary-out');
     const r = computeExistingPension(collectPen());
+    if (r.ok) lastRet = r;
     if (!r.ok) {
       if (fromBtn) { toast(r.errors[0]); return false; }
       out.innerHTML = `<div class="card empty"><div class="em">📝</div><b>এখনো হিসাব করা হয়নি</b><p>"তথ্য" অংশে পেনশনের তথ্য দিয়ে <b>পেনশন হিসাব করুন</b> বাটনে চাপুন।</p><button class="btn btn-primary" onclick="document.querySelector('[data-view=input]').click()">তথ্য দিন</button></div>`;

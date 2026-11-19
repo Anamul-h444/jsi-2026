@@ -19,6 +19,8 @@ const CORE = [
   './assets/img/niyontrok-crest.svg',
   './assets/img/og-image-v2.jpg',
   './assets/js/counter.js',
+  './assets/js/ai-kb.js',
+  './assets/js/ai.js',
 ];
 
 self.addEventListener('install', e => {
