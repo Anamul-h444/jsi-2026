@@ -56,7 +56,7 @@ function systemPrompt(userSummary) {
 async function discoverFlashModels(key) {
   try {
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models', {
-      headers: { 'x-goog-api-key': key },
+      headers: { 'x-goog-api-key': key }, signal: AbortSignal.timeout(5000),
     });
     if (!r.ok) return [];
     const j = await r.json().catch(() => ({}));
@@ -72,14 +72,28 @@ async function discoverFlashModels(key) {
 /* gemini-2.5-এ "thinking" টোকেনও আউটপুট সীমার মধ্যে গোনা হয় — সীমা কম হলে উত্তর কেটে যায়/ফাঁকা আসে */
 function genConfig(model) {
   const cfg = { temperature: 0.2, maxOutputTokens: 4096 };
-  if (/gemini-2\.5-flash-lite/.test(model)) cfg.thinkingConfig = { thinkingBudget: 512 };
-  else if (/gemini-2\.5/.test(model)) cfg.thinkingConfig = { thinkingBudget: 1024 };
+  if (/gemini-2\.5-flash-lite/.test(model)) cfg.thinkingConfig = { thinkingBudget: 0 };
+  else if (/gemini-2\.5/.test(model)) cfg.thinkingConfig = { thinkingBudget: 512 };
   return cfg;
 }
 
+/* পুরো অনুরোধ Vercel-এর সময়সীমার আগেই শেষ করতে হবে — নইলে Vercel CORS হেডার ছাড়া 504 দেয়,
+   আর ব্রাউজারে সেটা "ইন্টারনেট সংযোগ নেই" দেখায় */
+let DEADLINE = 0;
 async function tryModel(key, model, system, contents) {
+  const left = DEADLINE - Date.now();
+  if (left < 3000) return { ok: false, status: 504, detail: 'deadline' };
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), left);
+  try { return await tryModelInner(key, model, system, contents, ctrl.signal); }
+  catch (e) { return { ok: false, status: 504, detail: e.name === 'AbortError' ? 'timeout' : (e.message || 'fetch_error') }; }
+  finally { clearTimeout(timer); }
+}
+
+async function tryModelInner(key, model, system, contents, signal) {
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
     method: 'POST',
+    signal,
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
@@ -96,6 +110,7 @@ async function tryModel(key, model, system, contents) {
 }
 
 async function callGemini(key, system, contents) {
+  DEADLINE = Date.now() + 50000;
   let last = { status: 500, detail: '' };
   const tried = new Set();
 
@@ -163,7 +178,9 @@ module.exports = async (req, res) => {
   try { system = systemPrompt(clip(body.summary, 3000)); }
   catch (e) { return res.status(500).json({ error: 'kb' }); }
 
-  const out = await callGemini(key, system, contents);
+  let out;
+  try { out = await callGemini(key, system, contents); }
+  catch (e) { out = { status: 502, detail: e.message || 'error' }; }
   if (out.status === 200) return res.status(200).json({ answer: out.text });
   return res.status(out.status === 429 ? 429 : 502).json({
     error: 'upstream',

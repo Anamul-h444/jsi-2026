@@ -2,7 +2,7 @@
   "functions": {
     "api/ask.js": {
       "includeFiles": "assets/js/**",
-      "maxDuration": 30
+      "maxDuration": 60
     }
   }
 }

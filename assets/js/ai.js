@@ -128,7 +128,7 @@
     let summary = '';
     try { summary = typeof window.__jsiSummary === 'function' ? window.__jsiSummary() : ''; } catch (e) { summary = ''; }
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 45000);
+    const t = setTimeout(() => ctrl.abort(), 60000);
     try {
       const res = await fetch(CFG.endpoint, {
         method: 'POST',
