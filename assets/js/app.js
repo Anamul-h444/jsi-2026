@@ -172,6 +172,10 @@
     // কনফিগ
     $('#dev-name').innerHTML = devNameHTML();
     $('#dev-role').textContent = SITE_CONFIG.developer.title;
+    if (SITE_CONFIG.developer.whatsapp) {
+      $('#devWa').href = $('#footWa').href = waLink();
+      $('#footWaNum').textContent = waText();
+    } else { $('#devWa').hidden = true; $('#footWa').hidden = true; }
     $('#ad-title').textContent = SITE_CONFIG.ad.title;
     $('#ad-tag').textContent = SITE_CONFIG.ad.tagline;
     $('#ad-feats').innerHTML = (SITE_CONFIG.ad.features || []).map(f => `<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>${esc(f)}</li>`).join('');
@@ -247,6 +251,12 @@
     $$('[data-report]').forEach(b => b.addEventListener('click', () => makePdf(b.dataset.report)));
   }
 
+  /* হোয়াটসঅ্যাপ: 01735547549 → wa.me/8801735547549, দেখায় ০১৭৩৫-৫৪৭৫৪৯ */
+  const waNum = () => String(SITE_CONFIG.developer.whatsapp || '').replace(/\D/g, '');
+  const waLink = () => 'https://wa.me/' + (waNum().startsWith('880') ? waNum() : '88' + waNum());
+  const waText = () => { const n = waNum().replace(/^88/, ''); return bnDigits(n.slice(0, 5) + '-' + n.slice(5)); };
+  const bnDigits = t => String(t).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+  const devWaPDF = () => SITE_CONFIG.developer.whatsapp ? `<span class="wa">হোয়াটসঅ্যাপ: ${waText()}</span>` : '';
   const devNameHTML = () => esc(SITE_CONFIG.developer.name) + (SITE_CONFIG.developer.corps ? ` <small class="corps">${esc(SITE_CONFIG.developer.corps)}</small>` : '');
 
   /* ---------------- তালিকা থেকে বাছাই: ব্রাউজারের সাদা ড্রপডাউনের বদলে ডার্ক থিমের তালিকা ----------------
@@ -815,7 +825,7 @@
     return `
     <div class="rh">
       <div><h1>${title}</h1><p>জেএসআই ০১/২০২৬ (বাংলাদেশ গেজেট, অতিরিক্ত, ১৫ নভেম্বর ২০২৬) অনুযায়ী · প্রস্তুতের তারিখ: ${bnDate(today)}</p></div>
-      <div class="devbox"><img src="assets/img/developer.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${devNameHTML()}</b>${SITE_CONFIG.developer.title}</div></div>
+      <div class="devbox"><img src="assets/img/developer.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${devNameHTML()}</b>${SITE_CONFIG.developer.title}${devWaPDF()}</div></div>
     </div>
     <div class="info">
       <div><b>নাম:</b> ${esc(inp.name || '—')}</div>
@@ -1061,7 +1071,7 @@
     return `
     <div class="rh">
       <div><h1>পেনশনভোগীর হিসাব: জুলাই ২০২৬ – জানুয়ারি ২০২৮</h1><p>জেএসআই ০১/২০২৬ (বাংলাদেশ গেজেট, অতিরিক্ত, ১৫ নভেম্বর ২০২৬), চতুর্থ অংশ অনুযায়ী · প্রস্তুতের তারিখ: ${bnDate(today)}</p></div>
-      <div class="devbox"><img src="assets/img/developer.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${devNameHTML()}</b>${SITE_CONFIG.developer.title}</div></div>
+      <div class="devbox"><img src="assets/img/developer.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${devNameHTML()}</b>${SITE_CONFIG.developer.title}${devWaPDF()}</div></div>
     </div>
     <div class="info">
       <div><b>নাম:</b> ${esc(inp.name || '—')}</div>

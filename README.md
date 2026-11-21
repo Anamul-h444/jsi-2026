@@ -4,7 +4,7 @@
 
 A mobile-first web app that calculates new pay, arrears and pension for Bangladesh Army junior commissioned officers (JCOs), other ranks and pensioners, under the Joint Services Instructions JSI 01/2026 (Bangladesh Gazette, 15 November 2026). The interface and PDF reports are in Bangla for its users.
 
-**Built by:** Corporal (TAV) Anamul Haque, EME · Full-Stack Software Engineer
+**Built by:** Anamul Haque · Full-Stack Software Engineer · WhatsApp: [+880 1735-547549](https://wa.me/8801735547549)
 
 ## Features
 

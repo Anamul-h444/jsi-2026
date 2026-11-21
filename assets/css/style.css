@@ -87,7 +87,7 @@ button, input, select { font-family: inherit; font-size: inherit; color: inherit
   border-radius: 14.5px; background: #0e1714; padding: 10px 14px; display: flex; align-items: center; gap: 12px;
 }
 .dev-ribbon .avatar {
-  width: 44px; height: 44px; border-radius: 50%; flex: none; object-fit: cover; object-position: center 20%;
+  width: 54px; height: 54px; border-radius: 50%; flex: none; object-fit: cover; object-position: center 35%;
   border: 2px solid rgba(227,185,78,.75); box-shadow: 0 0 0 3px rgba(87,211,162,.15), 0 4px 12px rgba(0,0,0,.4);
 }
 .dev-ribbon small { display: block; color: var(--muted); font-size: 11.5px; line-height: 1.3; }
@@ -457,7 +457,7 @@ body.no-scroll { overflow: hidden; }
 .install-card .ic-x { width: 30px; height: 38px; border: 0; background: none; color: var(--muted); font-size: 22px; cursor: pointer; }
 
 /* ফুটার */
-.footer .dev-photo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; object-position: center 20%; border: 2px solid rgba(227,185,78,.7); box-shadow: 0 6px 18px rgba(0,0,0,.45); margin-bottom: 6px; }
+.footer .dev-photo { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; object-position: center 35%; border: 2px solid rgba(227,185,78,.7); box-shadow: 0 6px 18px rgba(0,0,0,.45); margin-bottom: 6px; }
 .footer { text-align: center; padding: 22px 10px 8px; color: var(--muted); font-size: 12.5px; line-height: 1.7; }
 .footer .devname { color: var(--gold-2); font-weight: 700; font-size: 14px; }
 
@@ -793,3 +793,13 @@ body.ai-open .ai-fab, body.retired-print .ai-fab { display: none; }
 .inl-ad-go { display: block; margin-top: 11px; text-align: center; padding: 9px 12px; border-radius: 12px; font-weight: 700; font-size: 14px; background: var(--green, #2ebe8c); color: #06140f; }
 .inl-ad-x { position: absolute; right: 6px; top: 4px; z-index: 2; width: 38px; height: 38px; border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 24px; line-height: 1; cursor: pointer; }
 .inl-ad-x:active { background: rgba(255,255,255,.06); }
+
+/* হোয়াটসঅ্যাপ যোগাযোগ */
+.dev-ribbon .in > div { flex: 1; min-width: 0; }
+.dev-wa { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: #25d366; color: #fff; box-shadow: 0 6px 16px rgba(37,211,102,.35); transition: transform .15s; }
+.dev-wa:active { transform: scale(.94); }
+.dev-wa svg { width: 23px; height: 23px; }
+.wa-pill { display: inline-flex; align-items: center; gap: 7px; margin-top: 8px; padding: 7px 14px; border-radius: 999px; background: rgba(37,211,102,.12); border: 1px solid rgba(37,211,102,.4); color: #7ef0a8; text-decoration: none; font-size: 13px; }
+.wa-pill svg { width: 17px; height: 17px; color: #25d366; }
+.wa-pill b { color: #fff; font-weight: 700; letter-spacing: .3px; }
+.rpt .rh .devbox .wa { display: block; color: #1a7f45; font-weight: 600; margin-top: 1px; }
