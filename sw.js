@@ -14,7 +14,7 @@ const CORE = [
   './assets/vendor/qrcode-generator.min.js',
   './assets/icon.svg',
   './assets/img/icon-192.png',
-  './assets/img/developer.jpg',
+  './assets/img/developer-full.jpg',
   './assets/img/varahobey-logo.png',
   './assets/img/niyontrok-crest.svg',
   './assets/img/og-image-v2.jpg',

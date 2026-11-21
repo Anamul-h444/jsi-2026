@@ -827,7 +827,7 @@
     return `
     <div class="rh">
       <div><h1>${title}</h1><p>জেএসআই ০১/২০২৬ (বাংলাদেশ গেজেট, অতিরিক্ত, ১৫ নভেম্বর ২০২৬) অনুযায়ী · প্রস্তুতের তারিখ: ${bnDate(today)}</p></div>
-      <div class="devbox"><img src="assets/img/developer.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${devNameHTML()}</b>${SITE_CONFIG.developer.title}${devWaPDF()}</div></div>
+      <div class="devbox"><img src="assets/img/developer-full.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${devNameHTML()}</b>${SITE_CONFIG.developer.title}${devWaPDF()}</div></div>
     </div>
     <div class="info">
       <div><b>নাম:</b> ${esc(inp.name || '—')}</div>
@@ -1073,7 +1073,7 @@
     return `
     <div class="rh">
       <div><h1>পেনশনভোগীর হিসাব: জুলাই ২০২৬ – জানুয়ারি ২০২৮</h1><p>জেএসআই ০১/২০২৬ (বাংলাদেশ গেজেট, অতিরিক্ত, ১৫ নভেম্বর ২০২৬), চতুর্থ অংশ অনুযায়ী · প্রস্তুতের তারিখ: ${bnDate(today)}</p></div>
-      <div class="devbox"><img src="assets/img/developer.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${devNameHTML()}</b>${SITE_CONFIG.developer.title}${devWaPDF()}</div></div>
+      <div class="devbox"><img src="assets/img/developer-full.jpg" alt="" /><div>ডেভেলপ করেছেন<b>${devNameHTML()}</b>${SITE_CONFIG.developer.title}${devWaPDF()}</div></div>
     </div>
     <div class="info">
       <div><b>নাম:</b> ${esc(inp.name || '—')}</div>
