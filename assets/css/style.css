@@ -818,3 +818,7 @@ body.ai-open .ai-fab, body.retired-print .ai-fab { display: none; }
 .dev-ribbon .dev-fb svg { width: 20px; height: 20px; }
 .dev-ribbon .dev-wa svg { width: 21px; height: 21px; }
 .dev-ribbon span.role { white-space: nowrap; }
+/* ডেভেলপারের পুরো ছবি (খাড়া আয়তাকার, কাটা ছাড়া) */
+.dev-ribbon .avatar { width: 54px; height: 68px; border-radius: 12px; object-fit: cover; object-position: center top; }
+.footer .dev-photo { width: 100px; height: 127px; border-radius: 16px; object-fit: cover; object-position: center top; }
+.rpt .rh .devbox img { width: 36px; height: 46px; border-radius: 6px; object-position: center top; }
