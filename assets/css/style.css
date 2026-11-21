@@ -803,3 +803,18 @@ body.ai-open .ai-fab, body.retired-print .ai-fab { display: none; }
 .wa-pill svg { width: 17px; height: 17px; color: #25d366; }
 .wa-pill b { color: #fff; font-weight: 700; letter-spacing: .3px; }
 .rpt .rh .devbox .wa { display: block; color: #1a7f45; font-weight: 600; margin-top: 1px; }
+
+/* ফেসবুক বোতাম (হোয়াটসঅ্যাপের পাশে) */
+.dev-links { display: flex; gap: 8px; flex: none; }
+.dev-fb { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: #1877f2; color: #fff; box-shadow: 0 6px 16px rgba(24,119,242,.35); transition: transform .15s; }
+.dev-fb:active { transform: scale(.94); }
+.dev-fb svg { width: 22px; height: 22px; }
+.contact-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 8px; }
+.contact-pills .wa-pill { margin-top: 0; }
+.fb-pill { background: rgba(24,119,242,.13); border-color: rgba(24,119,242,.45); color: #9cc3ff; }
+.fb-pill svg { color: #4b95ff; }
+.dev-ribbon .in > .dev-links { flex: none; gap: 7px; }
+.dev-ribbon .dev-fb, .dev-ribbon .dev-wa { width: 38px; height: 38px; }
+.dev-ribbon .dev-fb svg { width: 20px; height: 20px; }
+.dev-ribbon .dev-wa svg { width: 21px; height: 21px; }
+.dev-ribbon span.role { white-space: nowrap; }
