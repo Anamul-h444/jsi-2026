@@ -117,6 +117,14 @@ function specialAmount(rankKey, key, which) {
 }
 
 /** জুন ২০২৬-এর প্রতিটি ভাতার স্বয়ংক্রিয় প্রস্তাবিত মান */
+/** মাসিক জিপিএফ কর্তন — শতাংশ (সেই সময়ের মূল বেতনে) অথবা নির্ধারিত টাকার অঙ্ক;
+ *  দুটোই মূল বেতনের ৫%–২৫% সীমার মধ্যে রাখা হয় */
+function gpfOf(inp, basic) {
+  const lo = Math.round(basic * 0.05), hi = Math.round(basic * 0.25);
+  if (inp.gpfAmount) return Math.min(hi, Math.max(lo, Math.round(inp.gpfAmount)));
+  return Math.round(basic * Math.max(5, Math.min(25, inp.gpfPercent || 5)) / 100);
+}
+
 /** বিশেষ প্রণোদনা: জেসিও ১০%; সার্জেন্ট ও তদনিম্ন ১৫% (ন্যূনতম ২,০০০) */
 const pronoPct = rankKey => rankLevel(rankKey) === 'JCO' ? 10 : 15;
 function pronoAmount(rankKey, basic) {
@@ -235,10 +243,9 @@ function computeTimeline(inp) {
   const prono = pick('pronodona');
   const specialBenefit = prono || 0;
 
-  const gpfRate = Math.max(5, Math.min(25, inp.gpfPercent || 5)) / 100;
   const otherDed = inp.otherDeductions || 0;
   const deductions = basic => {
-    const gpf = Math.round(basic * gpfRate);
+    const gpf = gpfOf(inp, basic);
     return { gpf, other: otherDed, total: gpf + otherDed };
   };
 
@@ -477,6 +484,12 @@ function arrearsMonths(today, firstNewPay) {
 }
 
 /** চাকরিরত সদস্য: প্রাপ্য মোট বেতন (মূল বেতন + ভাতা) − জুন ২০২৬-এর হারে তোলা মোট (বিশেষ সুবিধাসহ) */
+function arrearGpfNote(inp) {
+  if (inp.gpfAmount) return 'নির্ধারিত অঙ্কে প্রতি মাসের বাড়তি কর্তন (৫% সীমা অনুযায়ী)';
+  const r = Math.max(5, Math.min(25, inp.gpfPercent || 5));
+  return `মূল বেতন বৃদ্ধির বকেয়ার ${bn(r, r % 1 ? 1 : 0)}%`;
+}
+
 function computeArrearsServing(tl, today, firstNewPay) {
   const [p1, p2, p3, p4] = tl.periods;
   const pick = d => d < new Date(2027, 0, 1) ? p1 : d < new Date(2027, 6, 1) ? p2 : d < new Date(2028, 0, 1) ? p3 : p4;
@@ -490,13 +503,15 @@ function computeArrearsServing(tl, today, firstNewPay) {
     const specD = Math.round(specialMonthly * m.frac);
     const diff = basicDiff + allowD - specD;
     const got = Math.round(drawn * m.frac);
-    return { ...m, label: bnMonthYear(m.date), due: got + diff, got, diff, basicDiff, allowD, specD };
+    // বকেয়ার জিপিএফ: নতুন মূল বেতনে কর্তন − পুরোনো মূল বেতনে কর্তন (মাসের আনুপাতিক অংশ)
+    const gpfD = Math.round((gpfOf(tl.input, p.basic) - gpfOf(tl.input, tl.june.basic)) * m.frac);
+    return { ...m, label: bnMonthYear(m.date), due: got + diff, got, diff, basicDiff, allowD, specD, gpfD };
   });
   const total = rows.reduce((s, r) => s + r.diff, 0);
   const basicTotal = rows.reduce((s, r) => s + r.basicDiff, 0);
   const allowDiff = rows.reduce((s, r) => s + r.allowD, 0);
   const specialAdj = rows.reduce((s, r) => s + r.specD, 0);
-  return { today, firstNewPay, rows, total, basicTotal, specialAdj, allowDiff, gpf: Math.round(basicTotal * 0.05), drawnMonthly: drawn, specialMonthly };
+  return { today, firstNewPay, rows, total, basicTotal, specialAdj, allowDiff, gpf: rows.reduce((s, r) => s + r.gpfD, 0), gpfNote: arrearGpfNote(tl.input), drawnMonthly: drawn, specialMonthly };
 }
 
 /** পেনশনভোগী: প্রাপ্য (নিট পেনশন + চিকিৎসা + রেশন) − ৩০ জুন ২০২৬-এর হারে তোলা */

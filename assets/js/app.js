@@ -13,7 +13,7 @@
     oldBasic: '',
     marital: 'MARRIED', children: 0, disabledChildren: 0,
     skill: 'NONE', appointment: 'NONE', badges: 0, serviceWardenship: '', specials: [],
-    otherNew: '',
+    otherNew: '', gpfPct: '', gpfAmt: '',
         retireDate: '', promotions: [], commutePct: '', rationAdults: 2, rationChildren: 0,
     firstNewPay: '', mode: 'SERVING', penName: '', penType: 'SELF', penNet: '', penDob: '', penAdults: 2, penChildren: 0,
   };
@@ -202,7 +202,7 @@
 
 
     // স্টেট → ফর্ম
-    ['name','baNo','unit','rank','dob','joinDate','oldBasic','skill','appointment','serviceWardenship','otherNew','retireDate','penName','penNet','penDob']
+    ['name','baNo','unit','rank','dob','joinDate','oldBasic','skill','appointment','serviceWardenship','otherNew','gpfPct','gpfAmt','retireDate','penName','penNet','penDob']
       .forEach(id => { const el = $('#' + id); if (el) el.value = el.classList.contains('date-in') ? isoToDmy(S[id]) : (S[id] ?? ''); });
     if (S.rank && !RANKS[S.rank]) S.rank = '';
     if (!S.rank || (RANKS[S.rank].oldScale && !RANKS[S.rank].oldScale.includes(num(S.oldBasic)))) S.oldBasic = '';
@@ -462,6 +462,12 @@
       refreshPlaceholders();
     } else if (el.id === 'oldBasicSel') {
       S.oldBasic = el.value; $('#oldBasic').value = el.value;
+    } else if (el.id === 'gpfPct' || el.id === 'gpfAmt') {
+      // যেকোনো একটি: একটিতে লিখলে অন্যটি খালি হয়ে যায়
+      S[el.id] = val;
+      const other = el.id === 'gpfPct' ? 'gpfAmt' : 'gpfPct';
+      if (String(val).trim()) { S[other] = ''; $('#' + other).value = ''; }
+      updateGpfHint();
     } else if (el.id in S) {
       S[el.id] = val;
     }
@@ -512,7 +518,9 @@
       serviceWardenship: num(S.serviceWardenship), specials: S.specials,
       kit: false, haor: false, radiation: false, hill: 'NONE', otherNew: num(S.otherNew),
       oldOverrides: {}, oldOther: 0,
-      gpfPercent: 5, otherDeductions: 0,
+      gpfPercent: S.gpfAmt && String(S.gpfAmt).trim() ? 0 : (num(S.gpfPct) || 5),
+      gpfAmount: S.gpfAmt && String(S.gpfAmt).trim() ? num(S.gpfAmt) : 0,
+      otherDeductions: 0,
       retireDate: parseDate(S.retireDate),
       promotions: S.promotions.map(p => ({ rank: p.rank, date: parseDate(p.date) })),
       commutePct: 50, // সবার জন্য অর্ধেক পেনশন এককালীন (প্রচলিত নিয়ম)
@@ -520,7 +528,35 @@
     };
   }
 
+  /* জিপিএফ ইনপুটের নিচের লেখা: সীমার বাইরে হলে সতর্ক করে */
+  /* জিপিএফ লেবেল: "১০%" বা "নির্ধারিত অঙ্ক, ৮.৫%" */
+  function gpfLabel(inp, basic) {
+    if (inp.gpfAmount) {
+      const g = gpfOf(inp, basic);
+      if (g > Math.round(inp.gpfAmount)) return 'আপনার অঙ্ক ৫%-এর কম, তাই সর্বনিম্ন ৫%';
+      if (g < Math.round(inp.gpfAmount)) return 'আপনার অঙ্ক ২৫%-এর বেশি, তাই সর্বোচ্চ ২৫%';
+      return `নির্ধারিত অঙ্ক · মূল বেতনের ${bn(g / basic * 100, 1)}%`;
+    }
+    const r = Math.max(5, Math.min(25, inp.gpfPercent || 5));
+    return bn(r, r % 1 ? 1 : 0) + '%';
+  }
+
+  function updateGpfHint() {
+    const h = $('#gpfHint'); if (!h) return;
+    const pct = num(S.gpfPct), amt = num(S.gpfAmt), basic = num(S.oldBasic);
+    let msg = 'মূল বেতনের ৫% থেকে ২৫% পর্যন্ত। কিছু না দিলে ৫% ধরা হবে।', warn = false;
+    if (String(S.gpfPct).trim() && (pct < 5 || pct > 25)) { msg = `${bn(pct, pct % 1 ? 1 : 0)}% সীমার বাইরে — হিসাবে ${pct < 5 ? '৫' : '২৫'}% ধরা হবে।`; warn = true; }
+    else if (String(S.gpfAmt).trim() && basic) {
+      const lo = Math.round(basic * 0.05), hi = Math.round(basic * 0.25);
+      if (amt < lo || amt > hi) { msg = `জুন ২০২৬-এর মূল বেতনে অঙ্ক হতে হবে ${bn(lo)} – ${bn(hi)} টাকা; সীমার বাইরে হলে সীমার মধ্যে ধরা হবে।`; warn = true; }
+      else msg = `প্রতি মাসে ${bn(amt)} টাকা কাটা ধরা হবে (জুন ২০২৬-এর মূল বেতনের ${bn(amt / basic * 100, 1)}%)। নতুন মূল বেতনে ৫%-এর কম হলে ৫% ধরা হবে।`;
+    } else if (String(S.gpfPct).trim()) msg = `প্রতি ধাপে সেই সময়ের মূল বেতনের ${bn(pct, pct % 1 ? 1 : 0)}% কাটা ধরা হবে।`;
+    h.className = 'hint' + (warn ? ' warn' : '');
+    h.textContent = msg;
+  }
+
   function refreshPlaceholders() {
+    updateGpfHint();
     const inp = collect();
     if (!inp.oldBasic || !RANKS[inp.rank]) {
       $$('[id^=ov_]').forEach(el => { if (el.id !== 'ov_other') el.placeholder = 'মূল বেতন দিন'; });
@@ -638,7 +674,7 @@
               <tr><td>মূল বেতন</td><td class="n">${tk(p.basic)}</td></tr>
               ${allowRows(p.allowances)}
               <tr class="sum"><td>মোট বেতন ও ভাতা</td><td class="n">${tk(p.gross)}</td></tr>
-              <tr class="minus"><td>জিপিএফ (${bn(Math.max(5, Math.min(25, inp.gpfPercent)))}%)</td><td class="n">− ${tk(p.ded.gpf)}</td></tr>
+              <tr class="minus"><td>জিপিএফ (${gpfLabel(inp, p.basic)})</td><td class="n">− ${tk(p.ded.gpf)}</td></tr>
               ${p.ded.other ? `<tr class="minus"><td>অন্যান্য কর্তন</td><td class="n">− ${tk(p.ded.other)}</td></tr>` : ''}
               <tr class="sum"><td>সর্বমোট বেতন</td><td class="n">${tk(p.net)}</td></tr>
             </table>
@@ -864,7 +900,8 @@
       `নতুন স্কেলে নির্ধারণ: পার্থক্য ${tl.fix.diff}, লক্ষ্য ${tl.fix.target}, নির্ধারিত ${tl.fix.fixed}; ১ জুলাই ২০২৬ ইনক্রিমেন্টসহ ${tl.newBasic26}`,
       ...tl.periods.map((p, i) => `${PERIODS[i].label}: মূল বেতন ${p.basic}, ভাতা ${n(p.allowTotal)}, মোট ${n(p.gross)}, কর্তন ${n(p.ded.total)}, হাতে ${n(p.net)}`),
       `জুন ২০২৬ মোট ${n(tl.june.gross)} (বিশেষ সুবিধা ${n(tl.june.specialTotal)} সহ)`,
-      `আজ পর্যন্ত বকেয়া: মূল বেতন বৃদ্ধি ${ar.basicTotal} − প্রণোদনা সমন্বয় ${ar.specialAdj} = ${ar.total}`];
+      `আজ পর্যন্ত বকেয়া: মূল বেতন বৃদ্ধি ${ar.basicTotal} − প্রণোদনা সমন্বয় ${ar.specialAdj} = ${ar.total}; বকেয়া থেকে জিপিএফ ${ar.gpf} (${ar.gpfNote})`,
+      `মাসিক জিপিএফ কর্তন: ${inp.gpfAmount ? 'নির্ধারিত অঙ্ক ' + inp.gpfAmount + ' টাকা' : 'মূল বেতনের ' + Math.max(5, Math.min(25, inp.gpfPercent || 5)) + '%'} (সীমা মূল বেতনের ৫–২৫%)`];
     if (S.retireDate) {
       const rt = lastRT || computeRetirement(inp, tl);
       if (rt && rt.ok) L.push(`অবসর ${S.retireDate.slice(0, 7)}: শেষ মূল বেতন ${rt.lastBasic}, চাকরি ${rt.years} বছর, গ্রস পেনশন ${n(rt.gross)}, নিট ${n(rt.net)}, এককালীন ${n(rt.lump)}, চিকিৎসা ${rt.med}, রেশন ${rt.ration}, মাসে মোট ${n(rt.monthlyInHand)}`);
@@ -899,7 +936,7 @@
         ${a.rows.some(r => r.date >= new Date(2028, 0, 1)) && a.allowDiff ? `<div class="ab-row"><span>ভাতার পার্থক্য<small>০১ জানুয়ারি ২০২৮ থেকে নতুন হারের ভাতা</small></span><b class="${deltaCls(a.allowDiff)}">${signed(a.allowDiff)}</b></div>` : ''}
         ${a.specialAdj ? `<div class="ab-row"><span>বিশেষ সুবিধা (প্রণোদনা) সমন্বয়<small>বিলুপ্ত হলেও জুলাই ২০২৬ থেকে তোলা হয়েছে (${tk(a.specialMonthly)}/মাস), তাই বকেয়া থেকে কাটা যাবে</small></span><b class="down">− ${tk(a.specialAdj)}</b></div>` : ''}
         <div class="ab-row ab-sum"><span>মোট বকেয়া</span><b>${tk(a.total)}</b></div>
-        <div class="ab-row ab-note"><span>সম্ভাব্য জিপিএফ কর্তন<small>মূল বেতন বৃদ্ধির বকেয়ার ৫%; এটি আপনার জিপিএফ হিসাবে জমা থাকবে</small></span><b>− ${tk(a.gpf)}</b></div>
+        <div class="ab-row ab-note"><span>সম্ভাব্য জিপিএফ কর্তন<small>${a.gpfNote}; এটি আপনার জিপিএফ হিসাবে জমা থাকবে</small></span><b>− ${tk(a.gpf)}</b></div>
       </div>` : ''}
       <div class="field" style="margin-top:14px"><label>নতুন হারে প্রথম ${ret ? 'পেনশন' : 'বেতন'} কোন মাসে পেয়েছেন?</label>
         <select class="input" id="firstNewPay">${arrearsOptions()}</select>
@@ -943,7 +980,7 @@
       <table><tr><th>মাস</th><th class="n">প্রাপ্য</th><th class="n">তোলা হয়েছে</th><th class="n">বকেয়া</th></tr>
       ${a.rows.map(r => `<tr><td>${r.label}${r.partial ? ` (${bn(r.days)} দিন)` : ''}</td><td class="n">${tk(r.due)}</td><td class="n">${tk(r.got)}</td><td class="n">${signed(r.diff)}</td></tr>`).join('')}
       <tr class="sum"><td>মোট সম্ভাব্য বকেয়া</td><td class="n"></td><td class="n"></td><td class="n">${signed(a.total)}</td></tr>
-      ${!ret ? `<tr><td colspan="3">মূল বেতন বৃদ্ধির বকেয়া</td><td class="n">+ ${tk(a.basicTotal)}</td></tr>${a.rows.some(r => r.date >= new Date(2028, 0, 1)) && a.allowDiff ? `<tr><td colspan="3">ভাতার পার্থক্য (০১ জানুয়ারি ২০২৮ থেকে)</td><td class="n">${signed(a.allowDiff)}</td></tr>` : ''}${a.specialAdj ? `<tr class="minus"><td colspan="3">বিশেষ সুবিধা (প্রণোদনা) সমন্বয় (${tk(a.specialMonthly)}/মাস)</td><td class="n">− ${tk(a.specialAdj)}</td></tr>` : ''}<tr class="minus"><td colspan="3">সম্ভাব্য জিপিএফ কর্তন (মূল বেতন বৃদ্ধির ৫%, জিপিএফে জমা)</td><td class="n">− ${tk(a.gpf)}</td></tr>` : ''}
+      ${!ret ? `<tr><td colspan="3">মূল বেতন বৃদ্ধির বকেয়া</td><td class="n">+ ${tk(a.basicTotal)}</td></tr>${a.rows.some(r => r.date >= new Date(2028, 0, 1)) && a.allowDiff ? `<tr><td colspan="3">ভাতার পার্থক্য (০১ জানুয়ারি ২০২৮ থেকে)</td><td class="n">${signed(a.allowDiff)}</td></tr>` : ''}${a.specialAdj ? `<tr class="minus"><td colspan="3">বিশেষ সুবিধা (প্রণোদনা) সমন্বয় (${tk(a.specialMonthly)}/মাস)</td><td class="n">− ${tk(a.specialAdj)}</td></tr>` : ''}<tr class="minus"><td colspan="3">সম্ভাব্য জিপিএফ কর্তন (${a.gpfNote}, জিপিএফে জমা)</td><td class="n">− ${tk(a.gpf)}</td></tr>` : ''}
       </table>
       <p class="note">"তোলা হয়েছে" ধরা হয়েছে ${ret ? '৩০ জুন ২০২৬-এর হারে পেনশন, চিকিৎসা ও রেশন ভাতা' : 'জুন ২০২৬-এর হারে মোট বেতন (বিলুপ্ত বিশেষ সুবিধাসহ, যা বকেয়া থেকে সমন্বয় হয়)'}। চলতি মাস দিনের হিসাবে আনুপাতিক। উৎসব ভাতার পার্থক্য ধরা হয়নি।</p></div>`;
   }
@@ -1223,7 +1260,7 @@
         <table><tr><th>বিবরণ</th><th class="n">টাকা</th></tr>
           <tr><td>মূল বেতন</td><td class="n">${tk(p.basic)}</td></tr>${rows(p.allowances)}
           <tr class="sum"><td>মোট বেতন ও ভাতা</td><td class="n">${tk(p.gross)}</td></tr>
-          <tr class="minus"><td>জিপিএফ</td><td class="n">− ${tk(p.ded.gpf)}</td></tr>
+          <tr class="minus"><td>জিপিএফ (${gpfLabel(tl.input, p.basic)})</td><td class="n">− ${tk(p.ded.gpf)}</td></tr>
           ${p.ded.other ? `<tr class="minus"><td>অন্যান্য কর্তন</td><td class="n">− ${tk(p.ded.other)}</td></tr>` : ''}
           <tr class="sum"><td>সর্বমোট বেতন</td><td class="n">${tk(p.net)}</td></tr>
         </table></div>`;
@@ -1310,7 +1347,7 @@
       ${R.oldNote ? `<li>${R.name} পদের পুরোনো স্কেলের প্রথম ধাপ নিশ্চিত না হওয়ায় ${tk(R.oldStart)} অনুমিত মান হিসেবে ধরা হয়েছে।</li>` : ''}
       <li>৩১ ডিসেম্বর ২০২৭ পর্যন্ত ভাতাগুলো ৩০ জুন ২০২৬-এর আহরিত অঙ্কে ধরা হয়েছে, যা মূল বেতন থেকে স্বয়ংক্রিয়ভাবে হিসাব করা।</li>
       <li>ফ্যামিলি কোয়ার্টারে বসবাস না করে সাধারণ হারে ("অন্যান্য স্থান") বাড়ি ভাড়া ধরা হয়েছে। কিট রক্ষণাবেক্ষণ, পাহাড়ি, হাওড়/দ্বীপ/চর ও তেজস্ক্রিয় ঝুঁকি ভাতা ধরা হয়নি।</li>
-      <li>মাসিক কর্তন সর্বনিম্ন হারে (জিপিএফ মূল বেতনের ৫%) ধরা হয়েছে।</li>
+      <li>মাসিক জিপিএফ কর্তন ধরা হয়েছে: ${gpfLabel(tl.input, tl.june.basic)}${tl.input.gpfAmount ? '' : ' (প্রতি ধাপে সেই সময়ের মূল বেতনে)'}।</li>
       <li>প্রচলিত নিয়মে পূর্ণ পেনশনের অর্ধেক এককালীন (আনুতোষিক) ও অর্ধেক মাসিক পেনশন ধরা হয়েছে।</li>
       <li>উচ্চতর গ্রেড (৮ বছর পূর্তিতে), ব্যক্তিগত বেতন ও বিশেষ পরিস্থিতি এই হিসাবে ধরা হয়নি।</li>
       <li>চূড়ান্ত অঙ্ক সংশ্লিষ্ট পে-অফিস (iBAS++) কর্তৃক নির্ধারিত হবে।</li>
